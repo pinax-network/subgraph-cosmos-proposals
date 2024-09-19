@@ -51,7 +51,7 @@ make package
 
 ### all_events
 
-The `all_events` module reads from the `sf.cosmos.type.v2.Block` source and outputs a list of all events in the block,
+The `all_events` module reads from the `sf.cosmos.type.v2.Block` source and outputs a list of all even85635725ts in the block,
 Some events are at the block level, others appear inside the transactions. The latter will include the transaction hash.
 
 ### filtered_events

@@ -25,7 +25,11 @@ network: injective-mainnet
 
 protobuf:
   descriptorSets:
-  - localPath: generated-buf-build.binpb
+    - localPath: generated-buf-build.binpb
+
+imports:
+  database_change: https://github.com/streamingfast/substreams-sink-database-changes/releases/download/v1.3.1/substreams-database-change-v1.3.1.spkg
+  sql: https://github.com/streamingfast/substreams-sink-sql/releases/download/protodefs-v1.0.7/substreams-sink-sql-protodefs-v1.0.7.spkg
 
 binaries:
   default:
@@ -33,92 +37,20 @@ binaries:
     file: target/wasm32-unknown-unknown/release/injective_common.wasm
 
 modules:
-  - name: all_events
+  - name: ch_out
     kind: map
-    initialBlock: 0
+    initialBlock: 82182057
     inputs:
+      - source: sf.substreams.v1.Clock
       - source: sf.cosmos.type.v2.Block
     output:
-      type: proto:sf.substreams.cosmos.v1.EventList
-    doc: |
-      `all_events` reads from the `sf.cosmos.type.v2.Block` source and outputs a list of all events in the block.
-      Some events are at the block level, others appear inside the transactions.
+      type: proto:sf.substreams.sink.database.v1.DatabaseChanges
 
-  - name: index_events
-    kind: blockIndex
-    inputs:
-      - map: all_events
-    output:
-      type: proto:sf.substreams.index.v1.Keys
-    doc: |
-      `index_events` sets the keys corresponding to all event 'types' and 'attribute keys' in the block
-      ex: `type:coin_received`, `type:injective.peggy.v1.EventDepositClaim`, `attr:action`, `attr:sender` ...
-      The attribute values are never indexed because they have a high cardinality and would be too expensive to index.
-
-  - name: filtered_events
-    kind: map
-    blockFilter:
-      module: index_events
-      query:
-        params: true
-    inputs:
-      - params: string
-      - map: all_events
-    output:
-      type: proto:sf.substreams.cosmos.v1.EventList
-    doc: |
-      `filtered_events` reads from `all_events` and applies a filter on the event types and attribute keys, 
-      only outputing the events that match the filter. 
-      Example usage: `(type:message && attr:action) || (type:wasm && attr:_contract_address)`
-
-  - name: filtered_event_groups
-    kind: map
-    blockFilter:
-      module: index_events
-      query:
-        params: true
-    inputs:
-      - params: string
-      - map: all_events
-    output:
-      type: proto:sf.substreams.cosmos.v1.EventList
-    doc: |
-      `filtered_event_groups` reads from `all_events` and applies a filter on the event types and attribute keys, 
-      outputing all the events from transactions that have at least one event matching the filter.
-      Example usage: `type:injective.peggy.v1.EventDepositClaim || (type:wasm && attr:_contract_address)`
-
-  - name: filtered_events_by_attribute_value
-    kind: map
-    inputs:
-      - params: string
-      - map: all_events
-    output:
-      type: proto:sf.substreams.cosmos.v1.EventList
-    doc: |
-      `filtered_events_by_attribute_value` reads from `all_events` and applies a filter on the event types, attribute keys and values,
-      only outputing the events that match the filter. 
-      Example usage: "type:wasm && attr:_contract_address:inj1v77y5ttah96dc9qkcpc88ad7rce8n88e99t3m5"
-
-      To use this module with an index, import it and override it with the `use:` parameter, setting blockFilter.Query.String to a query
-      that matches the event type and attribute keys only (ex: `type:wasm && attr:_contract_address`)
-
-  - name: filtered_event_groups_by_attribute_value
-    kind: map
-    inputs:
-      - params: string
-      - map: all_events
-    output:
-      type: proto:sf.substreams.cosmos.v1.EventList
-    doc: |
-      `filtered_events_groups_by_attribute_value` reads from `all_events` and applies a filter on the event types, attribute keys and values,
-      outputing all the events from transactions that have at least one event matching the filter.
-      Example usage: "type:wasm && attr:_contract_address:inj1v77y5ttah96dc9qkcpc88ad7rce8n88e99t3m5"
-
-      To use this module with an index, import it and override it with the `use:` parameter, setting blockFilter.Query.String to a query
-      that matches the event type and attribute keys only (ex: `type:wasm && attr:_contract_address`)
-
-params:
-  filtered_events: "(type:message && attr:action) || (type:wasm && attr:_contract_address)"
-  filtered_event_groups: "type:wasm && attr:_contract_address"
-  filtered_events_by_attribute_value: "type:wasm && attr:_contract_address:inj1v77y5ttah96dc9qkcpc88ad7rce8n88e99t3m5"
-  filtered_event_groups_by_attribute_value: "type:wasm && attr:_contract_address:inj1v77y5ttah96dc9qkcpc88ad7rce8n88e99t3m5"
+sink:
+  module: ch_out
+  type: sf.substreams.sink.sql.v1.Service
+  config:
+    schema: "./schema.sql"
+    engine: clickhouse
+    postgraphile_frontend:
+      enabled: false

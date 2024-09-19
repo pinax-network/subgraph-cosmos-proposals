@@ -14,8 +14,10 @@ strip = "debuginfo"
 crate-type = ["cdylib"]
 
 [dependencies]
-substreams = "^0.5.20"
+substreams = "0.5"
+substreams-entity-change = { git = "https://github.com/streamingfast/substreams-sink-entity-changes", branch = "develop", package = "substreams-entity-change" }
 hex = "0.4.3"
+substreams-database-change = "1.3"
 prost = "0.11"
 prost-types = "0.11"
 cosmrs = { version = "0.16.0", features = ["cosmwasm"] }

@@ -172,6 +172,11 @@ pub mod injective {
         }
     }
 }
+
+pub mod custom_proto {
+    include!("custom_proto.rs");
+}
+
 pub mod sf {
     pub mod cosmos {
         pub mod r#type {
