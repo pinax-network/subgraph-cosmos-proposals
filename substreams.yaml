@@ -39,7 +39,7 @@ binaries:
 modules:
   - name: ch_out
     kind: map
-    initialBlock: 82182057
+    initialBlock: 4275388
     inputs:
       - source: sf.substreams.v1.Clock
       - source: sf.cosmos.type.v2.Block

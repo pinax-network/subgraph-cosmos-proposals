@@ -1,6 +1,6 @@
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct MsgSubmitProposal {
+pub struct MsgSubmitProposalNew {
     /// content is the proposal's content.
     #[prost(message, optional, tag = "1")]
     pub content: ::core::option::Option<::prost_types::Any>,
@@ -11,14 +11,15 @@ pub struct MsgSubmitProposal {
     #[prost(string, tag = "3")]
     pub proposer: ::prost::alloc::string::String,
     /// metadata is the metadata of the proposal.
-    #[prost(string, tag = "4")]
-    pub metadata: ::prost::alloc::string::String,
+    /// metadata is the metadata of the proposal.
+    #[prost(string, optional, tag = "4")]
+    pub metadata: ::core::option::Option<::prost::alloc::string::String>,
     /// title is the title of the proposal.
-    #[prost(string, tag = "5")]
-    pub title: ::prost::alloc::string::String,
+    #[prost(string, optional, tag = "5")]
+    pub title: ::core::option::Option<::prost::alloc::string::String>,
     /// summary is the summary of the proposal.
-    #[prost(string, tag = "6")]
-    pub summary: ::prost::alloc::string::String,
+    #[prost(string, optional, tag = "6")]
+    pub summary: ::core::option::Option<::prost::alloc::string::String>,
 }
 
 #[allow(clippy::derive_partial_eq_without_eq)]
