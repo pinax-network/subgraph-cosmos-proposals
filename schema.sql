@@ -4,6 +4,7 @@ CREATE TABLE software_upgrade_proposals
     initial_deposit_denom String,
     initial_deposit_amount String,
     proposer String,
+    authority String,
     title String,
     summary String,
     metadata String,
