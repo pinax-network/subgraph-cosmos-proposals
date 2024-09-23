@@ -18,7 +18,7 @@ type Transaction @entity {
 
 type Event @entity {
     id:                      ID!
-    attributes:              String!
+    type:                    String!
 
     # derive from
     block:                    Block!
