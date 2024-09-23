@@ -1,38 +1,55 @@
 type Block @entity {
-    id:                     ID!
-    number:                 BigInt!
-    timestamp:              BigInt!
+  id: ID!
+  number: BigInt!
+  timestamp: BigInt!
 
-    # derive from
-    transactions:          [Transaction!]! @derivedFrom(field: "block")
+  # derive from
+  transactions: [Transaction!]! @derivedFrom(field: "block")
 }
 
 type Transaction @entity {
-    id:                     ID!
-    codespace:              String!
+  id: ID!
+  codespace: String!
 
-    # derive from
-    block:                  Block!
-    events:                 [Event!]! @derivedFrom(field: "transaction")
+  # derive from
+  block: Block!
+  events: [Event!]! @derivedFrom(field: "transaction")
 }
 
 type Event @entity {
-    id:                      ID!
-    type:                    String!
+  id: ID!
+  type: String!
 
-    # derive from
-    block:                    Block!
-    transaction:              Transaction!
-    attributes:               [Attribute!]! @derivedFrom(field: "event")
+  # derive from
+  block: Block!
+  transaction: Transaction!
+  attributes: [Attribute!]! @derivedFrom(field: "event")
 }
 
 type Attribute @entity {
-    id:                         ID!
-    key:                        String!
-    value:                      String!
+  id: ID!
+  key: String!
+  value: String!
 
-    # derive from
-    block:                    Block!
-    transaction:              Transaction!
-    event:                      Event!
+  # derive from
+  block: Block!
+  transaction: Transaction!
+  event: Event!
+}
+
+type Proposal @entity {
+  tx_hash: String!
+  block_number: BigInt!
+  id: ID!
+  type: String!
+  proposer: String!
+  initial_deposit_denom: String!
+  initial_deposit_amount: String!
+  authority: String!
+  title: String!
+  summary: String!
+  metadata: String!
+  plan_name: String!
+  plan_height: BigInt!
+  plan_info: String!
 }
