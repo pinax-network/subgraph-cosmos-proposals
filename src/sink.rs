@@ -1,3 +1,5 @@
+use crate::pb::cosmos::gov::v1beta1::MsgSubmitProposal;
+use crate::pb::cosmos::upgrade::v1beta1::SoftwareUpgradeProposal;
 use sha2::{Digest, Sha256};
 use substreams::{errors::Error, log, pb::substreams::Clock, Hex};
 use substreams_cosmos::Block;
@@ -11,6 +13,12 @@ pub fn graph_out(clock: Clock, block: Block) -> Result<EntityChanges, Error> {
 
     for tx in block.tx_results {
         let tx_hash = compute_tx_hash(&block.txs[transactions]);
+
+        let tx_as_bytes = block.txs[transactions].as_slice();
+
+        // if let Ok(tx) = <Tx as prost::Message>::decode(tx_as_bytes) {
+        // }
+
         for event in tx.events.iter() {
             let event_key = format!("{}:{}", tx_hash, events);
             tables
