@@ -1,0 +1,6 @@
+type Event @entity {
+    id:                       ID!
+    block_number:             BitInt!
+    tx_hash:                  String!
+    attributes:               String!
+}

@@ -1,14 +1,15 @@
-generated-buf-build.binpb: buf.yaml buf.gen.yaml proto/cosmos/*/*.proto
-	buf build --as-file-descriptor-set -o generated-buf-build.binpb
-
 .PHONY: build
-build: generated-buf-build.binpb
+build:
 	cargo build --target wasm32-unknown-unknown --release
-
-.PHONY: protogen
-protogen: generated-buf-build.binpb
-	buf generate --exclude-path=gogoproto --exclude-path=google/protobuf --exclude-path=cosmos/msg/v1 --exclude-path=amino generated-buf-build.binpb
 
 .PHONY: package
 package: build
 	substreams pack ./substreams.yaml
+
+.PHONY: gui
+gui:
+	substreams gui . -e mainnet.injective.streamingfast.io:443 graph_out -s 8982722 -t 8982732 --debug-modules-output graph_out
+
+.PHONY: run
+run:
+	substreams run . -e mainnet.injective.streamingfast.io:443 graph_out -s 8982722 -t 8982732
