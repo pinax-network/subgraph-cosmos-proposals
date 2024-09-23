@@ -1,0 +1,19 @@
+specVersion: 1.2.0
+description: Cosmos Software Upgrade Subgraph
+repository: https://github.com/pinax-network/subgraph-cosmos-software-upgrade
+schema:
+  file: ../../schema.graphql
+indexerHints:
+  prune: never
+dataSources:
+  - kind: substreams
+    name: cosmos_software_upgrade
+    network: injective
+    source:
+      startBlock: 82182057
+      package:
+        moduleName: graph_out
+        file: ../../cosmos-software-upgrade-v0.1.0.spkg
+    mapping:
+      kind: substreams/graph-entities
+      apiVersion: 0.0.5

@@ -1,9 +1,9 @@
 # requires substreams v1.7.1 and above
 specVersion: v0.1.0
 package:
-  name: cosmos_consensus
+  name: cosmos_software_upgrade
   version: v0.1.0
-  url: https://github.com/pinax-network/substreams-cosmos-consensus
+  url: https://github.com/pinax-network/subgraph-cosmos-software-upgrade
 
 imports:
   entity_changes: https://github.com/streamingfast/substreams-sink-entity-changes/releases/download/v1.3.2/substreams-sink-entity-changes-v1.3.2.spkg
@@ -11,7 +11,7 @@ imports:
 binaries:
   default:
     type: wasm/rust-v1
-    file: target/wasm32-unknown-unknown/release/cosmos_consensus.wasm
+    file: target/wasm32-unknown-unknown/release/cosmos_software_upgrade.wasm
 
 modules:
   - name: graph_out

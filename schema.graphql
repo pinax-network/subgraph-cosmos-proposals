@@ -1,6 +1,38 @@
+type Block @entity {
+    id:                     ID!
+    number:                 BigInt!
+    timestamp:              BigInt!
+
+    # derive from
+    transactions:          [Transaction!]! @derivedFrom(field: "block")
+}
+
+type Transaction @entity {
+    id:                     ID!
+    codespace:              String!
+
+    # derive from
+    block:                  Block!
+    events:                 [Event!]! @derivedFrom(field: "transaction")
+}
+
 type Event @entity {
-    id:                       ID!
-    block_number:             BitInt!
-    tx_hash:                  String!
-    attributes:               String!
+    id:                      ID!
+    attributes:              String!
+
+    # derive from
+    block:                    Block!
+    transaction:              Transaction!
+    attributes:               [Attribute!]! @derivedFrom(field: "event")
+}
+
+type Attribute @entity {
+    id:                         ID!
+    key:                        String!
+    value:                      String!
+
+    # derive from
+    block:                    Block!
+    transaction:              Transaction!
+    event:                      Event!
 }

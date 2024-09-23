@@ -12,24 +12,47 @@ pub fn graph_out(clock: Clock, block: Block) -> Result<EntityChanges, Error> {
     for tx in block.tx_results {
         let tx_hash = compute_tx_hash(&block.txs[transactions]);
         for event in tx.events.iter() {
-            let attributes: Vec<String> = event
-                .attributes
-                .iter()
-                .map(|attr| format!("key={} value={}", attr.key, attr.value))
-                .collect();
-
-            let key = format!("{}:{}", tx_hash, events);
+            let event_key = format!("{}:{}", tx_hash, events);
             tables
-                .create_row("events", key)
-                .set_bigint("block_number", &clock.number.to_string())
-                .set("tx_hash", tx_hash.clone())
-                .set("attributes", attributes);
+                .create_row("Event", event_key.as_str())
+                // derive from
+                .set("block", &clock.id)
+                .set("transaction", tx_hash.clone())
+                // event
+                .set("type", &event.r#type);
             events += 1;
+
+            for attribute in event.attributes.iter() {
+                let attribute_key = format!("{}:{}:{}", tx_hash, events, attribute.key);
+                tables
+                    .create_row("Attribute", attribute_key)
+                    // derive from
+                    .set("block", &clock.id)
+                    .set("transaction", &tx_hash)
+                    .set("event", &event_key)
+                    // attribute
+                    .set("key", attribute.key.clone())
+                    .set("value", attribute.value.clone());
+            }
         }
+
+        tables
+            .create_row("Transaction", tx_hash)
+            // derive From
+            .set("block", &clock.id)
+            // transaction
+            .set("codespace", tx.codespace);
         transactions += 1;
     }
 
     log::debug!("Processed transactions {} & events {}", transactions, events);
+
+    let timestamp = clock.timestamp.as_ref().expect("timestamp missing").seconds;
+    tables
+        .create_row("Block", &clock.id)
+        .set_bigint("number", &clock.number.to_string())
+        .set("hash", &clock.id)
+        .set_bigint("timestamp", &timestamp.to_string());
 
     Ok(tables.to_entity_changes())
 }

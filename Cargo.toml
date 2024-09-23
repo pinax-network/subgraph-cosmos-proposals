@@ -1,5 +1,5 @@
 [package]
-name = "cosmos_consensus"
+name = "cosmos_software_upgrade"
 version = "0.1.0"
 edition = "2021"
 

@@ -1,10 +1,12 @@
+.PHONY: all
+all:
+	make build
+
 .PHONY: build
 build:
 	cargo build --target wasm32-unknown-unknown --release
-
-.PHONY: package
-package: build
-	substreams pack ./substreams.yaml
+	substreams pack
+	substreams info
 
 .PHONY: gui
 gui:
