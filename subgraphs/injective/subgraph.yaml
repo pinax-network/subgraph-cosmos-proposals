@@ -1,4 +1,4 @@
-specVersion: 1.2.0
+specVersion: 1.1.0
 description: Cosmos Software Upgrade Subgraph
 repository: https://github.com/pinax-network/subgraph-cosmos-software-upgrade
 schema:

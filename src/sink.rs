@@ -51,7 +51,6 @@ pub fn graph_out(clock: Clock, block: Block) -> Result<EntityChanges, Error> {
     tables
         .create_row("Block", &clock.id)
         .set_bigint("number", &clock.number.to_string())
-        .set("hash", &clock.id)
         .set_bigint("timestamp", &timestamp.to_string());
 
     Ok(tables.to_entity_changes())
