@@ -60,5 +60,6 @@ type ProposalVote @entity {
   blockNumber: BigInt!
   voter: String!
   option: String!
+  weight: BigDecimal!
   proposalId: String!
 }
