@@ -1,6 +1,25 @@
-# Subgraph Cosmos Software Upgrade
+# Subgraph: `Cosmos Governance Proposals`
 
-This document describes the software upgrade process for the Cosmos Hub. The software upgrade process is a critical part of the Cosmos Hub governance process. It allows the network to evolve by upgrading the software that powers the network. The software upgrade process is a multi-step process that involves the coordination of validators, delegators, and other network participants.
+> Tracks governance proposals on Cosmos based networks.
+
+## Data Includes
+
+- `Votes`
+- `Deposits`
+- `Proposals`
+- `Software Upgrades`
+
+## Chains
+
+- **API Key**: <https://thegraph.com/studio/apikeys/>
+- **Base URL**: <https://gateway.thegraph.com/api>
+- **Query URL format**: `{base_url}`/api/`{api-key}`/subgraphs/id/`{subgraph_id}`
+
+| Chain | Subgraph ID |
+| ----- | ----------- |
+| Injective   | [`SUBGRAPH_ID`](https://thegraph.com/explorer/subgraphs/SUBGRAPH_ID?view=Query&chain=arbitrum-one) |
+| CosmosHub   | [`SUBGRAPH_ID`](https://thegraph.com/explorer/subgraphs/SUBGRAPH_ID?view=Query&chain=arbitrum-one) |
+| Osmosis   | [`SUBGRAPH_ID`](https://thegraph.com/explorer/subgraphs/SUBGRAPH_ID?view=Query&chain=arbitrum-one) |
 
 ## Proposals explorers
 
@@ -15,7 +34,7 @@ This document describes the software upgrade process for the Cosmos Hub. The sof
 
 ## Concepts
 
-<https://docs.cosmos.network/v0.46/modules/gov/01_concepts.html>
+<https://docs.cosmos.network/v0.46/modules/gov/>
 
 The governance process is divided in a few steps that are outlined below:
 
