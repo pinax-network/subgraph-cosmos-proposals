@@ -1,5 +1,6 @@
 use crate::pb::cosmos::custom_proto::v1::MsgSubmitProposalNew;
 use crate::pb::cosmos::{gov::v1beta1::MsgSubmitProposal, tx::v1beta1::Tx};
+use crate::proposal_votes::push_if_proposal_votes;
 use crate::proposals::{insert_message_software_upgrade, insert_software_upgrade_proposal};
 use prost_types::Any;
 use sha2::{Digest, Sha256};
@@ -11,7 +12,7 @@ use substreams_entity_change::{pb::entity::EntityChanges, tables::Tables};
 #[substreams::handlers::map]
 pub fn graph_out(clock: Clock, block: Block) -> Result<EntityChanges, Error> {
     let mut tables = Tables::new();
-    let mut events = 0;
+    // let mut events = 0;
     let mut transactions = 0;
 
     for tx_result in block.tx_results {
@@ -35,10 +36,10 @@ pub fn graph_out(clock: Clock, block: Block) -> Result<EntityChanges, Error> {
             }
         }
 
+        transactions += 1;
+
         push_if_proposal_votes(&mut tables, &tx_result, &clock, &tx_hash);
     }
-
-    log::debug!("Processed transactions {} & events {}", transactions, events);
 
     // let timestamp = clock.timestamp.as_ref().expect("timestamp missing").seconds;
     // tables
@@ -85,48 +86,6 @@ pub fn push_if_software_upgrade_proposal(
             if content.type_url == "/cosmos.upgrade.v1beta1.SoftwareUpgradeProposal" {
                 insert_software_upgrade_proposal(tables, msg_submit_proposal, tx_result, clock, tx_hash);
             }
-        }
-    }
-}
-
-pub fn push_if_proposal_votes(tables: &mut Tables, tx_result: &TxResults, clock: &Clock, tx_hash: &str) {
-    let proposal_votes = tx_result.events.iter().filter(|event| event.r#type == "proposal_vote");
-
-    for vote in proposal_votes {
-        let voter = vote
-            .attributes
-            .iter()
-            .find(|attr| attr.key == "voter")
-            .map(|attr| attr.value.clone())
-            .unwrap_or_default();
-        let option = vote
-            .attributes
-            .iter()
-            .find(|attr| attr.key == "option")
-            .map(|attr| attr.value.clone())
-            .unwrap_or_default();
-
-        let proposal_id = vote
-            .attributes
-            .iter()
-            .find(|attr| attr.key == "proposal_id")
-            .map(|attr| attr.value.to_string())
-            .unwrap_or_default();
-
-        log::debug!("voter: {}", voter);
-        log::debug!("option: {}", option);
-        // log::debug!("proposal_id: {}", proposal_id);
-
-        if !voter.is_empty() && !option.is_empty() {
-            let vote_id = format!("{}:{}", tx_hash, voter);
-            tables
-                .create_row("ProposalVote", vote_id.as_str())
-                .set("id", vote_id.as_str())
-                .set("txHash", tx_hash)
-                .set("blockNumber", clock.number)
-                .set("voter", voter.as_str())
-                .set("option", option.as_str())
-                .set("proposalId", proposal_id.as_str());
         }
     }
 }
