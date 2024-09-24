@@ -38,18 +38,27 @@ type Attribute @entity {
 }
 
 type Proposal @entity {
-  tx_hash: String!
-  block_number: BigInt!
+  txHash: String!
+  blockNumber: BigInt!
   id: ID!
   type: String!
   proposer: String!
-  initial_deposit_denom: String!
-  initial_deposit_amount: String!
+  initialDepositDenom: String!
+  initialDepositAmount: String!
   authority: String!
   title: String!
   summary: String!
   metadata: String!
-  plan_name: String!
-  plan_height: BigInt!
-  plan_info: String!
+  planName: String!
+  planHeight: BigInt!
+  planInfo: String!
+}
+
+type ProposalVote @entity {
+  id: ID!
+  txHash: String!
+  blockNumber: BigInt!
+  voter: String!
+  option: String!
+  proposalId: String!
 }

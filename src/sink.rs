@@ -1,5 +1,4 @@
 use crate::pb::cosmos::custom_proto::v1::MsgSubmitProposalNew;
-use crate::pb::cosmos::upgrade::v1beta1::SoftwareUpgradeProposal;
 use crate::pb::cosmos::{gov::v1beta1::MsgSubmitProposal, tx::v1beta1::Tx};
 use crate::proposals::{insert_message_software_upgrade, insert_software_upgrade_proposal};
 use prost_types::Any;
@@ -36,49 +35,16 @@ pub fn graph_out(clock: Clock, block: Block) -> Result<EntityChanges, Error> {
             }
         }
 
-        let msg_votes = tx_result.events.iter().filter(|event| event.r#type == "message_vote");
-
-        for event in tx_result.events.iter() {
-            let event_key = format!("{}:{}", tx_hash, events);
-            tables
-                .create_row("Event", event_key.as_str())
-                // derive from
-                .set("block", &clock.id)
-                .set("transaction", tx_hash.clone())
-                // event
-                .set("type", &event.r#type);
-            events += 1;
-
-            for attribute in event.attributes.iter() {
-                let attribute_key = format!("{}:{}:{}", tx_hash, events, attribute.key);
-                tables
-                    .create_row("Attribute", attribute_key)
-                    // derive from
-                    .set("block", &clock.id)
-                    .set("transaction", &tx_hash)
-                    .set("event", &event_key)
-                    // attribute
-                    .set("key", attribute.key.clone())
-                    .set("value", attribute.value.clone());
-            }
-        }
-
-        tables
-            .create_row("Transaction", tx_hash)
-            // derive From
-            .set("block", &clock.id)
-            // transaction
-            .set("codespace", tx_result.codespace);
-        transactions += 1;
+        push_if_proposal_votes(&mut tables, &tx_result, &clock, &tx_hash);
     }
 
     log::debug!("Processed transactions {} & events {}", transactions, events);
 
-    let timestamp = clock.timestamp.as_ref().expect("timestamp missing").seconds;
-    tables
-        .create_row("Block", &clock.id)
-        .set_bigint("number", &clock.number.to_string())
-        .set_bigint("timestamp", &timestamp.to_string());
+    // let timestamp = clock.timestamp.as_ref().expect("timestamp missing").seconds;
+    // tables
+    //     .create_row("Block", &clock.id)
+    //     .set_bigint("number", &clock.number.to_string())
+    //     .set_bigint("timestamp", &timestamp.to_string());
 
     Ok(tables.to_entity_changes())
 }
@@ -119,6 +85,48 @@ pub fn push_if_software_upgrade_proposal(
             if content.type_url == "/cosmos.upgrade.v1beta1.SoftwareUpgradeProposal" {
                 insert_software_upgrade_proposal(tables, msg_submit_proposal, tx_result, clock, tx_hash);
             }
+        }
+    }
+}
+
+pub fn push_if_proposal_votes(tables: &mut Tables, tx_result: &TxResults, clock: &Clock, tx_hash: &str) {
+    let proposal_votes = tx_result.events.iter().filter(|event| event.r#type == "proposal_vote");
+
+    for vote in proposal_votes {
+        let voter = vote
+            .attributes
+            .iter()
+            .find(|attr| attr.key == "voter")
+            .map(|attr| attr.value.clone())
+            .unwrap_or_default();
+        let option = vote
+            .attributes
+            .iter()
+            .find(|attr| attr.key == "option")
+            .map(|attr| attr.value.clone())
+            .unwrap_or_default();
+
+        let proposal_id = vote
+            .attributes
+            .iter()
+            .find(|attr| attr.key == "proposal_id")
+            .map(|attr| attr.value.to_string())
+            .unwrap_or_default();
+
+        log::debug!("voter: {}", voter);
+        log::debug!("option: {}", option);
+        // log::debug!("proposal_id: {}", proposal_id);
+
+        if !voter.is_empty() && !option.is_empty() {
+            let vote_id = format!("{}:{}", tx_hash, voter);
+            tables
+                .create_row("ProposalVote", vote_id.as_str())
+                .set("id", vote_id.as_str())
+                .set("txHash", tx_hash)
+                .set("blockNumber", clock.number)
+                .set("voter", voter.as_str())
+                .set("option", option.as_str())
+                .set("proposalId", proposal_id.as_str());
         }
     }
 }

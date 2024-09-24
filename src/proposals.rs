@@ -45,19 +45,19 @@ pub fn insert_message_software_upgrade(
             tables
                 .create_row("Proposal", proposal_id.to_string().as_str())
                 .set("id", proposal_id.to_string().as_str())
-                .set("tx_hash", tx_hash)
-                .set("block_number", clock.number)
+                .set("txHash", tx_hash)
+                .set("blockNumber", clock.number)
                 .set("type", "software_upgrade_proposal")
                 .set("proposer", proposer)
-                .set("initial_deposit_denom", initial_deposit_denom)
-                .set("initial_deposit_amount", initial_deposit_amount)
+                .set("initialDepositDenom", initial_deposit_denom)
+                .set("initialDepositAmount", initial_deposit_amount)
                 .set("authority", authority)
                 .set("title", title)
                 .set("summary", summary)
                 .set("metadata", metadata)
-                .set("plan_name", plan_name)
-                .set("plan_height", plan_height)
-                .set("plan_info", plan_info);
+                .set("planName", plan_name)
+                .set("planHeight", plan_height)
+                .set("planInfo", plan_info);
         }
     }
 }
@@ -106,19 +106,19 @@ pub fn insert_software_upgrade_proposal(
             tables
                 .create_row("Proposal", proposal_id.to_string().as_str())
                 .set("id", proposal_id.to_string().as_str())
-                .set("tx_hash", tx_hash)
-                .set("block_number", clock.number)
+                .set("txHash", tx_hash)
+                .set("blockNumber", clock.number)
                 .set("type", "software_upgrade_proposal")
                 .set("proposer", proposer)
-                .set("initial_deposit_denom", initial_deposit_denom)
-                .set("initial_deposit_amount", initial_deposit_amount)
+                .set("initialDepositDenom", initial_deposit_denom)
+                .set("initialDepositAmount", initial_deposit_amount)
                 .set("authority", authority)
                 .set("title", title)
                 .set("summary", description)
                 .set("metadata", "")
-                .set("plan_name", plan_name)
-                .set("plan_height", plan_height)
-                .set("plan_info", plan_info);
+                .set("planName", plan_name)
+                .set("planHeight", plan_height)
+                .set("planInfo", plan_info);
         }
     }
 }
