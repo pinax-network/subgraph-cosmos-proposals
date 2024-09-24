@@ -40,7 +40,11 @@ pub fn insert_message_software_upgrade(
                 .flat_map(|event| event.attributes.iter()) // flatten all attributes
                 .find(|attr| attr.key == "proposal_id") // find the one with the proposal_id attribute
                 .and_then(|attr| attr.value.parse::<u64>().ok()) // parse it as u64 if found
-                .expect("Failed to find or parse proposal_id");
+                .unwrap_or(0);
+
+            if proposal_id == 0 {
+                return;
+            }
 
             tables
                 .create_row("Proposal", proposal_id.to_string().as_str())
@@ -101,7 +105,11 @@ pub fn insert_software_upgrade_proposal(
                 .flat_map(|event| event.attributes.iter()) // flatten all attributes
                 .find(|attr| attr.key == "proposal_id") // find the one with the proposal_id attribute
                 .and_then(|attr| attr.value.parse::<u64>().ok()) // parse it as u64 if found
-                .expect("Failed to find or parse proposal_id");
+                .unwrap_or(0);
+
+            if proposal_id == 0 {
+                return;
+            }
 
             tables
                 .create_row("Proposal", proposal_id.to_string().as_str())
