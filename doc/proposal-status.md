@@ -38,7 +38,11 @@ In practice, this calculation is typically performed automatically by the blockc
 
 Citations:
 [1] https://hub.cosmos.network/main/governance/process
+
 [2] https://github.com/cosmos/cosmos-sdk/blob/main/x/gov/README.md
+
 [3] https://github.com/cosmos/cosmos/blob/master/GOVERNANCE_DOC.md
+
 [4] https://interchaininfo.zone/resources/a-beginners-guide-to-cosmos-governance
+
 [5] https://docs.exocore.network/whitepaper/restaking-mechanism/voting-power-calculation
