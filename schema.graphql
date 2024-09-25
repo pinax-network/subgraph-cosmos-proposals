@@ -50,7 +50,7 @@ type Proposal @entity {
   description: String!
   metadata: String!
   votes: [ProposalVote!]! @derivedFrom(field: "proposal")
-  softwareUpgrade: [SoftwareUpgradeProposal!]! @derivedFrom(field: "proposal")
+  softwareUpgrades: [SoftwareUpgradeProposal!]! @derivedFrom(field: "proposal")
 }
 
 type SoftwareUpgradeProposal @entity {
