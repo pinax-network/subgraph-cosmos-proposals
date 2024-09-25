@@ -42,6 +42,7 @@ pub fn insert_message_software_upgrade(
                 .and_then(|attr| attr.value.parse::<u64>().ok()) // parse it as u64 if found
                 .expect("proposal_id not found");
 
+            // Create Proposal entity
             tables
                 .create_row("Proposal", proposal_id.to_string().as_str())
                 .set("id", proposal_id.to_string().as_str())
@@ -53,11 +54,17 @@ pub fn insert_message_software_upgrade(
                 .set("initialDepositAmount", initial_deposit_amount)
                 .set("authority", authority)
                 .set("title", title)
-                .set("summary", summary)
-                .set("metadata", metadata)
+                .set("description", summary)
+                .set("metadata", metadata);
+
+            // Create SoftwareUpgradeProposal entity
+            tables
+                .create_row("SoftwareUpgradeProposal", proposal_id.to_string().as_str())
+                .set("id", proposal_id.to_string().as_str())
                 .set("planName", plan_name)
                 .set("planHeight", plan_height)
-                .set("planInfo", plan_info);
+                .set("planInfo", plan_info)
+                .set("proposal", proposal_id.to_string().as_str());
         }
     }
 }
@@ -103,6 +110,7 @@ pub fn insert_software_upgrade_proposal(
                 .and_then(|attr| attr.value.parse::<u64>().ok()) // parse it as u64 if found
                 .expect("proposal_id not found");
 
+            // Create Proposal entity
             tables
                 .create_row("Proposal", proposal_id.to_string().as_str())
                 .set("id", proposal_id.to_string().as_str())
@@ -114,11 +122,17 @@ pub fn insert_software_upgrade_proposal(
                 .set("initialDepositAmount", initial_deposit_amount)
                 .set("authority", authority)
                 .set("title", title)
-                .set("summary", description)
-                .set("metadata", "")
+                .set("description", description)
+                .set("metadata", "");
+
+            // Create SoftwareUpgradeProposal entity
+            tables
+                .create_row("SoftwareUpgradeProposal", proposal_id.to_string().as_str())
+                .set("id", proposal_id.to_string().as_str())
                 .set("planName", plan_name)
                 .set("planHeight", plan_height)
-                .set("planInfo", plan_info);
+                .set("planInfo", plan_info)
+                .set("proposal", proposal_id.to_string().as_str());
         }
     }
 }

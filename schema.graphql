@@ -38,20 +38,27 @@ type Attribute @entity {
 }
 
 type Proposal @entity {
+  id: ID!
   txHash: String!
   blockNumber: BigInt!
-  id: ID!
   type: String!
   proposer: String!
   initialDepositDenom: String!
   initialDepositAmount: String!
   authority: String!
   title: String!
-  summary: String!
+  description: String!
   metadata: String!
+  votes: [ProposalVote!]! @derivedFrom(field: "proposal")
+  softwareUpgrade: [SoftwareUpgradeProposal!]! @derivedFrom(field: "proposal")
+}
+
+type SoftwareUpgradeProposal @entity {
+  id: ID!
   planName: String!
   planHeight: BigInt!
   planInfo: String!
+  proposal: Proposal!
 }
 
 type ProposalVote @entity {
@@ -61,5 +68,5 @@ type ProposalVote @entity {
   voter: String!
   option: String!
   weight: BigDecimal!
-  proposalId: String!
+  proposal: Proposal!
 }

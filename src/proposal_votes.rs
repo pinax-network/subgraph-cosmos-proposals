@@ -42,7 +42,7 @@ pub fn push_if_proposal_votes(tables: &mut Tables, tx_result: &TxResults, clock:
             .unwrap_or_default();
 
         for (option, weight) in options_weights {
-            let vote_id = format!("{}:{}", tx_hash, voter);
+            let vote_id = format!("{}:{}:{}", tx_hash, voter, option);
             tables
                 .create_row("ProposalVote", vote_id.as_str())
                 .set("id", vote_id.as_str())
@@ -51,7 +51,7 @@ pub fn push_if_proposal_votes(tables: &mut Tables, tx_result: &TxResults, clock:
                 .set("voter", voter.as_str())
                 .set("option", option.as_str())
                 .set_bigdecimal("weight", &weight)
-                .set("proposalId", proposal_id.as_str());
+                .set("proposal", proposal_id.as_str());
         }
     }
 }

@@ -37,6 +37,7 @@ For an individual wanting to calculate the total voting power:
 In practice, this calculation is typically performed automatically by the blockchain software and governance interfaces, as it requires a comprehensive view of the network's state at a specific point in time.
 
 Citations:
+
 [1] https://hub.cosmos.network/main/governance/process
 
 [2] https://github.com/cosmos/cosmos-sdk/blob/main/x/gov/README.md
