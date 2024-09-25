@@ -63,10 +63,11 @@ pub fn insert_parameter_change_proposal(
                 .set("description", description);
 
             tables
-                .create_row("JsonDataProposal", &proposal_id.to_string())
+                .create_row("Content", &proposal_id.to_string())
                 .set("id", &proposal_id.to_string())
                 .set("proposal", &proposal_id.to_string())
-                .set("data", data.as_str());
+                .set("typeUrl", "/cosmos.params.v1beta1.ParameterChangeProposal")
+                .set("jsonData", data.as_str());
         }
     }
 }

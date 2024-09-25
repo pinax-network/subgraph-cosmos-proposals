@@ -49,9 +49,16 @@ type Proposal @entity {
   title: String!
   description: String!
   metadata: String
-  votes: [ProposalVote!]! @derivedFrom(field: "proposal")
-  softwareUpgrades: [SoftwareUpgradeProposal!]! @derivedFrom(field: "proposal")
-  jsonDataProposals: [JsonDataProposal!]! @derivedFrom(field: "proposal")
+  votes: [Vote!]! @derivedFrom(field: "proposal")
+  contents: [Content!]! @derivedFrom(field: "proposal")
+}
+
+type Content @entity {
+  id: ID!
+  typeUrl: String!
+  jsonData: String
+  value: String
+  proposal: Proposal!
 }
 
 type SoftwareUpgradeProposal @entity {
@@ -62,13 +69,7 @@ type SoftwareUpgradeProposal @entity {
   proposal: Proposal!
 }
 
-type JsonDataProposal @entity {
-  id: ID!
-  proposal: Proposal!
-  data: String!
-}
-
-type ProposalVote @entity {
+type Vote @entity {
   id: ID!
   txHash: String!
   blockNumber: BigInt!

@@ -1,6 +1,7 @@
 // Start of Selection
 use crate::parameter_changes::insert_parameter_change_proposal;
 use crate::pb::cosmos::gov::v1::MsgSubmitProposal as MsgSubmitProposalV1;
+use crate::pb::cosmos::gov::v1beta1::MsgVote;
 use crate::pb::cosmos::{gov::v1beta1::MsgSubmitProposal as MsgSubmitProposalV1Beta1, tx::v1beta1::Tx};
 use crate::proposal_votes::push_if_proposal_votes;
 use crate::proposals::{insert_message_software_upgrade, insert_software_upgrade_proposal};
@@ -45,6 +46,9 @@ pub fn graph_out(params: String, clock: Clock, block: Block) -> Result<EntityCha
                                 }
                             }
                         }
+                        "/cosmos.gov.v1beta1.MsgVote" => {
+                            push_if_proposal_votes(&mut tables, message, &tx_result, &clock, &tx_hash);
+                        }
                         _ => continue,
                     }
                 }
@@ -52,8 +56,6 @@ pub fn graph_out(params: String, clock: Clock, block: Block) -> Result<EntityCha
         }
 
         transactions += 1;
-
-        push_if_proposal_votes(&mut tables, &tx_result, &clock, &tx_hash);
     }
 
     let timestamp = clock.timestamp.as_ref().expect("timestamp missing").seconds;
