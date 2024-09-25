@@ -40,7 +40,10 @@ pub fn insert_message_software_upgrade(
                 .flat_map(|event| event.attributes.iter()) // flatten all attributes
                 .find(|attr| attr.key == "proposal_id") // find the one with the proposal_id attribute
                 .and_then(|attr| attr.value.parse::<u64>().ok()) // parse it as u64 if found
-                .expect("proposal_id not found");
+                .expect(&format!(
+                    "proposal_id not found for message software upgrade at block {}",
+                    clock.number
+                ));
 
             // Create Proposal entity
             tables
@@ -71,12 +74,12 @@ pub fn insert_message_software_upgrade(
 
 pub fn insert_software_upgrade_proposal(
     tables: &mut Tables,
-    msg_submit_proposal: MsgSubmitProposal,
+    msg_submit_proposal: &MsgSubmitProposal,
     tx_result: &TxResults,
     clock: &Clock,
     tx_hash: &str,
 ) {
-    if let Some(content) = msg_submit_proposal.content {
+    if let Some(content) = msg_submit_proposal.content.as_ref() {
         if let Ok(software_upgrade_proposal) =
             <SoftwareUpgradeProposal as prost::Message>::decode(content.value.as_slice())
         {
@@ -108,7 +111,10 @@ pub fn insert_software_upgrade_proposal(
                 .flat_map(|event| event.attributes.iter()) // flatten all attributes
                 .find(|attr| attr.key == "proposal_id") // find the one with the proposal_id attribute
                 .and_then(|attr| attr.value.parse::<u64>().ok()) // parse it as u64 if found
-                .expect("proposal_id not found");
+                .expect(&format!(
+                    "proposal_id not found for software upgrade proposal at block {}",
+                    clock.number
+                ));
 
             // Create Proposal entity
             tables

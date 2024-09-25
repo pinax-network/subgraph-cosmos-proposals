@@ -48,7 +48,7 @@ type Proposal @entity {
   authority: String!
   title: String!
   description: String!
-  metadata: String!
+  metadata: String
   votes: [ProposalVote!]! @derivedFrom(field: "proposal")
   softwareUpgrades: [SoftwareUpgradeProposal!]! @derivedFrom(field: "proposal")
   jsonDataProposals: [JsonDataProposal!]! @derivedFrom(field: "proposal")

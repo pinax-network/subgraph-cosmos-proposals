@@ -55,4 +55,12 @@ pub mod cosmos {
             // @@protoc_insertion_point(cosmos.custom_proto)
         }
     }
+
+    pub mod params {
+        // @@protoc_insertion_point(attribute:cosmos.params.v1beta1)
+        pub mod v1beta1 {
+            include!("cosmos.params.v1beta1.rs");
+            // @@protoc_insertion_point(cosmos.params.v1beta1)
+        }
+    }
 }

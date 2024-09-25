@@ -1,3 +1,4 @@
+mod parameter_changes;
 mod pb;
 mod proposal_votes;
 mod proposals;
