@@ -26,4 +26,23 @@ modules:
 params:
   # Governance Genesis Parameters
   # https://github.com/cosmos/mainnet/blob/master/genesis/genesis.cosmoshub-2.json
-  graph_out: '{"deposit_params":{"max_deposit_period":"1209600000000000","min_deposit":[{"amount":"512000000","denom":"uatom"}]}}'
+  # COSMOS
+  # graph_out: '{"deposit_params":{"max_deposit_period":"1209600000000000","min_deposit":[{"amount":"512000000","denom":"uatom"}]}}'
+  # INJECTIVE
+  graph_out: '{"deposit_params": {
+    "min_deposit": [
+    {
+    "denom": "inj",
+    "amount": "500000000000000000000"
+    }
+    ],
+    "max_deposit_period": "172800"
+    },
+    "voting_params": {
+    "voting_period": "172800"
+    },
+    "tally_params": {
+    "quorum": "0.334000000000000000",
+    "threshold": "0.500000000000000000",
+    "veto_threshold": "0.334000000000000000"
+    }}'

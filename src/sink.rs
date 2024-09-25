@@ -2,6 +2,7 @@ use crate::pb::cosmos::custom_proto::v1::MsgSubmitProposalNew;
 use crate::pb::cosmos::{gov::v1beta1::MsgSubmitProposal, tx::v1beta1::Tx};
 use crate::proposal_votes::push_if_proposal_votes;
 use crate::proposals::{insert_message_software_upgrade, insert_software_upgrade_proposal};
+use crate::serde_genesis::GenesisParams;
 use prost_types::Any;
 use sha2::{Digest, Sha256};
 use substreams::{errors::Error, log, pb::substreams::Clock, Hex};
@@ -11,9 +12,10 @@ use substreams_entity_change::{pb::entity::EntityChanges, tables::Tables};
 
 #[substreams::handlers::map]
 pub fn graph_out(params: String, clock: Clock, block: Block) -> Result<EntityChanges, Error> {
-    log::debug!("GenesisParams: {}", params);
+    // let parsed: GenesisParams = serde_json::from_str(&params).expect("Failed to parse params");
+
     let mut tables = Tables::new();
-    // let mut events = 0;
+
     let mut transactions = 0;
 
     for tx_result in block.tx_results {
