@@ -2,18 +2,18 @@ use substreams::pb::substreams::Clock;
 use substreams_cosmos::pb::TxResults;
 use substreams_entity_change::tables::Tables;
 
-use crate::pb::cosmos::custom_proto::v1::{MsgSoftwareUpgrade, MsgSubmitProposalNew};
-use crate::pb::cosmos::gov::v1beta1::MsgSubmitProposal;
-use crate::pb::cosmos::upgrade::v1beta1::SoftwareUpgradeProposal;
+use crate::pb::cosmos::gov::v1::MsgSubmitProposal as MsgSubmitProposalV1;
+use crate::pb::cosmos::gov::v1beta1::MsgSubmitProposal as MsgSubmitProposalV1Beta1;
+use crate::pb::cosmos::upgrade::v1beta1::{MsgSoftwareUpgrade, SoftwareUpgradeProposal};
 
 pub fn insert_message_software_upgrade(
     tables: &mut Tables,
-    msg_submit_proposal: MsgSubmitProposalNew,
+    msg_submit_proposal: &MsgSubmitProposalV1,
     tx_result: &TxResults,
     clock: &Clock,
     tx_hash: &str,
 ) {
-    if let Some(content) = msg_submit_proposal.content {
+    if let Some(content) = msg_submit_proposal.content.as_ref() {
         if let Ok(msg_software_upgrade) = <MsgSoftwareUpgrade as prost::Message>::decode(content.value.as_slice()) {
             let proposer = msg_submit_proposal.proposer.as_str();
             let initial_deposit = msg_submit_proposal.initial_deposit.get(0).unwrap();
@@ -74,7 +74,7 @@ pub fn insert_message_software_upgrade(
 
 pub fn insert_software_upgrade_proposal(
     tables: &mut Tables,
-    msg_submit_proposal: &MsgSubmitProposal,
+    msg_submit_proposal: &MsgSubmitProposalV1Beta1,
     tx_result: &TxResults,
     clock: &Clock,
     tx_hash: &str,

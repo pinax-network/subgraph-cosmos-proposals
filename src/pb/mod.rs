@@ -28,6 +28,10 @@ pub mod cosmos {
             include!("cosmos.gov.v1beta1.rs");
             // @@protoc_insertion_point(cosmos.gov.v1beta1)
         }
+        pub mod v1 {
+            include!("cosmos.gov.v1.rs");
+            // @@protoc_insertion_point(cosmos.gov.v1)
+        }
     }
 
     pub mod base {
@@ -61,6 +65,14 @@ pub mod cosmos {
         pub mod v1beta1 {
             include!("cosmos.params.v1beta1.rs");
             // @@protoc_insertion_point(cosmos.params.v1beta1)
+        }
+    }
+
+    pub mod distribution {
+        // @@protoc_insertion_point(attribute:cosmos.distribution.v1beta1)
+        pub mod v1beta1 {
+            include!("cosmos.distribution.v1beta1.rs");
+            // @@protoc_insertion_point(cosmos.distribution.v1beta1)
         }
     }
 }
