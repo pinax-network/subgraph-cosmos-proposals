@@ -30,6 +30,7 @@
   - <https://www.mintscan.io/cosmos/proposals>
   - <https://govscan.live/cosmoshub/proposals>
 - **Injective**
+  - <https://www.mintscan.io/injective/proposals>
   - <https://govscan.live/injective/proposals>
 
 ## Concepts
