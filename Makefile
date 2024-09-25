@@ -10,7 +10,7 @@ build:
 
 .PHONY: gui
 gui:
-	substreams gui . -e mainnet.injective.streamingfast.io:443 graph_out -s 8982722 -t 8982732 --debug-modules-output graph_out
+	substreams gui . -e mainnet.injective.streamingfast.io:443 graph_out -s -1000 -t 0 --debug-modules-output graph_out
 
 .PHONY: run
 run:

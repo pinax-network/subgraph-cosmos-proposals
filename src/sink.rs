@@ -10,7 +10,8 @@ use substreams_cosmos::Block;
 use substreams_entity_change::{pb::entity::EntityChanges, tables::Tables};
 
 #[substreams::handlers::map]
-pub fn graph_out(clock: Clock, block: Block) -> Result<EntityChanges, Error> {
+pub fn graph_out(params: String, clock: Clock, block: Block) -> Result<EntityChanges, Error> {
+    log::debug!("GenesisParams: {}", params);
     let mut tables = Tables::new();
     // let mut events = 0;
     let mut transactions = 0;

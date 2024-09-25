@@ -17,7 +17,13 @@ modules:
   - name: graph_out
     kind: map
     inputs:
+      - params: string
       - source: sf.substreams.v1.Clock
       - source: sf.cosmos.type.v2.Block
     output:
       type: proto:sf.substreams.sink.entity.v1.EntityChanges
+
+params:
+  # Governance Genesis Parameters
+  # https://github.com/cosmos/mainnet/blob/master/genesis/genesis.cosmoshub-2.json
+  graph_out: '{"deposit_params":{"max_deposit_period":"1209600000000000","min_deposit":[{"amount":"512000000","denom":"uatom"}]}}'

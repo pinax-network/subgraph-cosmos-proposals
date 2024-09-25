@@ -19,4 +19,4 @@ publish:
 
 .PHONY: gui
 gui:
-	substreams gui ../../substreams.yaml -e mainnet.injective.streamingfast.io:443  graph_out -s 82182057 -t 82192057 --production-mode
+	substreams gui ../../substreams.yaml -e mainnet.injective.streamingfast.io:443  graph_out -s -1000

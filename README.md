@@ -7,7 +7,9 @@
 - `Votes`
 - `Deposits`
 - `Proposals`
-- `Software Upgrades`
+  - `SoftwareUpgrades`
+  - `ParameterChanges`
+- `GovernanceParameters`
 
 ## Chains
 
