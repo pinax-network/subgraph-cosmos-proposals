@@ -11,7 +11,8 @@ dataSources:
     network: injective
     source:
       # startBlock: 82182057
-      startBlock: 8982722
+      # startBlock: 8982722
+      startBlock: 60343991
       package:
         moduleName: graph_out
         file: ../../cosmos-software-upgrade-v0.1.0.spkg

@@ -5,3 +5,4 @@ mod proposal_votes;
 mod serde_genesis;
 mod sink;
 mod software_upgrades;
+mod text;

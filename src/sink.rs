@@ -7,6 +7,7 @@ use crate::pb::cosmos::{gov::v1beta1::MsgSubmitProposal as MsgSubmitProposalV1Be
 use crate::proposal_votes::push_if_proposal_votes;
 use crate::serde_genesis::GenesisParams;
 use crate::software_upgrades::{insert_message_software_upgrade, insert_software_upgrade_proposal};
+use crate::text::insert_text_proposal;
 use prost::Message;
 use prost_types::Any;
 use sha2::{Digest, Sha256};
@@ -51,6 +52,9 @@ pub fn graph_out(params: String, clock: Clock, block: Block) -> Result<EntityCha
                                     continue;
                                 }
                                 if push_if_comm_pool_spend_prop(&mut tables, &msg, &tx_result, &clock, &tx_hash) {
+                                    continue;
+                                }
+                                if push_if_text_proposal(&mut tables, &msg, &tx_result, &clock, &tx_hash) {
                                     continue;
                                 }
                             }
@@ -158,6 +162,22 @@ pub fn push_if_msg_comm_pool_spend(
     if let Some(content) = msg_submit_proposal.content.as_ref() {
         if content.type_url == "/cosmos.distribution.v1beta1.MsgCommunityPoolSpend" {
             insert_msg_community_pool_spend(tables, msg_submit_proposal, content, tx_result, clock, tx_hash);
+            return true;
+        }
+    }
+    return false;
+}
+
+pub fn push_if_text_proposal(
+    tables: &mut Tables,
+    msg_submit_proposal: &MsgSubmitProposalV1Beta1,
+    tx_result: &TxResults,
+    clock: &Clock,
+    tx_hash: &str,
+) -> bool {
+    if let Some(content) = msg_submit_proposal.content.as_ref() {
+        if content.type_url == "/cosmos.gov.v1beta1.TextProposal" {
+            insert_text_proposal(tables, msg_submit_proposal, content, tx_result, clock, tx_hash);
             return true;
         }
     }
