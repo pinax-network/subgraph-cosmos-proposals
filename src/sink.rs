@@ -1,5 +1,6 @@
 use crate::client_update::insert_client_update_proposal;
 use crate::community_pool_spends::{insert_community_pool_spend_proposal, insert_msg_community_pool_spend};
+use crate::other_proposals::{insert_other_proposal_v1, insert_other_proposal_v1beta1};
 // Start of Selection
 use crate::parameter_changes::insert_parameter_change_proposal;
 use crate::pb::cosmos::gov::v1::MsgSubmitProposal as MsgSubmitProposalV1;
@@ -45,6 +46,7 @@ pub fn graph_out(params: String, clock: Clock, block: Block) -> Result<EntityCha
                                 if push_if_msg_comm_pool_spend(&mut tables, &msg, &tx_result, &clock, &tx_hash) {
                                     continue;
                                 }
+                                push_other_proposalv1(&mut tables, &msg, &tx_result, &clock, &tx_hash);
                             }
                         }
                         "/cosmos.gov.v1beta1.MsgSubmitProposal" => {
@@ -64,6 +66,7 @@ pub fn graph_out(params: String, clock: Clock, block: Block) -> Result<EntityCha
                                 if push_if_client_update_proposal(&mut tables, &msg, &tx_result, &clock, &tx_hash) {
                                     continue;
                                 }
+                                push_other_proposalv1beta1(&mut tables, &msg, &tx_result, &clock, &tx_hash);
                             }
                         }
                         "/cosmos.gov.v1beta1.MsgVote" => {
@@ -78,11 +81,11 @@ pub fn graph_out(params: String, clock: Clock, block: Block) -> Result<EntityCha
         transactions += 1;
     }
 
-    let timestamp = clock.timestamp.as_ref().expect("timestamp missing").seconds;
-    tables
-        .create_row("Block", &clock.id)
-        .set_bigint("number", &clock.number.to_string())
-        .set_bigint("timestamp", &timestamp.to_string());
+    // let timestamp = clock.timestamp.as_ref().expect("timestamp missing").seconds;
+    // tables
+    //     .create_row("Block", &clock.id)
+    //     .set_bigint("number", &clock.number.to_string())
+    //     .set_bigint("timestamp", &timestamp.to_string());
 
     Ok(tables.to_entity_changes())
 }
@@ -205,6 +208,30 @@ pub fn push_if_client_update_proposal(
         }
     }
     return false;
+}
+
+pub fn push_other_proposalv1(
+    tables: &mut Tables,
+    msg_submit_proposal: &MsgSubmitProposalV1,
+    tx_result: &TxResults,
+    clock: &Clock,
+    tx_hash: &str,
+) {
+    if let Some(content) = msg_submit_proposal.content.as_ref() {
+        insert_other_proposal_v1(tables, msg_submit_proposal, content, tx_result, clock, tx_hash);
+    }
+}
+
+pub fn push_other_proposalv1beta1(
+    tables: &mut Tables,
+    msg_submit_proposal: &MsgSubmitProposalV1Beta1,
+    tx_result: &TxResults,
+    clock: &Clock,
+    tx_hash: &str,
+) {
+    if let Some(content) = msg_submit_proposal.content.as_ref() {
+        insert_other_proposal_v1beta1(tables, msg_submit_proposal, content, tx_result, clock, tx_hash);
+    }
 }
 
 pub fn code_to_string(code: u32) -> String {

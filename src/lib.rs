@@ -1,5 +1,6 @@
 mod client_update;
 mod community_pool_spends;
+mod other_proposals;
 mod parameter_changes;
 mod pb;
 mod proposal_votes;
