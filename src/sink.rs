@@ -1,15 +1,14 @@
+use crate::client_update::insert_client_update_proposal;
 use crate::community_pool_spends::{insert_community_pool_spend_proposal, insert_msg_community_pool_spend};
 // Start of Selection
 use crate::parameter_changes::insert_parameter_change_proposal;
 use crate::pb::cosmos::gov::v1::MsgSubmitProposal as MsgSubmitProposalV1;
-use crate::pb::cosmos::gov::v1beta1::MsgVote;
 use crate::pb::cosmos::{gov::v1beta1::MsgSubmitProposal as MsgSubmitProposalV1Beta1, tx::v1beta1::Tx};
 use crate::proposal_votes::push_if_proposal_votes;
 use crate::serde_genesis::GenesisParams;
 use crate::software_upgrades::{insert_message_software_upgrade, insert_software_upgrade_proposal};
 use crate::text::insert_text_proposal;
 use prost::Message;
-use prost_types::Any;
 use sha2::{Digest, Sha256};
 use substreams::{errors::Error, log, pb::substreams::Clock, Hex};
 use substreams_cosmos::pb::TxResults;
@@ -25,6 +24,11 @@ pub fn graph_out(params: String, clock: Clock, block: Block) -> Result<EntityCha
     let mut transactions = 0;
 
     for tx_result in block.tx_results {
+        if tx_result.code != 0 {
+            transactions += 1;
+            continue;
+        }
+
         let tx_hash = compute_tx_hash(&block.txs[transactions]);
 
         let tx_as_bytes = block.txs[transactions].as_slice();
@@ -55,6 +59,9 @@ pub fn graph_out(params: String, clock: Clock, block: Block) -> Result<EntityCha
                                     continue;
                                 }
                                 if push_if_text_proposal(&mut tables, &msg, &tx_result, &clock, &tx_hash) {
+                                    continue;
+                                }
+                                if push_if_client_update_proposal(&mut tables, &msg, &tx_result, &clock, &tx_hash) {
                                     continue;
                                 }
                             }
@@ -182,4 +189,68 @@ pub fn push_if_text_proposal(
         }
     }
     return false;
+}
+
+pub fn push_if_client_update_proposal(
+    tables: &mut Tables,
+    msg_submit_proposal: &MsgSubmitProposalV1Beta1,
+    tx_result: &TxResults,
+    clock: &Clock,
+    tx_hash: &str,
+) -> bool {
+    if let Some(content) = msg_submit_proposal.content.as_ref() {
+        if content.type_url == "/ibc.core.client.v1.ClientUpdateProposal" {
+            insert_client_update_proposal(tables, msg_submit_proposal, content, tx_result, clock, tx_hash);
+            return true;
+        }
+    }
+    return false;
+}
+
+pub fn code_to_string(code: u32) -> String {
+    match code {
+        0 => "Success".to_string(),
+        2 => "Tx parse error".to_string(),
+        3 => "Invalid sequence".to_string(),
+        4 => "Unauthorized".to_string(),
+        5 => "Insufficient funds".to_string(),
+        6 => "Unknown request".to_string(),
+        7 => "Invalid address".to_string(),
+        8 => "Invalid pubkey".to_string(),
+        9 => "Unknown address".to_string(),
+        10 => "Invalid coins".to_string(),
+        11 => "Out of gas".to_string(),
+        12 => "Memo too large".to_string(),
+        13 => "Insufficient fee".to_string(),
+        14 => "Maximum number of signatures exceeded".to_string(),
+        15 => "No signatures supplied".to_string(),
+        16 => "Failed to marshal JSON bytes".to_string(),
+        17 => "Failed to unmarshal JSON bytes".to_string(),
+        18 => "Invalid request".to_string(),
+        19 => "Tx already in mempool".to_string(),
+        20 => "Mempool is full".to_string(),
+        21 => "Tx too large".to_string(),
+        22 => "Key not found".to_string(),
+        23 => "Invalid account password".to_string(),
+        24 => "Tx intended signer does not match the given signer".to_string(),
+        25 => "Invalid gas adjustment".to_string(),
+        26 => "Invalid height".to_string(),
+        27 => "Invalid version".to_string(),
+        28 => "Invalid chain-id".to_string(),
+        29 => "Invalid type".to_string(),
+        30 => "Tx timeout height".to_string(),
+        31 => "Unknown extension options".to_string(),
+        32 => "Incorrect account sequence".to_string(),
+        33 => "Failed packing protobuf message to Any".to_string(),
+        34 => "Failed unpacking protobuf message from Any".to_string(),
+        35 => "Internal logic error".to_string(),
+        36 => "Conflict".to_string(),
+        37 => "Feature not supported".to_string(),
+        38 => "Not found".to_string(),
+        39 => "Internal IO error".to_string(),
+        40 => "Error in app.toml".to_string(),
+        41 => "Invalid gas limit".to_string(),
+        42 => "Tx timeout".to_string(),
+        _ => "Unknown error".to_string(),
+    }
 }

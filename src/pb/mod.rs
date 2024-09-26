@@ -68,3 +68,13 @@ pub mod cosmos {
         }
     }
 }
+
+pub mod ibc {
+    pub mod core {
+        pub mod client {
+            pub mod v1 {
+                include!("ibc.core.client.v1.rs");
+            }
+        }
+    }
+}

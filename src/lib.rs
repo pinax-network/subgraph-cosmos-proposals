@@ -1,3 +1,4 @@
+mod client_update;
 mod community_pool_spends;
 mod parameter_changes;
 mod pb;
