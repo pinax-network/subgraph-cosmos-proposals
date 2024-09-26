@@ -87,13 +87,13 @@ pub fn insert_software_upgrade_proposal(
         let initial_deposit_denom = initial_deposit.denom.as_str();
         let initial_deposit_amount = initial_deposit.amount.as_str();
 
-        // let authority = tx_result
-        //     .events
-        //     .iter()
-        //     .find(|event| event.r#type == "coin_received")
-        //     .and_then(|event| event.attributes.iter().find(|attr| attr.key == "receiver"))
-        //     .map(|attr| attr.value.as_str())
-        //     .unwrap_or("");
+        let authority = tx_result
+            .events
+            .iter()
+            .find(|event| event.r#type == "coin_received")
+            .and_then(|event| event.attributes.iter().find(|attr| attr.key == "receiver"))
+            .map(|attr| attr.value.as_str())
+            .unwrap_or("");
 
         let title = software_upgrade_proposal.title.as_str();
         let description = software_upgrade_proposal.description.as_str();
@@ -125,7 +125,7 @@ pub fn insert_software_upgrade_proposal(
             .set("proposer", proposer)
             .set("initialDepositDenom", initial_deposit_denom)
             .set("initialDepositAmount", initial_deposit_amount)
-            .set("authority", "")
+            .set("authority", authority)
             .set("title", title)
             .set("description", description)
             .set("metadata", "");

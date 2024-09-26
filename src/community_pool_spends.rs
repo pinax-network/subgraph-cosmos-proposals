@@ -1,4 +1,4 @@
-use crate::pb::cosmos::distribution::v1beta1::MsgCommunityPoolSpend;
+use crate::pb::cosmos::distribution::v1beta1::{CommunityPoolSpendProposal, MsgCommunityPoolSpend};
 use crate::pb::cosmos::gov::v1::MsgSubmitProposal as MsgSubmitProposalV1;
 use crate::pb::cosmos::gov::v1beta1::MsgSubmitProposal as MsgSubmitProposalV1Beta1;
 use prost_types::Any;
@@ -56,7 +56,7 @@ pub fn insert_msg_community_pool_spend(
             .set("id", &proposal_id.to_string())
             .set("txHash", tx_hash)
             .set("blockNumber", clock.number)
-            .set("type", "CommunityPoolSpendProposal")
+            .set("type", "CommunityPoolSpend")
             .set("proposer", proposer)
             .set("authority", authority)
             .set("initialDepositDenom", initial_deposit_denom)
@@ -82,4 +82,69 @@ pub fn insert_community_pool_spend_proposal(
     clock: &Clock,
     tx_hash: &str,
 ) {
+    if let Ok(comm_pool_spend_prop) = <CommunityPoolSpendProposal as prost::Message>::decode(content.value.as_slice()) {
+        let proposer = msg_submit_proposal.proposer.as_str();
+        let initial_deposit = msg_submit_proposal.initial_deposit.get(0).unwrap();
+        let initial_deposit_denom = initial_deposit.denom.as_str();
+        let initial_deposit_amount = initial_deposit.amount.as_str();
+
+        let title = comm_pool_spend_prop.title.as_str();
+        let description = comm_pool_spend_prop.description.as_str();
+        let recipient = comm_pool_spend_prop.recipient.as_str();
+        let amount = comm_pool_spend_prop.amount.get(0).unwrap();
+        let amount_denom = amount.denom.as_str();
+        let amount_amount = amount.amount.as_str();
+
+        let authority = tx_result
+            .events
+            .iter()
+            .find(|event| event.r#type == "coin_received")
+            .and_then(|event| event.attributes.iter().find(|attr| attr.key == "receiver"))
+            .map(|attr| attr.value.as_str())
+            .expect(&format!(
+                "Authority not found for community pool spend proposal at block {}",
+                clock.number
+            ));
+
+        let proposal_id = tx_result
+            .events
+            .iter()
+            .filter(|event| event.r#type == "submit_proposal")
+            .flat_map(|event| event.attributes.iter())
+            .find(|attr| attr.key == "proposal_id")
+            .and_then(|attr| attr.value.parse::<u64>().ok())
+            .expect(&format!(
+                "Proposal_id not found for community pool spend proposal at block {}",
+                clock.number
+            ));
+
+        let data = serde_json::to_string(&serde_json::json!({
+            "recipient": recipient,
+            "amount": {
+                "denom": amount_denom,
+                "amount": amount_amount
+            }
+        }))
+        .unwrap_or_default();
+
+        tables
+            .create_row("Proposal", &proposal_id.to_string())
+            .set("id", &proposal_id.to_string())
+            .set("txHash", tx_hash)
+            .set("blockNumber", clock.number)
+            .set("type", "CommunityPoolSpend")
+            .set("title", title)
+            .set("description", description)
+            .set("proposer", proposer)
+            .set("authority", authority)
+            .set("initialDepositDenom", initial_deposit_denom)
+            .set("initialDepositAmount", initial_deposit_amount);
+
+        tables
+            .create_row("Content", &proposal_id.to_string())
+            .set("id", &proposal_id.to_string())
+            .set("proposal", &proposal_id.to_string())
+            .set("typeUrl", "/cosmos.gov.v1beta1.CommunityPoolSpendProposal")
+            .set("jsonData", data.as_str());
+    }
 }

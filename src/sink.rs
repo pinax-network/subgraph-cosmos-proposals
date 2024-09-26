@@ -37,17 +37,20 @@ pub fn graph_out(params: String, clock: Clock, block: Block) -> Result<EntityCha
                                 if push_if_message_software_upgrade(&mut tables, &msg, &tx_result, &clock, &tx_hash) {
                                     continue;
                                 }
-                                if push_if_msg_community_pool_spend(&mut tables, &msg, &tx_result, &clock, &tx_hash) {
+                                if push_if_msg_comm_pool_spend(&mut tables, &msg, &tx_result, &clock, &tx_hash) {
                                     continue;
                                 }
                             }
                         }
                         "/cosmos.gov.v1beta1.MsgSubmitProposal" => {
                             if let Ok(msg) = MsgSubmitProposalV1Beta1::decode(message.value.as_slice()) {
-                                if push_if_software_upgrade_proposal(&mut tables, &msg, &tx_result, &clock, &tx_hash) {
+                                if push_if_software_upgrade_prop(&mut tables, &msg, &tx_result, &clock, &tx_hash) {
                                     continue;
                                 }
-                                if push_if_parameter_change_proposal(&mut tables, &msg, &tx_result, &clock, &tx_hash) {
+                                if push_if_parameter_change_prop(&mut tables, &msg, &tx_result, &clock, &tx_hash) {
+                                    continue;
+                                }
+                                if push_if_comm_pool_spend_prop(&mut tables, &msg, &tx_result, &clock, &tx_hash) {
                                     continue;
                                 }
                             }
@@ -97,7 +100,7 @@ pub fn push_if_message_software_upgrade(
     return false;
 }
 
-pub fn push_if_software_upgrade_proposal(
+pub fn push_if_software_upgrade_prop(
     tables: &mut Tables,
     msg_submit_proposal: &MsgSubmitProposalV1Beta1,
     tx_result: &TxResults,
@@ -113,7 +116,7 @@ pub fn push_if_software_upgrade_proposal(
     return false;
 }
 
-pub fn push_if_parameter_change_proposal(
+pub fn push_if_parameter_change_prop(
     tables: &mut Tables,
     msg_submit_proposal: &MsgSubmitProposalV1Beta1,
     tx_result: &TxResults,
@@ -129,7 +132,7 @@ pub fn push_if_parameter_change_proposal(
     return false;
 }
 
-pub fn push_if_community_pool_spend_proposal(
+pub fn push_if_comm_pool_spend_prop(
     tables: &mut Tables,
     msg_submit_proposal: &MsgSubmitProposalV1Beta1,
     tx_result: &TxResults,
@@ -145,7 +148,7 @@ pub fn push_if_community_pool_spend_proposal(
     return false;
 }
 
-pub fn push_if_msg_community_pool_spend(
+pub fn push_if_msg_comm_pool_spend(
     tables: &mut Tables,
     msg_submit_proposal: &MsgSubmitProposalV1,
     tx_result: &TxResults,
