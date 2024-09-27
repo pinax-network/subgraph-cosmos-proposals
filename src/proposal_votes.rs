@@ -21,7 +21,15 @@ pub fn push_proposal_vote(tables: &mut Tables, msg: &Any, tx_result: &TxResults,
                     .unwrap_or_default()
             });
 
-        let proposal_id = extract_proposal_id(tx_result, clock, tx_hash);
+        let proposal_id = vote
+            .attributes
+            .iter()
+            .find(|attr| attr.key == "proposal_id")
+            .map(|attr| attr.value.to_string())
+            .expect(&format!(
+                "Proposal_id not found for proposal vote at block {}, tx {}",
+                clock.number, tx_hash
+            ));
 
         // Extract options and weights from the "option" attribute
         // Votes can take three forms:
@@ -88,7 +96,7 @@ pub fn push_proposal_vote(tables: &mut Tables, msg: &Any, tx_result: &TxResults,
     }
 }
 
-pub fn option_number_to_proper_string(option: i64) -> String {
+fn option_number_to_proper_string(option: i64) -> String {
     match option {
         1 => "Yes".to_string(),
         2 => "Abstain".to_string(),
@@ -98,7 +106,7 @@ pub fn option_number_to_proper_string(option: i64) -> String {
     }
 }
 
-pub fn option_string_to_proper_string(option: &str) -> String {
+fn option_string_to_proper_string(option: &str) -> String {
     match option {
         "VOTE_OPTION_YES" => "Yes".to_string(),
         "VOTE_OPTION_ABSTAIN" => "Abstain".to_string(),
