@@ -6,7 +6,7 @@ use substreams_entity_change::tables::Tables;
 use crate::pb::cosmos::gov::v1::MsgSubmitProposal as MsgSubmitProposalV1;
 use crate::pb::cosmos::gov::v1beta1::MsgSubmitProposal as MsgSubmitProposalV1Beta1;
 use crate::pb::cosmos::upgrade::v1beta1::{MsgSoftwareUpgrade, SoftwareUpgradeProposal};
-use crate::utils::extract_initial_deposit;
+use crate::utils::{extract_authority, extract_initial_deposit, extract_proposal_id};
 
 pub fn insert_message_software_upgrade(
     tables: &mut Tables,
@@ -33,22 +33,12 @@ pub fn insert_message_software_upgrade(
 
         // There can be multiple submit_proposal events in a single tx
         // So we need to filter the events and get the proposal_id from the correct one
-        let proposal_id = tx_result
-            .events
-            .iter()
-            .filter(|event| event.r#type == "submit_proposal") // filter to get all submit_proposal events
-            .flat_map(|event| event.attributes.iter()) // flatten all attributes
-            .find(|attr| attr.key == "proposal_id") // find the one with the proposal_id attribute
-            .and_then(|attr| attr.value.parse::<u64>().ok()) // parse it as u64 if found
-            .expect(&format!(
-                "proposal_id not found for message software upgrade at block {}",
-                clock.number
-            ));
+        let proposal_id = extract_proposal_id(tx_result, clock, tx_hash);
 
         // Create Proposal entity
         tables
-            .create_row("Proposal", proposal_id.to_string().as_str())
-            .set("id", proposal_id.to_string().as_str())
+            .create_row("Proposal", &proposal_id)
+            .set("id", &proposal_id)
             .set("txHash", tx_hash)
             .set("blockNumber", clock.number)
             .set("type", "SoftwareUpgrade")
@@ -62,12 +52,12 @@ pub fn insert_message_software_upgrade(
 
         // Create SoftwareUpgradeProposal entity
         tables
-            .create_row("SoftwareUpgradeProposal", proposal_id.to_string().as_str())
-            .set("id", proposal_id.to_string().as_str())
+            .create_row("SoftwareUpgradeProposal", &proposal_id)
+            .set("id", &proposal_id)
             .set("planName", plan_name)
             .set("planHeight", plan_height)
             .set("planInfo", plan_info)
-            .set("proposal", proposal_id.to_string().as_str());
+            .set("proposal", proposal_id);
     }
 }
 
@@ -83,13 +73,7 @@ pub fn insert_software_upgrade_proposal(
     {
         let proposer = msg.proposer.as_str();
         let (initial_deposit_denom, initial_deposit_amount) = extract_initial_deposit(&msg.initial_deposit);
-        let authority = tx_result
-            .events
-            .iter()
-            .find(|event| event.r#type == "coin_received")
-            .and_then(|event| event.attributes.iter().find(|attr| attr.key == "receiver"))
-            .map(|attr| attr.value.as_str())
-            .unwrap_or("");
+        let authority = extract_authority(tx_result);
 
         let title = software_upgrade_proposal.title.as_str();
         let description = software_upgrade_proposal.description.as_str();
@@ -99,22 +83,12 @@ pub fn insert_software_upgrade_proposal(
         let plan_height = plan.height;
         let plan_info = plan.info.as_str();
 
-        let proposal_id = tx_result
-            .events
-            .iter()
-            .filter(|event| event.r#type == "submit_proposal") // filter to get all submit_proposal events
-            .flat_map(|event| event.attributes.iter()) // flatten all attributes
-            .find(|attr| attr.key == "proposal_id") // find the one with the proposal_id attribute
-            .and_then(|attr| attr.value.parse::<u64>().ok()) // parse it as u64 if found
-            .expect(&format!(
-                "proposal_id not found for software upgrade proposal at block {}",
-                clock.number
-            ));
+        let proposal_id = extract_proposal_id(tx_result, clock, tx_hash);
 
         // Create Proposal entity
         tables
-            .create_row("Proposal", proposal_id.to_string().as_str())
-            .set("id", proposal_id.to_string().as_str())
+            .create_row("Proposal", &proposal_id)
+            .set("id", &proposal_id)
             .set("txHash", tx_hash)
             .set("blockNumber", clock.number)
             .set("type", "SoftwareUpgrade")
@@ -128,11 +102,11 @@ pub fn insert_software_upgrade_proposal(
 
         // Create SoftwareUpgradeProposal entity
         tables
-            .create_row("SoftwareUpgradeProposal", proposal_id.to_string().as_str())
-            .set("id", proposal_id.to_string().as_str())
+            .create_row("SoftwareUpgradeProposal", &proposal_id)
+            .set("id", &proposal_id)
             .set("planName", plan_name)
             .set("planHeight", plan_height)
             .set("planInfo", plan_info)
-            .set("proposal", proposal_id.to_string().as_str());
+            .set("proposal", proposal_id);
     }
 }

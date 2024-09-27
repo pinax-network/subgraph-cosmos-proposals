@@ -1,6 +1,8 @@
 use crate::pb::cosmos::gov::v1beta1::MsgSubmitProposal as MsgSubmitProposalV1Beta1;
 use crate::pb::cosmos::gov::v1beta1::TextProposal;
+use crate::utils::extract_authority;
 use crate::utils::extract_initial_deposit;
+use crate::utils::extract_proposal_id;
 use prost_types::Any;
 use substreams::pb::substreams::Clock;
 use substreams_cosmos::pb::TxResults;
@@ -19,31 +21,15 @@ pub fn insert_text_proposal(
         let description = text_prop.description.as_str();
         let proposer = msg.proposer.as_str();
 
-        let proposal_id = tx_result
-            .events
-            .iter()
-            .filter(|event| event.r#type == "submit_proposal")
-            .flat_map(|event| event.attributes.iter())
-            .find(|attr| attr.key == "proposal_id")
-            .and_then(|attr| attr.value.parse::<u64>().ok())
-            .expect(&format!(
-                "Proposal_id not found for text proposal at block {}",
-                clock.number
-            ));
+        let proposal_id = extract_proposal_id(tx_result, clock, tx_hash);
 
         let (initial_deposit_denom, initial_deposit_amount) = extract_initial_deposit(&msg.initial_deposit);
 
-        let authority = tx_result
-            .events
-            .iter()
-            .find(|event| event.r#type == "coin_received")
-            .and_then(|event| event.attributes.iter().find(|attr| attr.key == "receiver"))
-            .map(|attr| attr.value.as_str())
-            .unwrap_or("");
+        let authority = extract_authority(tx_result);
 
         tables
-            .create_row("Proposal", &proposal_id.to_string())
-            .set("id", &proposal_id.to_string())
+            .create_row("Proposal", &proposal_id)
+            .set("id", &proposal_id)
             .set("txHash", tx_hash)
             .set("proposer", proposer)
             .set("authority", authority)

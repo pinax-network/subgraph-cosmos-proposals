@@ -8,7 +8,7 @@ use crate::{
         cosmos::gov::v1beta1::MsgSubmitProposal as MsgSubmitProposalV1Beta1,
         ibc::core::client::v1::ClientUpdateProposal,
     },
-    utils::extract_initial_deposit,
+    utils::{extract_authority, extract_initial_deposit, extract_proposal_id},
 };
 
 pub fn insert_client_update_proposal(
@@ -28,37 +28,18 @@ pub fn insert_client_update_proposal(
 
         let (initial_deposit_denom, initial_deposit_amount) = extract_initial_deposit(&msg.initial_deposit);
 
-        let authority = tx_result
-            .events
-            .iter()
-            .find(|event| event.r#type == "coin_received")
-            .and_then(|event| event.attributes.iter().find(|attr| attr.key == "receiver"))
-            .map(|attr| attr.value.as_str())
-            .expect(&format!(
-                "Authority not found for client update proposal at block {}",
-                clock.number
-            ));
+        let authority = extract_authority(tx_result);
 
         let data = serde_json::json!({
             "subject_client_id": subject_client_id,
             "substitute_client_id": substitute_client_id,
         });
 
-        let proposal_id = tx_result
-            .events
-            .iter()
-            .filter(|event| event.r#type == "submit_proposal")
-            .flat_map(|event| event.attributes.iter())
-            .find(|attr| attr.key == "proposal_id")
-            .and_then(|attr| attr.value.parse::<u64>().ok())
-            .expect(&format!(
-                "proposal_id not found for client update proposal at block {} tx_hash {}",
-                clock.number, tx_hash
-            ));
+        let proposal_id = extract_proposal_id(tx_result, clock, tx_hash);
 
         tables
-            .create_row("Proposal", &proposal_id.to_string())
-            .set("id", &proposal_id.to_string())
+            .create_row("Proposal", &proposal_id)
+            .set("id", &proposal_id)
             .set("txHash", tx_hash)
             .set("blockNumber", clock.number)
             .set("type", "ClientUpdate")
@@ -70,10 +51,10 @@ pub fn insert_client_update_proposal(
             .set("initialDepositAmount", initial_deposit_amount);
 
         tables
-            .create_row("Content", &proposal_id.to_string())
-            .set("id", &proposal_id.to_string())
-            .set("proposal", &proposal_id.to_string())
-            .set("typeUrl", content.type_url.as_str())
+            .create_row("Content", &proposal_id)
+            .set("id", &proposal_id)
+            .set("proposal", &proposal_id)
+            .set("typeUrl", &content.type_url)
             .set("jsonData", data.to_string());
     }
 }

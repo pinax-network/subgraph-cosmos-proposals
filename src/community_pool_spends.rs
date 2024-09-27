@@ -1,7 +1,7 @@
 use crate::pb::cosmos::distribution::v1beta1::{CommunityPoolSpendProposal, MsgCommunityPoolSpend};
 use crate::pb::cosmos::gov::v1::MsgSubmitProposal as MsgSubmitProposalV1;
 use crate::pb::cosmos::gov::v1beta1::MsgSubmitProposal as MsgSubmitProposalV1Beta1;
-use crate::utils::extract_initial_deposit;
+use crate::utils::{extract_authority, extract_initial_deposit, extract_proposal_id};
 use prost_types::Any;
 use substreams::pb::substreams::Clock;
 use substreams_cosmos::pb::TxResults;
@@ -29,17 +29,7 @@ pub fn insert_msg_community_pool_spend(
         let amount_denom = amount.denom.as_str();
         let amount_amount = amount.amount.as_str();
 
-        let proposal_id = tx_result
-            .events
-            .iter()
-            .filter(|event| event.r#type == "submit_proposal")
-            .flat_map(|event| event.attributes.iter())
-            .find(|attr| attr.key == "proposal_id")
-            .and_then(|attr| attr.value.parse::<u64>().ok())
-            .expect(&format!(
-                "proposal_id not found for parameter change proposal at block {}",
-                clock.number
-            ));
+        let proposal_id = extract_proposal_id(tx_result, clock, tx_hash);
 
         let data = serde_json::to_string(&serde_json::json!({
             "recipient": recipient,
@@ -51,8 +41,8 @@ pub fn insert_msg_community_pool_spend(
         .unwrap_or_default();
 
         tables
-            .create_row("Proposal", &proposal_id.to_string())
-            .set("id", &proposal_id.to_string())
+            .create_row("Proposal", &proposal_id)
+            .set("id", &proposal_id)
             .set("txHash", tx_hash)
             .set("blockNumber", clock.number)
             .set("type", "CommunityPoolSpend")
@@ -65,11 +55,11 @@ pub fn insert_msg_community_pool_spend(
             .set("metadata", metadata);
 
         tables
-            .create_row("Content", &proposal_id.to_string())
-            .set("id", &proposal_id.to_string())
-            .set("proposal", &proposal_id.to_string())
+            .create_row("Content", &proposal_id)
+            .set("id", &proposal_id)
             .set("typeUrl", "/cosmos.distribution.v1beta1.MsgCommunityPoolSpend")
-            .set("jsonData", data.as_str());
+            .set("jsonData", data)
+            .set("proposal", &proposal_id);
     }
 }
 
@@ -92,28 +82,9 @@ pub fn insert_community_pool_spend_proposal(
         let amount_denom = amount.denom.as_str();
         let amount_amount = amount.amount.as_str();
 
-        let authority = tx_result
-            .events
-            .iter()
-            .find(|event| event.r#type == "coin_received")
-            .and_then(|event| event.attributes.iter().find(|attr| attr.key == "receiver"))
-            .map(|attr| attr.value.as_str())
-            .expect(&format!(
-                "Authority not found for community pool spend proposal at block {}",
-                clock.number
-            ));
+        let authority = extract_authority(tx_result);
 
-        let proposal_id = tx_result
-            .events
-            .iter()
-            .filter(|event| event.r#type == "submit_proposal")
-            .flat_map(|event| event.attributes.iter())
-            .find(|attr| attr.key == "proposal_id")
-            .and_then(|attr| attr.value.parse::<u64>().ok())
-            .expect(&format!(
-                "Proposal_id not found for community pool spend proposal at block {}",
-                clock.number
-            ));
+        let proposal_id = extract_proposal_id(tx_result, clock, tx_hash);
 
         let data = serde_json::to_string(&serde_json::json!({
             "recipient": recipient,
@@ -138,9 +109,9 @@ pub fn insert_community_pool_spend_proposal(
             .set("initialDepositAmount", initial_deposit_amount);
 
         tables
-            .create_row("Content", &proposal_id.to_string())
-            .set("id", &proposal_id.to_string())
-            .set("proposal", &proposal_id.to_string())
+            .create_row("Content", &proposal_id)
+            .set("id", &proposal_id)
+            .set("proposal", &proposal_id)
             .set("typeUrl", "/cosmos.gov.v1beta1.CommunityPoolSpendProposal")
             .set("jsonData", data.as_str());
     }

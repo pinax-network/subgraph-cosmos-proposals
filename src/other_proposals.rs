@@ -8,7 +8,7 @@ use crate::{
     pb::cosmos::gov::{
         v1::MsgSubmitProposal as MsgSubmitProposalV1, v1beta1::MsgSubmitProposal as MsgSubmitProposalV1Beta1,
     },
-    utils::extract_initial_deposit,
+    utils::{extract_authority, extract_initial_deposit, extract_proposal_id},
 };
 
 pub fn insert_other_proposal_v1(
@@ -27,34 +27,15 @@ pub fn insert_other_proposal_v1(
 
     let (initial_deposit_denom, initial_deposit_amount) = extract_initial_deposit(&msg.initial_deposit);
 
-    let proposal_id = tx_result
-        .events
-        .iter()
-        .filter(|event| event.r#type == "submit_proposal")
-        .flat_map(|event| event.attributes.iter())
-        .find(|attr| attr.key == "proposal_id")
-        .and_then(|attr| attr.value.parse::<u64>().ok())
-        .expect(&format!(
-            "Proposal_id not found for other proposal at block {} tx_hash {}",
-            clock.number, tx_hash
-        ));
+    let proposal_id = extract_proposal_id(tx_result, clock, tx_hash);
 
-    let authority = tx_result
-        .events
-        .iter()
-        .find(|event| event.r#type == "coin_received")
-        .and_then(|event| event.attributes.iter().find(|attr| attr.key == "receiver"))
-        .map(|attr| attr.value.as_str())
-        .expect(&format!(
-            "Authority not found for other proposal at block {}, tx_hash {}",
-            clock.number, tx_hash
-        ));
+    let authority = extract_authority(tx_result);
 
     let raw_data = Hex::encode(content.value.as_slice());
 
     tables
-        .create_row("Proposal", &proposal_id.to_string())
-        .set("id", &proposal_id.to_string())
+        .create_row("Proposal", &proposal_id)
+        .set("id", &proposal_id)
         .set("txHash", tx_hash)
         .set("blockNumber", clock.number)
         .set("type", "Undecoded Proposal")
@@ -67,11 +48,11 @@ pub fn insert_other_proposal_v1(
         .set("metadata", metadata);
 
     tables
-        .create_row("Content", &proposal_id.to_string())
-        .set("id", &proposal_id.to_string())
-        .set("proposal", &proposal_id.to_string())
+        .create_row("Content", &proposal_id)
+        .set("id", &proposal_id)
+        .set("proposal", &proposal_id)
         .set("typeUrl", type_url)
-        .set("value", raw_data.as_str());
+        .set("value", raw_data);
 }
 
 pub fn insert_other_proposal_v1beta1(
@@ -87,28 +68,9 @@ pub fn insert_other_proposal_v1beta1(
 
     let (initial_deposit_denom, initial_deposit_amount) = extract_initial_deposit(&msg.initial_deposit);
 
-    let proposal_id = tx_result
-        .events
-        .iter()
-        .filter(|event| event.r#type == "submit_proposal")
-        .flat_map(|event| event.attributes.iter())
-        .find(|attr| attr.key == "proposal_id")
-        .and_then(|attr| attr.value.parse::<u64>().ok())
-        .expect(&format!(
-            "Proposal_id not found for other proposal at block {}, tx_hash {}",
-            clock.number, tx_hash
-        ));
+    let proposal_id = extract_proposal_id(tx_result, clock, tx_hash);
 
-    let authority = tx_result
-        .events
-        .iter()
-        .find(|event| event.r#type == "coin_received")
-        .and_then(|event| event.attributes.iter().find(|attr| attr.key == "receiver"))
-        .map(|attr| attr.value.as_str())
-        .expect(&format!(
-            "Authority not found for other proposal at block {}, tx_hash {}",
-            clock.number, tx_hash
-        ));
+    let authority = extract_authority(tx_result);
 
     let mut title = "".to_string();
     let mut description = "".to_string();
@@ -122,8 +84,8 @@ pub fn insert_other_proposal_v1beta1(
     let raw_data = Hex::encode(content.value.as_slice());
 
     tables
-        .create_row("Proposal", &proposal_id.to_string())
-        .set("id", &proposal_id.to_string())
+        .create_row("Proposal", &proposal_id)
+        .set("id", &proposal_id)
         .set("txHash", tx_hash)
         .set("blockNumber", clock.number)
         .set("type", "Undecoded Proposal")
@@ -135,11 +97,11 @@ pub fn insert_other_proposal_v1beta1(
         .set("description", description);
 
     tables
-        .create_row("Content", &proposal_id.to_string())
-        .set("id", &proposal_id.to_string())
-        .set("proposal", &proposal_id.to_string())
+        .create_row("Content", &proposal_id)
+        .set("id", &proposal_id)
+        .set("proposal", &proposal_id)
         .set("typeUrl", type_url)
-        .set("value", raw_data.as_str());
+        .set("value", raw_data);
 }
 
 #[allow(clippy::derive_partial_eq_without_eq)]

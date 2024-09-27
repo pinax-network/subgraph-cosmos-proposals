@@ -4,7 +4,7 @@ use substreams::{log, pb::substreams::Clock};
 use substreams_cosmos::pb::TxResults;
 use substreams_entity_change::tables::Tables;
 
-use crate::pb::cosmos::gov::v1beta1::MsgVote;
+use crate::{pb::cosmos::gov::v1beta1::MsgVote, utils::extract_proposal_id};
 
 pub fn push_proposal_vote(tables: &mut Tables, msg: &Any, tx_result: &TxResults, clock: &Clock, tx_hash: &str) {
     let proposal_votes = tx_result.events.iter().filter(|event| event.r#type == "proposal_vote");
@@ -21,12 +21,7 @@ pub fn push_proposal_vote(tables: &mut Tables, msg: &Any, tx_result: &TxResults,
                     .unwrap_or_default()
             });
 
-        let proposal_id = vote
-            .attributes
-            .iter()
-            .find(|attr| attr.key == "proposal_id")
-            .map(|attr| attr.value.to_string())
-            .unwrap_or_default();
+        let proposal_id = extract_proposal_id(tx_result, clock, tx_hash);
 
         // Extract options and weights from the "option" attribute
         // Votes can take three forms:
@@ -79,16 +74,16 @@ pub fn push_proposal_vote(tables: &mut Tables, msg: &Any, tx_result: &TxResults,
             .expect("Failed to parse options and weights for the proposal vote");
 
         for (option, weight) in options_weights {
-            let vote_id = format!("{}:{}:{}", tx_hash, proposal_id, option);
+            let vote_id = format!("{}:{}:{}", tx_hash, &proposal_id, option);
             tables
-                .create_row("Vote", vote_id.as_str())
-                .set("id", vote_id.as_str())
+                .create_row("Vote", &vote_id)
+                .set("id", &vote_id)
                 .set("txHash", tx_hash)
                 .set("blockNumber", clock.number)
-                .set("voter", voter.as_str())
-                .set("option", option.as_str())
+                .set("voter", &voter)
+                .set("option", &option)
                 .set_bigdecimal("weight", &weight)
-                .set("proposal", proposal_id.as_str());
+                .set("proposal", &proposal_id);
         }
     }
 }

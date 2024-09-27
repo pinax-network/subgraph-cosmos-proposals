@@ -1,6 +1,6 @@
 use crate::pb::cosmos::gov::v1beta1::MsgSubmitProposal;
 use crate::pb::cosmos::params::v1beta1::{ParamChange, ParameterChangeProposal};
-use crate::utils::extract_initial_deposit;
+use crate::utils::{extract_authority, extract_initial_deposit, extract_proposal_id};
 use prost_types::Any;
 use substreams::pb::substreams::Clock;
 use substreams_cosmos::pb::TxResults;
@@ -23,26 +23,9 @@ pub fn insert_parameter_change_proposal(
         let title = parameter_change_proposal.title.as_str();
         let description = parameter_change_proposal.description.as_str();
 
-        let authority = tx_result
-            .events
-            .iter()
-            .find(|event| event.r#type == "coin_received")
-            .and_then(|event| event.attributes.iter().find(|attr| attr.key == "receiver"))
-            .map(|attr| attr.value.as_str())
-            .unwrap_or("");
+        let authority = extract_authority(tx_result);
 
-        let proposal_id = tx_result
-            .events
-            .iter()
-            .filter(|event| event.r#type == "submit_proposal")
-            .flat_map(|event| event.attributes.iter())
-            .find(|attr| attr.key == "proposal_id")
-            .and_then(|attr| attr.value.parse::<u64>().ok())
-            // Start of Selection
-            .expect(&format!(
-                "proposal_id not found for parameter change proposal at block {}",
-                clock.number
-            ));
+        let proposal_id = extract_proposal_id(tx_result, clock, tx_hash);
 
         let data = serde_json::to_string(&serde_json::json!({
             "changes": parameter_change_proposal.changes
@@ -50,8 +33,8 @@ pub fn insert_parameter_change_proposal(
         .unwrap_or_default();
 
         tables
-            .create_row("Proposal", &proposal_id.to_string())
-            .set("id", &proposal_id.to_string())
+            .create_row("Proposal", &proposal_id)
+            .set("id", &proposal_id)
             .set("txHash", tx_hash)
             .set("blockNumber", clock.number)
             .set("type", "ParameterChange")
@@ -63,10 +46,10 @@ pub fn insert_parameter_change_proposal(
             .set("description", description);
 
         tables
-            .create_row("Content", &proposal_id.to_string())
-            .set("id", &proposal_id.to_string())
-            .set("proposal", &proposal_id.to_string())
+            .create_row("Content", &proposal_id)
+            .set("id", &proposal_id)
+            .set("proposal", &proposal_id)
             .set("typeUrl", "/cosmos.params.v1beta1.ParameterChangeProposal")
-            .set("jsonData", data.as_str());
+            .set("jsonData", data);
     }
 }
