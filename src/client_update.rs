@@ -58,7 +58,7 @@ pub fn insert_client_update_proposal(
             .set("id", &proposal_id.to_string())
             .set("txHash", tx_hash)
             .set("blockNumber", clock.number)
-            .set("type", "ClientUpdateProposal")
+            .set("type", "ClientUpdate")
             .set("title", title)
             .set("description", description)
             .set("proposer", proposer)

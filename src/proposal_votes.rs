@@ -29,6 +29,10 @@ pub fn push_proposal_vote(tables: &mut Tables, msg: &Any, tx_result: &TxResults,
             .unwrap_or_default();
 
         // Extract options and weights from the "option" attribute
+        // Votes can take three forms:
+        // 1. JSON array of objects with "option" and "weight" fields
+        // 2. JSON object with "option" and "weight" fields
+        // 3. Key-value string with "option" and "weight" fields
         let options_weights = vote
             .attributes
             .iter()

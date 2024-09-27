@@ -68,7 +68,7 @@ pub fn graph_out(params: String, clock: Clock, block: Block) -> Result<EntityCha
     Ok(tables.to_entity_changes())
 }
 
-pub fn push_proposal_v1beta1(
+fn push_proposal_v1beta1(
     tables: &mut Tables,
     msg: &MsgSubmitProposalV1Beta1,
     tx_result: &TxResults,
@@ -99,7 +99,7 @@ pub fn push_proposal_v1beta1(
     }
 }
 
-pub fn push_proposal_v1(
+fn push_proposal_v1(
     tables: &mut Tables,
     msg: &MsgSubmitProposalV1,
     tx_result: &TxResults,

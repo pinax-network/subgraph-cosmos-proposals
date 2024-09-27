@@ -54,7 +54,7 @@ pub fn insert_parameter_change_proposal(
             .set("id", &proposal_id.to_string())
             .set("txHash", tx_hash)
             .set("blockNumber", clock.number)
-            .set("type", "ParameterChangeProposal")
+            .set("type", "ParameterChange")
             .set("proposer", proposer)
             .set("authority", authority)
             .set("initialDepositDenom", initial_deposit_denom)

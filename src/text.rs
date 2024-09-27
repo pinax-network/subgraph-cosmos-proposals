@@ -49,7 +49,7 @@ pub fn insert_text_proposal(
             .set("proposer", proposer)
             .set("authority", authority)
             .set("blockNumber", clock.number)
-            .set("type", "TextProposal")
+            .set("type", "Text")
             .set("initialDepositDenom", initial_deposit_denom)
             .set("initialDepositAmount", initial_deposit_amount)
             .set("title", title)
