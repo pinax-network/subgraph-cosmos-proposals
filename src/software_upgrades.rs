@@ -38,7 +38,6 @@ pub fn insert_message_software_upgrade(
         // Create Proposal entity
         tables
             .create_row("Proposal", &proposal_id)
-            .set("id", &proposal_id)
             .set("txHash", tx_hash)
             .set("blockNumber", clock.number)
             .set("type", "SoftwareUpgrade")
@@ -53,7 +52,6 @@ pub fn insert_message_software_upgrade(
         // Create SoftwareUpgradeProposal entity
         tables
             .create_row("SoftwareUpgradeProposal", &proposal_id)
-            .set("id", &proposal_id)
             .set("planName", plan_name)
             .set("planHeight", plan_height)
             .set("planInfo", plan_info)
@@ -88,7 +86,6 @@ pub fn insert_software_upgrade_proposal(
         // Create Proposal entity
         tables
             .create_row("Proposal", &proposal_id)
-            .set("id", &proposal_id)
             .set("txHash", tx_hash)
             .set("blockNumber", clock.number)
             .set("type", "SoftwareUpgrade")
@@ -103,7 +100,6 @@ pub fn insert_software_upgrade_proposal(
         // Create SoftwareUpgradeProposal entity
         tables
             .create_row("SoftwareUpgradeProposal", &proposal_id)
-            .set("id", &proposal_id)
             .set("planName", plan_name)
             .set("planHeight", plan_height)
             .set("planInfo", plan_info)

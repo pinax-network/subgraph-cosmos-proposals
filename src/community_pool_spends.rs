@@ -42,7 +42,6 @@ pub fn insert_msg_community_pool_spend(
 
         tables
             .create_row("Proposal", &proposal_id)
-            .set("id", &proposal_id)
             .set("txHash", tx_hash)
             .set("blockNumber", clock.number)
             .set("type", "CommunityPoolSpend")
@@ -56,7 +55,6 @@ pub fn insert_msg_community_pool_spend(
 
         tables
             .create_row("Content", &proposal_id)
-            .set("id", &proposal_id)
             .set("typeUrl", "/cosmos.distribution.v1beta1.MsgCommunityPoolSpend")
             .set("jsonData", data)
             .set("proposal", &proposal_id);
@@ -96,8 +94,7 @@ pub fn insert_community_pool_spend_proposal(
         .unwrap_or_default();
 
         tables
-            .create_row("Proposal", &proposal_id.to_string())
-            .set("id", &proposal_id.to_string())
+            .create_row("Proposal", &proposal_id)
             .set("txHash", tx_hash)
             .set("blockNumber", clock.number)
             .set("type", "CommunityPoolSpend")
@@ -110,7 +107,6 @@ pub fn insert_community_pool_spend_proposal(
 
         tables
             .create_row("Content", &proposal_id)
-            .set("id", &proposal_id)
             .set("proposal", &proposal_id)
             .set("typeUrl", "/cosmos.gov.v1beta1.CommunityPoolSpendProposal")
             .set("jsonData", data.as_str());

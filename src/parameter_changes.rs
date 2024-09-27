@@ -34,7 +34,6 @@ pub fn insert_parameter_change_proposal(
 
         tables
             .create_row("Proposal", &proposal_id)
-            .set("id", &proposal_id)
             .set("txHash", tx_hash)
             .set("blockNumber", clock.number)
             .set("type", "ParameterChange")
@@ -47,7 +46,6 @@ pub fn insert_parameter_change_proposal(
 
         tables
             .create_row("Content", &proposal_id)
-            .set("id", &proposal_id)
             .set("proposal", &proposal_id)
             .set("typeUrl", "/cosmos.params.v1beta1.ParameterChangeProposal")
             .set("jsonData", data);

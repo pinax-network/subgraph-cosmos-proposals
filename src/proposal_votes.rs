@@ -85,7 +85,6 @@ pub fn push_proposal_vote(tables: &mut Tables, msg: &Any, tx_result: &TxResults,
             let vote_id = format!("{}:{}:{}", tx_hash, &proposal_id, option);
             tables
                 .create_row("Vote", &vote_id)
-                .set("id", &vote_id)
                 .set("txHash", tx_hash)
                 .set("blockNumber", clock.number)
                 .set("voter", &voter)

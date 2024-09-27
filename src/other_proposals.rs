@@ -35,7 +35,6 @@ pub fn insert_other_proposal_v1(
 
     tables
         .create_row("Proposal", &proposal_id)
-        .set("id", &proposal_id)
         .set("txHash", tx_hash)
         .set("blockNumber", clock.number)
         .set("type", "Undecoded Proposal")
@@ -49,7 +48,6 @@ pub fn insert_other_proposal_v1(
 
     tables
         .create_row("Content", &proposal_id)
-        .set("id", &proposal_id)
         .set("proposal", &proposal_id)
         .set("typeUrl", type_url)
         .set("value", raw_data);
@@ -85,7 +83,6 @@ pub fn insert_other_proposal_v1beta1(
 
     tables
         .create_row("Proposal", &proposal_id)
-        .set("id", &proposal_id)
         .set("txHash", tx_hash)
         .set("blockNumber", clock.number)
         .set("type", "Undecoded Proposal")
@@ -98,7 +95,6 @@ pub fn insert_other_proposal_v1beta1(
 
     tables
         .create_row("Content", &proposal_id)
-        .set("id", &proposal_id)
         .set("proposal", &proposal_id)
         .set("typeUrl", type_url)
         .set("value", raw_data);

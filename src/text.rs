@@ -29,7 +29,6 @@ pub fn insert_text_proposal(
 
         tables
             .create_row("Proposal", &proposal_id)
-            .set("id", &proposal_id)
             .set("txHash", tx_hash)
             .set("proposer", proposer)
             .set("authority", authority)

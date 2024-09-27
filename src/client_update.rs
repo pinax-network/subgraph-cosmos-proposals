@@ -39,7 +39,6 @@ pub fn insert_client_update_proposal(
 
         tables
             .create_row("Proposal", &proposal_id)
-            .set("id", &proposal_id)
             .set("txHash", tx_hash)
             .set("blockNumber", clock.number)
             .set("type", "ClientUpdate")
@@ -52,7 +51,6 @@ pub fn insert_client_update_proposal(
 
         tables
             .create_row("Content", &proposal_id)
-            .set("id", &proposal_id)
             .set("proposal", &proposal_id)
             .set("typeUrl", &content.type_url)
             .set("jsonData", data.to_string());
