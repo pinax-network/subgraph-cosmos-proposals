@@ -1,6 +1,7 @@
 use crate::pb::cosmos::distribution::v1beta1::{CommunityPoolSpendProposal, MsgCommunityPoolSpend};
 use crate::pb::cosmos::gov::v1::MsgSubmitProposal as MsgSubmitProposalV1;
 use crate::pb::cosmos::gov::v1beta1::MsgSubmitProposal as MsgSubmitProposalV1Beta1;
+use crate::utils::extract_initial_deposit;
 use prost_types::Any;
 use substreams::pb::substreams::Clock;
 use substreams_cosmos::pb::TxResults;
@@ -8,21 +9,19 @@ use substreams_entity_change::tables::Tables;
 
 pub fn insert_msg_community_pool_spend(
     tables: &mut Tables,
-    msg_submit_proposal: &MsgSubmitProposalV1,
+    msg: &MsgSubmitProposalV1,
     content: &Any,
     tx_result: &TxResults,
     clock: &Clock,
     tx_hash: &str,
 ) {
     if let Ok(msg_community_pool_spend) = <MsgCommunityPoolSpend as prost::Message>::decode(content.value.as_slice()) {
-        let proposer = msg_submit_proposal.proposer.as_str();
-        let initial_deposit = msg_submit_proposal.initial_deposit.get(0).unwrap();
-        let initial_deposit_denom = initial_deposit.denom.as_str();
-        let initial_deposit_amount = initial_deposit.amount.as_str();
+        let proposer = msg.proposer.as_str();
+        let (initial_deposit_denom, initial_deposit_amount) = extract_initial_deposit(&msg.initial_deposit);
 
-        let title = msg_submit_proposal.title.as_str();
-        let summary = msg_submit_proposal.summary.as_str();
-        let metadata = msg_submit_proposal.metadata.as_str();
+        let title = msg.title.as_str();
+        let summary = msg.summary.as_str();
+        let metadata = msg.metadata.as_str();
 
         let authority = msg_community_pool_spend.authority.as_str();
         let recipient = msg_community_pool_spend.recipient.as_str();
@@ -76,17 +75,15 @@ pub fn insert_msg_community_pool_spend(
 
 pub fn insert_community_pool_spend_proposal(
     tables: &mut Tables,
-    msg_submit_proposal: &MsgSubmitProposalV1Beta1,
+    msg: &MsgSubmitProposalV1Beta1,
     content: &Any,
     tx_result: &TxResults,
     clock: &Clock,
     tx_hash: &str,
 ) {
     if let Ok(comm_pool_spend_prop) = <CommunityPoolSpendProposal as prost::Message>::decode(content.value.as_slice()) {
-        let proposer = msg_submit_proposal.proposer.as_str();
-        let initial_deposit = msg_submit_proposal.initial_deposit.get(0).unwrap();
-        let initial_deposit_denom = initial_deposit.denom.as_str();
-        let initial_deposit_amount = initial_deposit.amount.as_str();
+        let proposer = msg.proposer.as_str();
+        let (initial_deposit_denom, initial_deposit_amount) = extract_initial_deposit(&msg.initial_deposit);
 
         let title = comm_pool_spend_prop.title.as_str();
         let description = comm_pool_spend_prop.description.as_str();

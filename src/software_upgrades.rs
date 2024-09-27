@@ -6,6 +6,7 @@ use substreams_entity_change::tables::Tables;
 use crate::pb::cosmos::gov::v1::MsgSubmitProposal as MsgSubmitProposalV1;
 use crate::pb::cosmos::gov::v1beta1::MsgSubmitProposal as MsgSubmitProposalV1Beta1;
 use crate::pb::cosmos::upgrade::v1beta1::{MsgSoftwareUpgrade, SoftwareUpgradeProposal};
+use crate::utils::extract_initial_deposit;
 
 pub fn insert_message_software_upgrade(
     tables: &mut Tables,
@@ -17,9 +18,7 @@ pub fn insert_message_software_upgrade(
 ) {
     if let Ok(msg_software_upgrade) = <MsgSoftwareUpgrade as prost::Message>::decode(content.value.as_slice()) {
         let proposer = msg.proposer.as_str();
-        let initial_deposit = msg.initial_deposit.get(0).unwrap();
-        let initial_deposit_denom = initial_deposit.denom.as_str();
-        let initial_deposit_amount = initial_deposit.amount.as_str();
+        let (initial_deposit_denom, initial_deposit_amount) = extract_initial_deposit(&msg.initial_deposit);
 
         let authority = msg_software_upgrade.authority.as_str();
 
@@ -83,10 +82,7 @@ pub fn insert_software_upgrade_proposal(
     if let Ok(software_upgrade_proposal) = <SoftwareUpgradeProposal as prost::Message>::decode(content.value.as_slice())
     {
         let proposer = msg.proposer.as_str();
-        let initial_deposit = msg.initial_deposit.get(0).unwrap();
-        let initial_deposit_denom = initial_deposit.denom.as_str();
-        let initial_deposit_amount = initial_deposit.amount.as_str();
-
+        let (initial_deposit_denom, initial_deposit_amount) = extract_initial_deposit(&msg.initial_deposit);
         let authority = tx_result
             .events
             .iter()

@@ -1,5 +1,6 @@
 use crate::pb::cosmos::gov::v1beta1::MsgSubmitProposal;
 use crate::pb::cosmos::params::v1beta1::{ParamChange, ParameterChangeProposal};
+use crate::utils::extract_initial_deposit;
 use prost_types::Any;
 use substreams::pb::substreams::Clock;
 use substreams_cosmos::pb::TxResults;
@@ -16,9 +17,8 @@ pub fn insert_parameter_change_proposal(
     if let Ok(parameter_change_proposal) = <ParameterChangeProposal as prost::Message>::decode(content.value.as_slice())
     {
         let proposer = msg.proposer.as_str();
-        let initial_deposit = msg.initial_deposit.get(0).unwrap();
-        let initial_deposit_denom = initial_deposit.denom.as_str();
-        let initial_deposit_amount = initial_deposit.amount.as_str();
+
+        let (initial_deposit_denom, initial_deposit_amount) = extract_initial_deposit(&msg.initial_deposit);
 
         let title = parameter_change_proposal.title.as_str();
         let description = parameter_change_proposal.description.as_str();

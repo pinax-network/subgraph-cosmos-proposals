@@ -3,28 +3,31 @@ use substreams::pb::substreams::Clock;
 use substreams_cosmos::pb::TxResults;
 use substreams_entity_change::tables::Tables;
 
-use crate::pb::{
-    cosmos::gov::v1beta1::MsgSubmitProposal as MsgSubmitProposalV1Beta1, ibc::core::client::v1::ClientUpdateProposal,
+use crate::{
+    pb::{
+        cosmos::gov::v1beta1::MsgSubmitProposal as MsgSubmitProposalV1Beta1,
+        ibc::core::client::v1::ClientUpdateProposal,
+    },
+    utils::extract_initial_deposit,
 };
 
 pub fn insert_client_update_proposal(
     tables: &mut Tables,
-    msg_submit_proposal: &MsgSubmitProposalV1Beta1,
+    msg: &MsgSubmitProposalV1Beta1,
     content: &Any,
     tx_result: &TxResults,
     clock: &Clock,
     tx_hash: &str,
 ) {
     if let Ok(client_update_proposal) = <ClientUpdateProposal as prost::Message>::decode(content.value.as_slice()) {
-        let proposer = msg_submit_proposal.proposer.as_str();
+        let proposer = msg.proposer.as_str();
         let title = client_update_proposal.title.as_str();
         let description = client_update_proposal.description.as_str();
         let subject_client_id = client_update_proposal.subject_client_id.as_str();
         let substitute_client_id = client_update_proposal.substitute_client_id.as_str();
 
-        let initial_deposit = msg_submit_proposal.initial_deposit.get(0).unwrap();
-        let initial_deposit_denom = initial_deposit.denom.as_str();
-        let initial_deposit_amount = initial_deposit.amount.as_str();
+        let (initial_deposit_denom, initial_deposit_amount) = extract_initial_deposit(&msg.initial_deposit);
+
         let authority = tx_result
             .events
             .iter()

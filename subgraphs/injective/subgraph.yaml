@@ -14,7 +14,8 @@ dataSources:
       # startBlock: 8982722
       # startBlock: 60343991
       # startBlock: 51589432
-      startBlock: 0
+      # startBlock: 0
+      startBlock: 7962600
       package:
         moduleName: graph_out
         file: ../../cosmos-software-upgrade-v0.1.0.spkg

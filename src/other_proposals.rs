@@ -4,8 +4,11 @@ use substreams::Hex;
 use substreams_cosmos::pb::TxResults;
 use substreams_entity_change::tables::Tables;
 
-use crate::pb::cosmos::gov::{
-    v1::MsgSubmitProposal as MsgSubmitProposalV1, v1beta1::MsgSubmitProposal as MsgSubmitProposalV1Beta1,
+use crate::{
+    pb::cosmos::gov::{
+        v1::MsgSubmitProposal as MsgSubmitProposalV1, v1beta1::MsgSubmitProposal as MsgSubmitProposalV1Beta1,
+    },
+    utils::extract_initial_deposit,
 };
 
 pub fn insert_other_proposal_v1(
@@ -22,9 +25,7 @@ pub fn insert_other_proposal_v1(
     let description = msg.summary.as_str();
     let metadata = msg.metadata.as_str();
 
-    let initial_deposit = msg.initial_deposit.get(0).unwrap();
-    let initial_deposit_denom = initial_deposit.denom.as_str();
-    let initial_deposit_amount = initial_deposit.amount.as_str();
+    let (initial_deposit_denom, initial_deposit_amount) = extract_initial_deposit(&msg.initial_deposit);
 
     let proposal_id = tx_result
         .events
@@ -84,9 +85,7 @@ pub fn insert_other_proposal_v1beta1(
     let type_url = content.type_url.as_str();
     let proposer = msg.proposer.as_str();
 
-    let initial_deposit = msg.initial_deposit.get(0).unwrap();
-    let initial_deposit_denom = initial_deposit.denom.as_str();
-    let initial_deposit_amount = initial_deposit.amount.as_str();
+    let (initial_deposit_denom, initial_deposit_amount) = extract_initial_deposit(&msg.initial_deposit);
 
     let proposal_id = tx_result
         .events
