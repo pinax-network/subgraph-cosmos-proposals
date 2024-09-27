@@ -6,7 +6,7 @@ use substreams_entity_change::tables::Tables;
 
 use crate::pb::cosmos::gov::v1beta1::MsgVote;
 
-pub fn push_if_proposal_votes(tables: &mut Tables, msg: &Any, tx_result: &TxResults, clock: &Clock, tx_hash: &str) {
+pub fn push_proposal_vote(tables: &mut Tables, msg: &Any, tx_result: &TxResults, clock: &Clock, tx_hash: &str) {
     let proposal_votes = tx_result.events.iter().filter(|event| event.r#type == "proposal_vote");
 
     for vote in proposal_votes {

@@ -1,4 +1,3 @@
-use prost::Message;
 use prost_types::Any;
 use substreams::pb::substreams::Clock;
 use substreams::Hex;
@@ -11,19 +10,19 @@ use crate::pb::cosmos::gov::{
 
 pub fn insert_other_proposal_v1(
     tables: &mut Tables,
-    msg_submit_proposal: &MsgSubmitProposalV1,
+    msg: &MsgSubmitProposalV1,
     content: &Any,
     tx_result: &TxResults,
     clock: &Clock,
     tx_hash: &str,
 ) {
     let type_url = content.type_url.as_str();
-    let proposer = msg_submit_proposal.proposer.as_str();
-    let title = msg_submit_proposal.title.as_str();
-    let description = msg_submit_proposal.summary.as_str();
-    let metadata = msg_submit_proposal.metadata.as_str();
+    let proposer = msg.proposer.as_str();
+    let title = msg.title.as_str();
+    let description = msg.summary.as_str();
+    let metadata = msg.metadata.as_str();
 
-    let initial_deposit = msg_submit_proposal.initial_deposit.get(0).unwrap();
+    let initial_deposit = msg.initial_deposit.get(0).unwrap();
     let initial_deposit_denom = initial_deposit.denom.as_str();
     let initial_deposit_amount = initial_deposit.amount.as_str();
 
@@ -76,16 +75,16 @@ pub fn insert_other_proposal_v1(
 
 pub fn insert_other_proposal_v1beta1(
     tables: &mut Tables,
-    msg_submit_proposal: &MsgSubmitProposalV1Beta1,
+    msg: &MsgSubmitProposalV1Beta1,
     content: &Any,
     tx_result: &TxResults,
     clock: &Clock,
     tx_hash: &str,
 ) {
     let type_url = content.type_url.as_str();
-    let proposer = msg_submit_proposal.proposer.as_str();
+    let proposer = msg.proposer.as_str();
 
-    let initial_deposit = msg_submit_proposal.initial_deposit.get(0).unwrap();
+    let initial_deposit = msg.initial_deposit.get(0).unwrap();
     let initial_deposit_denom = initial_deposit.denom.as_str();
     let initial_deposit_amount = initial_deposit.amount.as_str();
 

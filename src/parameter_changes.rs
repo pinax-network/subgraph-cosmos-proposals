@@ -7,7 +7,7 @@ use substreams_entity_change::{pb::entity::EntityChanges, tables::Tables};
 
 pub fn insert_parameter_change_proposal(
     tables: &mut Tables,
-    msg_submit_proposal: &MsgSubmitProposal,
+    msg: &MsgSubmitProposal,
     content: &Any,
     tx_result: &TxResults,
     clock: &Clock,
@@ -15,8 +15,8 @@ pub fn insert_parameter_change_proposal(
 ) {
     if let Ok(parameter_change_proposal) = <ParameterChangeProposal as prost::Message>::decode(content.value.as_slice())
     {
-        let proposer = msg_submit_proposal.proposer.as_str();
-        let initial_deposit = msg_submit_proposal.initial_deposit.get(0).unwrap();
+        let proposer = msg.proposer.as_str();
+        let initial_deposit = msg.initial_deposit.get(0).unwrap();
         let initial_deposit_denom = initial_deposit.denom.as_str();
         let initial_deposit_amount = initial_deposit.amount.as_str();
 

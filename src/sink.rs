@@ -1,11 +1,10 @@
 use crate::client_update::insert_client_update_proposal;
 use crate::community_pool_spends::{insert_community_pool_spend_proposal, insert_msg_community_pool_spend};
 use crate::other_proposals::{insert_other_proposal_v1, insert_other_proposal_v1beta1};
-// Start of Selection
 use crate::parameter_changes::insert_parameter_change_proposal;
 use crate::pb::cosmos::gov::v1::MsgSubmitProposal as MsgSubmitProposalV1;
 use crate::pb::cosmos::{gov::v1beta1::MsgSubmitProposal as MsgSubmitProposalV1Beta1, tx::v1beta1::Tx};
-use crate::proposal_votes::push_if_proposal_votes;
+use crate::proposal_votes::push_proposal_vote;
 use crate::serde_genesis::GenesisParams;
 use crate::software_upgrades::{insert_message_software_upgrade, insert_software_upgrade_proposal};
 use crate::text::insert_text_proposal;
@@ -40,37 +39,16 @@ pub fn graph_out(params: String, clock: Clock, block: Block) -> Result<EntityCha
                     match message.type_url.as_str() {
                         "/cosmos.gov.v1.MsgSubmitProposal" => {
                             if let Ok(msg) = MsgSubmitProposalV1::decode(message.value.as_slice()) {
-                                if push_if_message_software_upgrade(&mut tables, &msg, &tx_result, &clock, &tx_hash) {
-                                    continue;
-                                }
-                                if push_if_msg_comm_pool_spend(&mut tables, &msg, &tx_result, &clock, &tx_hash) {
-                                    continue;
-                                }
-                                push_other_proposalv1(&mut tables, &msg, &tx_result, &clock, &tx_hash);
+                                push_proposal_v1(&mut tables, &msg, &tx_result, &clock, &tx_hash);
                             }
                         }
                         "/cosmos.gov.v1beta1.MsgSubmitProposal" => {
                             if let Ok(msg) = MsgSubmitProposalV1Beta1::decode(message.value.as_slice()) {
-                                if push_if_software_upgrade_prop(&mut tables, &msg, &tx_result, &clock, &tx_hash) {
-                                    continue;
-                                }
-                                if push_if_parameter_change_prop(&mut tables, &msg, &tx_result, &clock, &tx_hash) {
-                                    continue;
-                                }
-                                if push_if_comm_pool_spend_prop(&mut tables, &msg, &tx_result, &clock, &tx_hash) {
-                                    continue;
-                                }
-                                if push_if_text_proposal(&mut tables, &msg, &tx_result, &clock, &tx_hash) {
-                                    continue;
-                                }
-                                if push_if_client_update_proposal(&mut tables, &msg, &tx_result, &clock, &tx_hash) {
-                                    continue;
-                                }
-                                push_other_proposalv1beta1(&mut tables, &msg, &tx_result, &clock, &tx_hash);
+                                push_proposal_v1beta1(&mut tables, &msg, &tx_result, &clock, &tx_hash);
                             }
                         }
                         "/cosmos.gov.v1beta1.MsgVote" => {
-                            push_if_proposal_votes(&mut tables, message, &tx_result, &clock, &tx_hash);
+                            push_proposal_vote(&mut tables, message, &tx_result, &clock, &tx_hash);
                         }
                         _ => continue,
                     }
@@ -90,148 +68,65 @@ pub fn graph_out(params: String, clock: Clock, block: Block) -> Result<EntityCha
     Ok(tables.to_entity_changes())
 }
 
+pub fn push_proposal_v1beta1(
+    tables: &mut Tables,
+    msg: &MsgSubmitProposalV1Beta1,
+    tx_result: &TxResults,
+    clock: &Clock,
+    tx_hash: &str,
+) {
+    if let Some(content) = msg.content.as_ref() {
+        match content.type_url.as_str() {
+            "/cosmos.upgrade.v1beta1.SoftwareUpgradeProposal" => {
+                insert_software_upgrade_proposal(tables, msg, content, tx_result, clock, tx_hash);
+            }
+            "/cosmos.params.v1beta1.ParameterChangeProposal" => {
+                insert_parameter_change_proposal(tables, msg, content, tx_result, clock, tx_hash);
+            }
+            "/cosmos.distribution.v1beta1.CommunityPoolSpendProposal" => {
+                insert_community_pool_spend_proposal(tables, msg, content, tx_result, clock, tx_hash);
+            }
+            "/cosmos.gov.v1beta1.TextProposal" => {
+                insert_text_proposal(tables, msg, content, tx_result, clock, tx_hash);
+            }
+            "/ibc.core.client.v1.ClientUpdateProposal" => {
+                insert_client_update_proposal(tables, msg, content, tx_result, clock, tx_hash);
+            }
+            _ => {
+                insert_other_proposal_v1beta1(tables, msg, content, tx_result, clock, tx_hash);
+            }
+        }
+    }
+}
+
+pub fn push_proposal_v1(
+    tables: &mut Tables,
+    msg: &MsgSubmitProposalV1,
+    tx_result: &TxResults,
+    clock: &Clock,
+    tx_hash: &str,
+) {
+    if let Some(content) = msg.content.as_ref() {
+        match content.type_url.as_str() {
+            "/cosmos.upgrade.v1beta1.MsgSoftwareUpgrade" => {
+                insert_message_software_upgrade(tables, msg, content, tx_result, clock, tx_hash);
+            }
+            "/cosmos.distribution.v1beta1.MsgCommunityPoolSpend" => {
+                insert_msg_community_pool_spend(tables, msg, content, tx_result, clock, tx_hash);
+            }
+            _ => {
+                insert_other_proposal_v1(tables, msg, content, tx_result, clock, tx_hash);
+            }
+        }
+    }
+}
+
 // Should be included in Substreams Cosmos
 fn compute_tx_hash(tx_as_bytes: &[u8]) -> String {
     let mut hasher = Sha256::new();
     hasher.update(tx_as_bytes);
     let tx_hash = hasher.finalize();
     return Hex::encode(tx_hash);
-}
-
-pub fn push_if_message_software_upgrade(
-    tables: &mut Tables,
-    msg_submit_proposal: &MsgSubmitProposalV1,
-    tx_result: &TxResults,
-    clock: &Clock,
-    tx_hash: &str,
-) -> bool {
-    if let Some(content) = msg_submit_proposal.content.as_ref() {
-        if content.type_url == "/cosmos.upgrade.v1beta1.MsgSoftwareUpgrade" {
-            insert_message_software_upgrade(tables, msg_submit_proposal, content, tx_result, clock, tx_hash);
-            return true;
-        }
-    }
-    return false;
-}
-
-pub fn push_if_software_upgrade_prop(
-    tables: &mut Tables,
-    msg_submit_proposal: &MsgSubmitProposalV1Beta1,
-    tx_result: &TxResults,
-    clock: &Clock,
-    tx_hash: &str,
-) -> bool {
-    if let Some(content) = msg_submit_proposal.content.as_ref() {
-        if content.type_url == "/cosmos.upgrade.v1beta1.SoftwareUpgradeProposal" {
-            insert_software_upgrade_proposal(tables, msg_submit_proposal, content, tx_result, clock, tx_hash);
-            return true;
-        }
-    }
-    return false;
-}
-
-pub fn push_if_parameter_change_prop(
-    tables: &mut Tables,
-    msg_submit_proposal: &MsgSubmitProposalV1Beta1,
-    tx_result: &TxResults,
-    clock: &Clock,
-    tx_hash: &str,
-) -> bool {
-    if let Some(content) = msg_submit_proposal.content.as_ref() {
-        if content.type_url == "/cosmos.params.v1beta1.ParameterChangeProposal" {
-            insert_parameter_change_proposal(tables, msg_submit_proposal, content, tx_result, clock, tx_hash);
-            return true;
-        }
-    }
-    return false;
-}
-
-pub fn push_if_comm_pool_spend_prop(
-    tables: &mut Tables,
-    msg_submit_proposal: &MsgSubmitProposalV1Beta1,
-    tx_result: &TxResults,
-    clock: &Clock,
-    tx_hash: &str,
-) -> bool {
-    if let Some(content) = msg_submit_proposal.content.as_ref() {
-        if content.type_url == "/cosmos.distribution.v1beta1.CommunityPoolSpendProposal" {
-            insert_community_pool_spend_proposal(tables, msg_submit_proposal, content, tx_result, clock, tx_hash);
-            return true;
-        }
-    }
-    return false;
-}
-
-pub fn push_if_msg_comm_pool_spend(
-    tables: &mut Tables,
-    msg_submit_proposal: &MsgSubmitProposalV1,
-    tx_result: &TxResults,
-    clock: &Clock,
-    tx_hash: &str,
-) -> bool {
-    if let Some(content) = msg_submit_proposal.content.as_ref() {
-        if content.type_url == "/cosmos.distribution.v1beta1.MsgCommunityPoolSpend" {
-            insert_msg_community_pool_spend(tables, msg_submit_proposal, content, tx_result, clock, tx_hash);
-            return true;
-        }
-    }
-    return false;
-}
-
-pub fn push_if_text_proposal(
-    tables: &mut Tables,
-    msg_submit_proposal: &MsgSubmitProposalV1Beta1,
-    tx_result: &TxResults,
-    clock: &Clock,
-    tx_hash: &str,
-) -> bool {
-    if let Some(content) = msg_submit_proposal.content.as_ref() {
-        if content.type_url == "/cosmos.gov.v1beta1.TextProposal" {
-            insert_text_proposal(tables, msg_submit_proposal, content, tx_result, clock, tx_hash);
-            return true;
-        }
-    }
-    return false;
-}
-
-pub fn push_if_client_update_proposal(
-    tables: &mut Tables,
-    msg_submit_proposal: &MsgSubmitProposalV1Beta1,
-    tx_result: &TxResults,
-    clock: &Clock,
-    tx_hash: &str,
-) -> bool {
-    if let Some(content) = msg_submit_proposal.content.as_ref() {
-        if content.type_url == "/ibc.core.client.v1.ClientUpdateProposal" {
-            insert_client_update_proposal(tables, msg_submit_proposal, content, tx_result, clock, tx_hash);
-            return true;
-        }
-    }
-    return false;
-}
-
-pub fn push_other_proposalv1(
-    tables: &mut Tables,
-    msg_submit_proposal: &MsgSubmitProposalV1,
-    tx_result: &TxResults,
-    clock: &Clock,
-    tx_hash: &str,
-) {
-    if let Some(content) = msg_submit_proposal.content.as_ref() {
-        insert_other_proposal_v1(tables, msg_submit_proposal, content, tx_result, clock, tx_hash);
-    }
-}
-
-pub fn push_other_proposalv1beta1(
-    tables: &mut Tables,
-    msg_submit_proposal: &MsgSubmitProposalV1Beta1,
-    tx_result: &TxResults,
-    clock: &Clock,
-    tx_hash: &str,
-) {
-    if let Some(content) = msg_submit_proposal.content.as_ref() {
-        insert_other_proposal_v1beta1(tables, msg_submit_proposal, content, tx_result, clock, tx_hash);
-    }
 }
 
 pub fn code_to_string(code: u32) -> String {

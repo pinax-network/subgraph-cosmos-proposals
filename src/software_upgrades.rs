@@ -9,23 +9,23 @@ use crate::pb::cosmos::upgrade::v1beta1::{MsgSoftwareUpgrade, SoftwareUpgradePro
 
 pub fn insert_message_software_upgrade(
     tables: &mut Tables,
-    msg_submit_proposal: &MsgSubmitProposalV1,
+    msg: &MsgSubmitProposalV1,
     content: &Any,
     tx_result: &TxResults,
     clock: &Clock,
     tx_hash: &str,
 ) {
     if let Ok(msg_software_upgrade) = <MsgSoftwareUpgrade as prost::Message>::decode(content.value.as_slice()) {
-        let proposer = msg_submit_proposal.proposer.as_str();
-        let initial_deposit = msg_submit_proposal.initial_deposit.get(0).unwrap();
+        let proposer = msg.proposer.as_str();
+        let initial_deposit = msg.initial_deposit.get(0).unwrap();
         let initial_deposit_denom = initial_deposit.denom.as_str();
         let initial_deposit_amount = initial_deposit.amount.as_str();
 
         let authority = msg_software_upgrade.authority.as_str();
 
-        let title = msg_submit_proposal.title.as_str();
-        let summary = msg_submit_proposal.summary.as_str();
-        let metadata = msg_submit_proposal.metadata.as_str();
+        let title = msg.title.as_str();
+        let summary = msg.summary.as_str();
+        let metadata = msg.metadata.as_str();
 
         let plan = msg_software_upgrade.plan.unwrap();
         let plan_name = plan.name.as_str();
@@ -74,7 +74,7 @@ pub fn insert_message_software_upgrade(
 
 pub fn insert_software_upgrade_proposal(
     tables: &mut Tables,
-    msg_submit_proposal: &MsgSubmitProposalV1Beta1,
+    msg: &MsgSubmitProposalV1Beta1,
     content: &Any,
     tx_result: &TxResults,
     clock: &Clock,
@@ -82,8 +82,8 @@ pub fn insert_software_upgrade_proposal(
 ) {
     if let Ok(software_upgrade_proposal) = <SoftwareUpgradeProposal as prost::Message>::decode(content.value.as_slice())
     {
-        let proposer = msg_submit_proposal.proposer.as_str();
-        let initial_deposit = msg_submit_proposal.initial_deposit.get(0).unwrap();
+        let proposer = msg.proposer.as_str();
+        let initial_deposit = msg.initial_deposit.get(0).unwrap();
         let initial_deposit_denom = initial_deposit.denom.as_str();
         let initial_deposit_amount = initial_deposit.amount.as_str();
 

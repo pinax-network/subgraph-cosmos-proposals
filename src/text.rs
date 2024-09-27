@@ -7,7 +7,7 @@ use substreams_entity_change::tables::Tables;
 
 pub fn insert_text_proposal(
     tables: &mut Tables,
-    msg_submit_proposal: &MsgSubmitProposalV1Beta1,
+    msg: &MsgSubmitProposalV1Beta1,
     content: &Any,
     tx_result: &TxResults,
     clock: &Clock,
@@ -16,7 +16,7 @@ pub fn insert_text_proposal(
     if let Ok(text_prop) = <TextProposal as prost::Message>::decode(content.value.as_slice()) {
         let title = text_prop.title.as_str();
         let description = text_prop.description.as_str();
-        let proposer = msg_submit_proposal.proposer.as_str();
+        let proposer = msg.proposer.as_str();
 
         let proposal_id = tx_result
             .events
@@ -30,7 +30,7 @@ pub fn insert_text_proposal(
                 clock.number
             ));
 
-        let initial_deposit = msg_submit_proposal.initial_deposit.get(0).unwrap();
+        let initial_deposit = msg.initial_deposit.get(0).unwrap();
         let initial_deposit_denom = initial_deposit.denom.as_str();
         let initial_deposit_amount = initial_deposit.amount.as_str();
 
