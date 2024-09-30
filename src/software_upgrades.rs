@@ -7,6 +7,7 @@ use crate::blocks::insert_block;
 use crate::pb::cosmos::gov::v1::MsgSubmitProposal as MsgSubmitProposalV1;
 use crate::pb::cosmos::gov::v1beta1::MsgSubmitProposal as MsgSubmitProposalV1Beta1;
 use crate::pb::cosmos::upgrade::v1beta1::{MsgSoftwareUpgrade, SoftwareUpgradeProposal};
+use crate::proposal_deposits::insert_deposit;
 use crate::utils::{extract_authority, extract_initial_deposit, extract_proposal_id};
 
 pub fn insert_message_software_upgrade(
@@ -19,7 +20,7 @@ pub fn insert_message_software_upgrade(
 ) {
     if let Ok(msg_software_upgrade) = <MsgSoftwareUpgrade as prost::Message>::decode(content.value.as_slice()) {
         let proposer = msg.proposer.as_str();
-        let (initial_deposit_denom, initial_deposit_amount) = extract_initial_deposit(&msg.initial_deposit);
+        let (deposit_denom, deposit_amount) = extract_initial_deposit(&msg.initial_deposit);
 
         let authority = msg_software_upgrade.authority.as_str();
 
@@ -45,12 +46,20 @@ pub fn insert_message_software_upgrade(
             .set("block", &clock.id)
             .set("type", "SoftwareUpgrade")
             .set("proposer", proposer)
-            .set("initialDepositDenom", initial_deposit_denom)
-            .set("initialDepositAmount", initial_deposit_amount)
             .set("authority", authority)
             .set("title", title)
             .set("description", summary)
             .set("metadata", metadata);
+
+        insert_deposit(
+            tables,
+            &proposal_id,
+            &deposit_amount,
+            &deposit_denom,
+            proposer,
+            clock,
+            tx_hash,
+        );
 
         // Create SoftwareUpgradeProposal entity
         tables
@@ -73,7 +82,7 @@ pub fn insert_software_upgrade_proposal(
     if let Ok(software_upgrade_proposal) = <SoftwareUpgradeProposal as prost::Message>::decode(content.value.as_slice())
     {
         let proposer = msg.proposer.as_str();
-        let (initial_deposit_denom, initial_deposit_amount) = extract_initial_deposit(&msg.initial_deposit);
+        let (deposit_denom, deposit_amount) = extract_initial_deposit(&msg.initial_deposit);
         let authority = extract_authority(tx_result);
 
         let title = software_upgrade_proposal.title.as_str();
@@ -95,12 +104,20 @@ pub fn insert_software_upgrade_proposal(
             .set("block", &clock.id)
             .set("type", "SoftwareUpgrade")
             .set("proposer", proposer)
-            .set("initialDepositDenom", initial_deposit_denom)
-            .set("initialDepositAmount", initial_deposit_amount)
             .set("authority", authority)
             .set("title", title)
             .set("description", description)
             .set("metadata", "");
+
+        insert_deposit(
+            tables,
+            &proposal_id,
+            &deposit_amount,
+            &deposit_denom,
+            proposer,
+            clock,
+            tx_hash,
+        );
 
         // Create SoftwareUpgradeProposal entity
         tables

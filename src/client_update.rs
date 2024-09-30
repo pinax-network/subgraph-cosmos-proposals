@@ -9,6 +9,7 @@ use crate::{
         cosmos::gov::v1beta1::MsgSubmitProposal as MsgSubmitProposalV1Beta1,
         ibc::core::client::v1::ClientUpdateProposal,
     },
+    proposal_deposits::insert_deposit,
     utils::{extract_authority, extract_initial_deposit, extract_proposal_id},
 };
 
@@ -27,7 +28,7 @@ pub fn insert_client_update_proposal(
         let subject_client_id = client_update_proposal.subject_client_id.as_str();
         let substitute_client_id = client_update_proposal.substitute_client_id.as_str();
 
-        let (initial_deposit_denom, initial_deposit_amount) = extract_initial_deposit(&msg.initial_deposit);
+        let (deposit_denom, deposit_amount) = extract_initial_deposit(&msg.initial_deposit);
 
         let authority = extract_authority(tx_result);
 
@@ -48,9 +49,17 @@ pub fn insert_client_update_proposal(
             .set("title", title)
             .set("description", description)
             .set("proposer", proposer)
-            .set("authority", authority)
-            .set("initialDepositDenom", initial_deposit_denom)
-            .set("initialDepositAmount", initial_deposit_amount);
+            .set("authority", authority);
+
+        insert_deposit(
+            tables,
+            &proposal_id,
+            &deposit_amount,
+            &deposit_denom,
+            proposer,
+            clock,
+            tx_hash,
+        );
 
         tables
             .create_row("Content", &proposal_id)

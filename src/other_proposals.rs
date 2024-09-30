@@ -9,6 +9,7 @@ use crate::{
     pb::cosmos::gov::{
         v1::MsgSubmitProposal as MsgSubmitProposalV1, v1beta1::MsgSubmitProposal as MsgSubmitProposalV1Beta1,
     },
+    proposal_deposits::insert_deposit,
     utils::{extract_authority, extract_initial_deposit, extract_proposal_id},
 };
 
@@ -26,7 +27,7 @@ pub fn insert_other_proposal_v1(
     let description = msg.summary.as_str();
     let metadata = msg.metadata.as_str();
 
-    let (initial_deposit_denom, initial_deposit_amount) = extract_initial_deposit(&msg.initial_deposit);
+    let (deposit_denom, deposit_amount) = extract_initial_deposit(&msg.initial_deposit);
 
     let proposal_id = extract_proposal_id(tx_result, clock, tx_hash);
 
@@ -42,12 +43,20 @@ pub fn insert_other_proposal_v1(
         .set("block", &clock.id)
         .set("type", "Undecoded Proposal")
         .set("proposer", proposer)
-        .set("initialDepositDenom", initial_deposit_denom)
-        .set("initialDepositAmount", initial_deposit_amount)
         .set("authority", authority)
         .set("title", title)
         .set("description", description)
         .set("metadata", metadata);
+
+    insert_deposit(
+        tables,
+        &proposal_id,
+        &deposit_amount,
+        &deposit_denom,
+        proposer,
+        clock,
+        tx_hash,
+    );
 
     tables
         .create_row("Content", &proposal_id)
@@ -67,7 +76,7 @@ pub fn insert_other_proposal_v1beta1(
     let type_url = content.type_url.as_str();
     let proposer = msg.proposer.as_str();
 
-    let (initial_deposit_denom, initial_deposit_amount) = extract_initial_deposit(&msg.initial_deposit);
+    let (deposit_denom, deposit_amount) = extract_initial_deposit(&msg.initial_deposit);
 
     let proposal_id = extract_proposal_id(tx_result, clock, tx_hash);
 
@@ -92,11 +101,19 @@ pub fn insert_other_proposal_v1beta1(
         .set("block", &clock.id)
         .set("type", "Undecoded Proposal")
         .set("proposer", proposer)
-        .set("initialDepositDenom", initial_deposit_denom)
-        .set("initialDepositAmount", initial_deposit_amount)
         .set("authority", authority)
         .set("title", title)
         .set("description", description);
+
+    insert_deposit(
+        tables,
+        &proposal_id,
+        &deposit_amount,
+        &deposit_denom,
+        proposer,
+        clock,
+        tx_hash,
+    );
 
     tables
         .create_row("Content", &proposal_id)

@@ -4,6 +4,7 @@ use crate::other_proposals::{insert_other_proposal_v1, insert_other_proposal_v1b
 use crate::parameter_changes::insert_parameter_change_proposal;
 use crate::pb::cosmos::gov::v1::MsgSubmitProposal as MsgSubmitProposalV1;
 use crate::pb::cosmos::{gov::v1beta1::MsgSubmitProposal as MsgSubmitProposalV1Beta1, tx::v1beta1::Tx};
+use crate::proposal_deposits::insert_deposit_undecoded;
 use crate::proposal_votes::push_proposal_vote;
 use crate::serde_genesis::GenesisParams;
 use crate::software_upgrades::{insert_message_software_upgrade, insert_software_upgrade_proposal};
@@ -26,11 +27,11 @@ pub fn graph_out(params: String, clock: Clock, block: Block) -> Result<EntityCha
         .iter()
         .enumerate()
         .filter(|(_, tx_result)| {
-            tx_result
-                .events
-                .iter()
-                .any(|event| event.r#type == "submit_proposal" || event.r#type == "proposal_vote")
-                && tx_result.code == 0
+            tx_result.events.iter().any(|event| {
+                event.r#type == "submit_proposal"
+                    || event.r#type == "proposal_vote"
+                    || event.r#type == "proposal_deposit"
+            }) && tx_result.code == 0
         })
         .collect();
 
@@ -56,18 +57,15 @@ pub fn graph_out(params: String, clock: Clock, block: Block) -> Result<EntityCha
                         "/cosmos.gov.v1beta1.MsgVote" => {
                             push_proposal_vote(&mut tables, message, &tx_result, &clock, &tx_hash);
                         }
+                        "/cosmos.gov.v1beta1.MsgDeposit" => {
+                            insert_deposit_undecoded(&mut tables, message, &clock, &tx_hash);
+                        }
                         _ => continue,
                     }
                 }
             }
         }
     }
-
-    // let timestamp = clock.timestamp.as_ref().expect("timestamp missing").seconds;
-    // tables
-    //     .create_row("Block", &clock.id)
-    //     .set_bigint("number", &clock.number.to_string())
-    //     .set_bigint("timestamp", &timestamp.to_string());
 
     Ok(tables.to_entity_changes())
 }

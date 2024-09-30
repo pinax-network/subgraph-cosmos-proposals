@@ -1,6 +1,7 @@
 use crate::blocks::insert_block;
 use crate::pb::cosmos::gov::v1beta1::MsgSubmitProposal;
 use crate::pb::cosmos::params::v1beta1::{ParamChange, ParameterChangeProposal};
+use crate::proposal_deposits::insert_deposit;
 use crate::utils::{extract_authority, extract_initial_deposit, extract_proposal_id};
 use prost_types::Any;
 use substreams::pb::substreams::Clock;
@@ -19,7 +20,7 @@ pub fn insert_parameter_change_proposal(
     {
         let proposer = msg.proposer.as_str();
 
-        let (initial_deposit_denom, initial_deposit_amount) = extract_initial_deposit(&msg.initial_deposit);
+        let (deposit_denom, deposit_amount) = extract_initial_deposit(&msg.initial_deposit);
 
         let title = parameter_change_proposal.title.as_str();
         let description = parameter_change_proposal.description.as_str();
@@ -42,10 +43,18 @@ pub fn insert_parameter_change_proposal(
             .set("type", "ParameterChange")
             .set("proposer", proposer)
             .set("authority", authority)
-            .set("initialDepositDenom", initial_deposit_denom)
-            .set("initialDepositAmount", initial_deposit_amount)
             .set("title", title)
             .set("description", description);
+
+        insert_deposit(
+            tables,
+            &proposal_id,
+            &deposit_amount,
+            &deposit_denom,
+            proposer,
+            clock,
+            tx_hash,
+        );
 
         tables
             .create_row("Content", &proposal_id)

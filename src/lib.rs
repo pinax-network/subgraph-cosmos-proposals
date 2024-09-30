@@ -5,6 +5,7 @@ mod index;
 mod other_proposals;
 mod parameter_changes;
 mod pb;
+mod proposal_deposits;
 mod proposal_votes;
 mod serde_genesis;
 mod sink;

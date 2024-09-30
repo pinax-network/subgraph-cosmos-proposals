@@ -2,6 +2,7 @@ use crate::blocks::insert_block;
 use crate::pb::cosmos::distribution::v1beta1::{CommunityPoolSpendProposal, MsgCommunityPoolSpend};
 use crate::pb::cosmos::gov::v1::MsgSubmitProposal as MsgSubmitProposalV1;
 use crate::pb::cosmos::gov::v1beta1::MsgSubmitProposal as MsgSubmitProposalV1Beta1;
+use crate::proposal_deposits::insert_deposit;
 use crate::utils::{extract_authority, extract_initial_deposit, extract_proposal_id};
 use prost_types::Any;
 use substreams::pb::substreams::Clock;
@@ -18,7 +19,7 @@ pub fn insert_msg_community_pool_spend(
 ) {
     if let Ok(msg_community_pool_spend) = <MsgCommunityPoolSpend as prost::Message>::decode(content.value.as_slice()) {
         let proposer = msg.proposer.as_str();
-        let (initial_deposit_denom, initial_deposit_amount) = extract_initial_deposit(&msg.initial_deposit);
+        let (deposit_denom, deposit_amount) = extract_initial_deposit(&msg.initial_deposit);
 
         let title = msg.title.as_str();
         let summary = msg.summary.as_str();
@@ -50,11 +51,19 @@ pub fn insert_msg_community_pool_spend(
             .set("type", "CommunityPoolSpend")
             .set("proposer", proposer)
             .set("authority", authority)
-            .set("initialDepositDenom", initial_deposit_denom)
-            .set("initialDepositAmount", initial_deposit_amount)
             .set("title", title)
             .set("description", summary)
             .set("metadata", metadata);
+
+        insert_deposit(
+            tables,
+            &proposal_id,
+            &deposit_amount,
+            &deposit_denom,
+            proposer,
+            clock,
+            tx_hash,
+        );
 
         tables
             .create_row("Content", &proposal_id)
@@ -74,14 +83,12 @@ pub fn insert_community_pool_spend_proposal(
 ) {
     if let Ok(comm_pool_spend_prop) = <CommunityPoolSpendProposal as prost::Message>::decode(content.value.as_slice()) {
         let proposer = msg.proposer.as_str();
-        let (initial_deposit_denom, initial_deposit_amount) = extract_initial_deposit(&msg.initial_deposit);
+        let (deposit_denom, deposit_amount) = extract_initial_deposit(&msg.initial_deposit);
 
         let title = comm_pool_spend_prop.title.as_str();
         let description = comm_pool_spend_prop.description.as_str();
         let recipient = comm_pool_spend_prop.recipient.as_str();
-        let amount = comm_pool_spend_prop.amount.get(0).unwrap();
-        let amount_denom = amount.denom.as_str();
-        let amount_amount = amount.amount.as_str();
+        let (amount_denom, amount_amount) = extract_initial_deposit(&comm_pool_spend_prop.amount);
 
         let authority = extract_authority(tx_result);
 
@@ -105,9 +112,17 @@ pub fn insert_community_pool_spend_proposal(
             .set("title", title)
             .set("description", description)
             .set("proposer", proposer)
-            .set("authority", authority)
-            .set("initialDepositDenom", initial_deposit_denom)
-            .set("initialDepositAmount", initial_deposit_amount);
+            .set("authority", authority);
+
+        insert_deposit(
+            tables,
+            &proposal_id,
+            &deposit_amount,
+            &deposit_denom,
+            proposer,
+            clock,
+            tx_hash,
+        );
 
         tables
             .create_row("Content", &proposal_id)
