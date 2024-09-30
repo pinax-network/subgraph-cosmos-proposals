@@ -21,17 +21,23 @@ pub fn graph_out(params: String, clock: Clock, block: Block) -> Result<EntityCha
 
     let mut tables = Tables::new();
 
-    let mut transactions = 0;
+    let transactions: Vec<(usize, &TxResults)> = block
+        .tx_results
+        .iter()
+        .enumerate()
+        .filter(|(_, tx_result)| {
+            tx_result
+                .events
+                .iter()
+                .any(|event| event.r#type == "submit_proposal" || event.r#type == "proposal_vote")
+                && tx_result.code == 0
+        })
+        .collect();
 
-    for tx_result in block.tx_results {
-        if tx_result.code != 0 {
-            transactions += 1;
-            continue;
-        }
+    for (i, tx_result) in transactions {
+        let tx_hash = compute_tx_hash(&block.txs[i]);
 
-        let tx_hash = compute_tx_hash(&block.txs[transactions]);
-
-        let tx_as_bytes = block.txs[transactions].as_slice();
+        let tx_as_bytes = block.txs[i].as_slice();
 
         if let Ok(tx) = <Tx as prost::Message>::decode(tx_as_bytes) {
             if let Some(body) = tx.body {
@@ -55,8 +61,6 @@ pub fn graph_out(params: String, clock: Clock, block: Block) -> Result<EntityCha
                 }
             }
         }
-
-        transactions += 1;
     }
 
     // let timestamp = clock.timestamp.as_ref().expect("timestamp missing").seconds;
