@@ -1,3 +1,4 @@
+use crate::blocks::insert_block;
 use crate::pb::cosmos::distribution::v1beta1::{CommunityPoolSpendProposal, MsgCommunityPoolSpend};
 use crate::pb::cosmos::gov::v1::MsgSubmitProposal as MsgSubmitProposalV1;
 use crate::pb::cosmos::gov::v1beta1::MsgSubmitProposal as MsgSubmitProposalV1Beta1;
@@ -40,10 +41,12 @@ pub fn insert_msg_community_pool_spend(
         }))
         .unwrap_or_default();
 
+        insert_block(tables, clock);
+
         tables
             .create_row("Proposal", &proposal_id)
             .set("txHash", tx_hash)
-            .set("blockNumber", clock.number)
+            .set("block", &clock.id)
             .set("type", "CommunityPoolSpend")
             .set("proposer", proposer)
             .set("authority", authority)
@@ -93,10 +96,11 @@ pub fn insert_community_pool_spend_proposal(
         }))
         .unwrap_or_default();
 
+        insert_block(tables, clock);
         tables
             .create_row("Proposal", &proposal_id)
             .set("txHash", tx_hash)
-            .set("blockNumber", clock.number)
+            .set("block", &clock.id)
             .set("type", "CommunityPoolSpend")
             .set("title", title)
             .set("description", description)

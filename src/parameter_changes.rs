@@ -1,3 +1,4 @@
+use crate::blocks::insert_block;
 use crate::pb::cosmos::gov::v1beta1::MsgSubmitProposal;
 use crate::pb::cosmos::params::v1beta1::{ParamChange, ParameterChangeProposal};
 use crate::utils::{extract_authority, extract_initial_deposit, extract_proposal_id};
@@ -32,10 +33,12 @@ pub fn insert_parameter_change_proposal(
         }))
         .unwrap_or_default();
 
+        insert_block(tables, clock);
+
         tables
             .create_row("Proposal", &proposal_id)
             .set("txHash", tx_hash)
-            .set("blockNumber", clock.number)
+            .set("block", &clock.id)
             .set("type", "ParameterChange")
             .set("proposer", proposer)
             .set("authority", authority)

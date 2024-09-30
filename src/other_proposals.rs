@@ -5,6 +5,7 @@ use substreams_cosmos::pb::TxResults;
 use substreams_entity_change::tables::Tables;
 
 use crate::{
+    blocks::insert_block,
     pb::cosmos::gov::{
         v1::MsgSubmitProposal as MsgSubmitProposalV1, v1beta1::MsgSubmitProposal as MsgSubmitProposalV1Beta1,
     },
@@ -33,10 +34,12 @@ pub fn insert_other_proposal_v1(
 
     let raw_data = Hex::encode(content.value.as_slice());
 
+    insert_block(tables, clock);
+
     tables
         .create_row("Proposal", &proposal_id)
         .set("txHash", tx_hash)
-        .set("blockNumber", clock.number)
+        .set("block", &clock.id)
         .set("type", "Undecoded Proposal")
         .set("proposer", proposer)
         .set("initialDepositDenom", initial_deposit_denom)
@@ -81,10 +84,12 @@ pub fn insert_other_proposal_v1beta1(
 
     let raw_data = Hex::encode(content.value.as_slice());
 
+    insert_block(tables, clock);
+
     tables
         .create_row("Proposal", &proposal_id)
         .set("txHash", tx_hash)
-        .set("blockNumber", clock.number)
+        .set("block", &clock.id)
         .set("type", "Undecoded Proposal")
         .set("proposer", proposer)
         .set("initialDepositDenom", initial_deposit_denom)

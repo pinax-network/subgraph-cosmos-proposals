@@ -1,10 +1,7 @@
 type Block @entity {
   id: ID!
   number: BigInt!
-  timestamp: BigInt!
-
-  # derive from
-  transactions: [Transaction!]! @derivedFrom(field: "block")
+  timestamp: Timestamp!
 }
 
 type Transaction @entity {
@@ -39,8 +36,8 @@ type Attribute @entity {
 
 type Proposal @entity {
   id: ID!
+  block: Block!
   txHash: String!
-  blockNumber: BigInt!
   type: String!
   proposer: String!
   initialDepositDenom: String!
@@ -72,9 +69,31 @@ type SoftwareUpgradeProposal @entity {
 type Vote @entity {
   id: ID!
   txHash: String!
-  blockNumber: BigInt!
+  block: Block!
   voter: String!
   option: String!
   weight: BigDecimal!
   proposal: Proposal!
 }
+
+#type VoteStats @aggregation(intervals: ["hour", "day"], source: "Vote") {
+# id: ID!
+#  timestamp: Timestamp!
+#  proposal: Proposal!
+#
+#  # Aggregates
+#  yesCount: BigInt!
+#    @aggregate(fn: "count", arg: "case when option =  'Yes' then 1 else 0 end")
+#  noCount: BigInt!
+#    @aggregate(fn: "count", arg: "case when option =  'No' then 1 else 0 end")
+#  abstainCount: BigInt!
+#    @aggregate(
+#      fn: "count"
+#      arg: "case when option =  'Abstain' then 1 else 0 end"
+#    )
+#  noWithVetoCount: BigInt!
+#   @aggregate(
+#    fn: "count"
+#      arg: "case when option =  'NoWithVeto' then 1 else 0 end"
+#    )
+#}

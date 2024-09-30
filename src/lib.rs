@@ -1,3 +1,4 @@
+mod blocks;
 mod client_update;
 mod community_pool_spends;
 mod other_proposals;
