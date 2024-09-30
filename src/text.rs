@@ -1,6 +1,7 @@
 use crate::blocks::insert_block;
 use crate::pb::cosmos::gov::v1beta1::MsgSubmitProposal as MsgSubmitProposalV1Beta1;
 use crate::pb::cosmos::gov::v1beta1::TextProposal;
+use crate::proposal_deposits::insert_deposit;
 use crate::utils::extract_authority;
 use crate::utils::extract_initial_deposit;
 use crate::utils::extract_proposal_id;
@@ -24,7 +25,7 @@ pub fn insert_text_proposal(
 
         let proposal_id = extract_proposal_id(tx_result, clock, tx_hash);
 
-        let (initial_deposit_denom, initial_deposit_amount) = extract_initial_deposit(&msg.initial_deposit);
+        let (deposit_denom, deposit_amount) = extract_initial_deposit(&msg.initial_deposit);
 
         let authority = extract_authority(tx_result);
 
@@ -37,9 +38,17 @@ pub fn insert_text_proposal(
             .set("authority", authority)
             .set("block", &clock.id)
             .set("type", "Text")
-            .set("initialDepositDenom", initial_deposit_denom)
-            .set("initialDepositAmount", initial_deposit_amount)
             .set("title", title)
             .set("description", description);
+
+        insert_deposit(
+            tables,
+            &proposal_id,
+            &deposit_amount,
+            &deposit_denom,
+            proposer,
+            clock,
+            tx_hash,
+        );
     }
 }

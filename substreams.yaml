@@ -29,7 +29,7 @@ modules:
     blockFilter:
       module: index_blocks
       query:
-        string: "event_type:proposal_vote || event_type:submit_proposal"
+        string: "event_type:proposal_vote || event_type:submit_proposal || event_type:proposal_deposit"
     output:
       type: proto:sf.substreams.sink.entity.v1.EntityChanges
 

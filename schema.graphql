@@ -40,14 +40,13 @@ type Proposal @entity {
   txHash: String!
   type: String!
   proposer: String!
-  initialDepositDenom: String!
-  initialDepositAmount: String!
   authority: String!
   title: String!
   description: String!
   metadata: String
   votes: [Vote!]! @derivedFrom(field: "proposal")
   contents: [Content!]! @derivedFrom(field: "proposal")
+  deposits: [Deposit!]! @derivedFrom(field: "proposal")
 }
 
 type Content @entity {
@@ -68,12 +67,22 @@ type SoftwareUpgradeProposal @entity {
 
 type Vote @entity {
   id: ID!
-  txHash: String!
   block: Block!
+  txHash: String!
   voter: String!
   option: String!
   weight: BigDecimal!
   proposal: Proposal!
+}
+
+type Deposit @entity {
+  id: ID!
+  block: Block!
+  txHash: String!
+  proposal: Proposal!
+  amount: String!
+  denom: String!
+  depositor: String!
 }
 
 #type VoteStats @aggregation(intervals: ["hour", "day"], source: "Vote") {

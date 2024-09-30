@@ -13,7 +13,10 @@ fn index_blocks(block: Block) -> Result<Keys, substreams::errors::Error> {
 
         for event in tx_result.events.iter() {
             // Index by event type
-            if event.r#type == "submit_proposal" || event.r#type == "proposal_vote" {
+            if event.r#type == "submit_proposal"
+                || event.r#type == "proposal_vote"
+                || event.r#type == "proposal_deposit"
+            {
                 let event_type_key = format!("event_type:{}", event.r#type);
                 keys.keys.push(event_type_key);
             }
