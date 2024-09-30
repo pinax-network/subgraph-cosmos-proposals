@@ -7,9 +7,15 @@
 - `Votes`
 - `Deposits`
 - `Proposals`
-  - `SoftwareUpgrades`
-  - `ParameterChanges`
-- `GovernanceParameters`
+  - Fully decoded -> own entity
+    - `SoftwareUpgrade`
+  - Fully decoded -> serialized JSON in Content
+    - `ParameterChange`
+    - `CommunityPoolSpend`
+    - `Text`
+    - `ClientUpdate`
+  - Undecoded -> raw value in Content
+    - Every other proposal type from Cosmos-based chains
 
 ## Chains
 
