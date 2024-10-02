@@ -1,4 +1,3 @@
-use std::collections::HashSet;
 use substreams::pb::sf::substreams::index::v1::Keys;
 use substreams_cosmos::Block;
 
