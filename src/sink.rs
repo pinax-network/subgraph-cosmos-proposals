@@ -22,20 +22,7 @@ pub fn graph_out(params: String, clock: Clock, block: Block) -> Result<EntityCha
 
     let mut tables = Tables::new();
 
-    let transactions: Vec<(usize, &TxResults)> = block
-        .tx_results
-        .iter()
-        .enumerate()
-        .filter(|(_, tx_result)| {
-            tx_result.events.iter().any(|event| {
-                event.r#type == "submit_proposal"
-                    || event.r#type == "proposal_vote"
-                    || event.r#type == "proposal_deposit"
-            }) && tx_result.code == 0
-        })
-        .collect();
-
-    for (i, tx_result) in transactions {
+    for (i, tx_result) in block.tx_results.iter().enumerate() {
         let tx_hash = compute_tx_hash(&block.txs[i]);
 
         let tx_as_bytes = block.txs[i].as_slice();

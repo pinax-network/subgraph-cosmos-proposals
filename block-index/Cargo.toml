@@ -1,0 +1,16 @@
+[package]
+name = "cosmos-proposals-block-index"
+edition = "2021"
+version = "0.0.0"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+substreams-cosmos = "0.1"
+substreams = "0.5"
+
+[profile.release]
+lto = true
+opt-level = 's'
+strip = "debuginfo"

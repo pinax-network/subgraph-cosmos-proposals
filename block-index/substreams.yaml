@@ -1,0 +1,30 @@
+specVersion: v0.1.0
+package:
+  name: cosmos_proposals_block_index
+  version: v0.1.0
+  url: https://github.com/pinax-network/substreams-cosmos-proposals
+
+binaries:
+  default:
+    type: wasm/rust-v1
+    file: target/wasm32-unknown-unknown/release/cosmos_proposals_block_index.wasm
+
+modules:
+  - name: index_blocks
+    kind: blockIndex
+    inputs:
+      - source: sf.cosmos.type.v2.Block
+    output:
+      type: proto:sf.substreams.index.v1.Keys
+
+  - name: map_blocks
+    kind: map
+    inputs:
+      - source: sf.cosmos.type.v2.Block
+    blockFilter:
+      module: index_blocks
+      query:
+        string: "event_type:proposal_vote || event_type:submit_proposal || event_type:proposal_deposit"
+        params: false
+    output:
+      type: proto:sf.cosmos.type.v2.Block
