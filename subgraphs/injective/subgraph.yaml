@@ -1,24 +1,40 @@
 specVersion: 1.1.0
 description: Cosmos Software Upgrade Subgraph
-repository: https://github.com/pinax-network/subgraph-cosmos-software-upgrade
+repository: https://github.com/pinax-network/subgraph-cosmos-proposals
 schema:
   file: ../../schema.graphql
 indexerHints:
   prune: never
 dataSources:
   - kind: substreams
-    name: cosmos_software_upgrade
+    name: cosmos_proposals
     network: injective
     source:
       # startBlock: 82182057
       # startBlock: 8982722
       # startBlock: 60343991
       # startBlock: 51589432
+      # startBlock: 21632894
       startBlock: 0
-      #startBlock: 21632894
       package:
         moduleName: graph_out
         file: ../../cosmos-software-upgrade-v0.1.0.spkg
+        # Governance Genesis Parameters as JSON
+        # https://github.com/InjectiveLabs/mainnet-config/blob/master/10001/genesis.json
+        params: '{
+          "deposit_params": {
+            "min_deposit": [{ "denom": "inj", "amount": "500000000000000000000"}],
+            "max_deposit_period": "172800"
+          },
+          "voting_params": {
+            "voting_period": "172800"
+          },
+          "tally_params": {
+            "quorum": "0.334000000000000000",
+            "threshold": "0.500000000000000000",
+            "veto_threshold": "0.334000000000000000"
+          }}'
+
     mapping:
       kind: substreams/graph-entities
       apiVersion: 0.0.5

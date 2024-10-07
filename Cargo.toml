@@ -1,6 +1,6 @@
 [package]
-name = "cosmos_software_upgrade"
-version = "0.1.0"
+name = "cosmos_proposals"
+version = "0.0.0"
 edition = "2021"
 
 [profile.release]
