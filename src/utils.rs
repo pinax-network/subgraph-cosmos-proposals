@@ -54,7 +54,7 @@ pub fn insert_proposal_entity(
         .create_row("Proposal", id)
         .set("txHash", tx_hash)
         .set("block", block)
-        .set("proposalType", proposal_type)
+        .set("type", proposal_type)
         .set("proposer", proposer)
         .set("authority", authority)
         .set("title", title)
