@@ -13,7 +13,7 @@ fn map_blocks(params: String, mut block: Block) -> Result<Block, substreams::err
         tx_result.events.iter().any(|event| {
             event.r#type == "submit_proposal" || event.r#type == "proposal_vote" || event.r#type == "proposal_deposit"
         })
-        // TO-DO: Apply filtering based on `events.attributes`
+        // TO-DO: Apply filtering based on `events.attr`
         // https://github.com/pinax-network/subgraph-cosmos-proposals/issues/9
     });
 

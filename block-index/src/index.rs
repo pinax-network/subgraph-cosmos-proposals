@@ -7,17 +7,11 @@ fn index_blocks(block: Block) -> Result<Keys, substreams::errors::Error> {
     let mut keys = HashSet::new();
 
     for tx_result in block.tx_results.iter() {
-        // only index successful transactions
-        if tx_result.code != 0 {
-            continue;
-        }
-
         for event in tx_result.events.iter() {
+            keys.insert(format!("type:{}", event.r#type));
             event.attributes.iter().for_each(|attr| {
-                keys.insert(format!("event.attribute:{}", attr.key));
-                keys.insert(format!("event.type:{}:{}", event.r#type, attr.key));
+                keys.insert(format!("attr:{}", attr.key));
             });
-            keys.insert(format!("event.type:{}", event.r#type));
         }
     }
     Ok(Keys {
