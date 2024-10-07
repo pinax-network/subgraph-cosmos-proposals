@@ -9,8 +9,8 @@ build:
 .PHONY: deploy
 deploy:
 	graph build
-	graph create --node=http://localhost:8020 cosmos_proposals
-	graph deploy --node=http://localhost:8020 cosmos_proposals
+	graph create --node=http://localhost:8020 injective_proposals
+	graph deploy --node=http://localhost:8020 injective_proposals
 
 .PHONY: publish
 publish:

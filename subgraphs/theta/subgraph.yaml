@@ -1,0 +1,23 @@
+specVersion: 1.1.0
+description: Cosmos Governance Proposals
+repository: https://github.com/pinax-network/subgraph-cosmos-proposals
+schema:
+  file: ../../schema.graphql
+indexerHints:
+  prune: never
+dataSources:
+  - kind: substreams
+    name: theta_proposals
+    network: theta
+    source:
+      startBlock: 0
+      package:
+        moduleName: graph_out
+        file: ../../cosmos-proposals-v0.1.0.spkg
+        # Governance Genesis Parameters as JSON
+        # https://github.com/???
+        params: ''
+
+    mapping:
+      kind: substreams/graph-entities
+      apiVersion: 0.0.5

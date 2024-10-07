@@ -1,5 +1,5 @@
 specVersion: 1.1.0
-description: Cosmos Software Upgrade Subgraph
+description: Cosmos Governance Proposals
 repository: https://github.com/pinax-network/subgraph-cosmos-proposals
 schema:
   file: ../../schema.graphql
@@ -7,7 +7,7 @@ indexerHints:
   prune: never
 dataSources:
   - kind: substreams
-    name: cosmos_proposals
+    name: cosmoshub_proposals
     network: cosmoshub
     source:
       startBlock: 0
@@ -18,16 +18,16 @@ dataSources:
         # https://github.com/cosmos/mainnet/blob/master/genesis/genesis.cosmoshub-2.json
         params: '{
           "deposit_params": {
-          "min_deposit": [{"denom": "uatom", "amount": "512000000"}],
-          "max_deposit_period": "1209600000000000"
+            "min_deposit": [{"denom": "uatom", "amount": "512000000"}],
+            "max_deposit_period": "1209600000000000"
           },
           "voting_params": {
-          "voting_period": "1209600000000000"
+            "voting_period": "1209600000000000"
           },
           "tally_params": {
-          "quorum": "0.400000000000000000",
-          "threshold": "0.500000000000000000",
-          "veto_threshold": "0.334000000000000000"
+            "quorum": "0.400000000000000000",
+            "threshold": "0.500000000000000000",
+            "veto_threshold": "0.334000000000000000"
           }
           }'
 

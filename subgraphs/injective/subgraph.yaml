@@ -1,5 +1,5 @@
 specVersion: 1.1.0
-description: Cosmos Software Upgrade Subgraph
+description: Cosmos Governance Proposals
 repository: https://github.com/pinax-network/subgraph-cosmos-proposals
 schema:
   file: ../../schema.graphql
@@ -23,18 +23,17 @@ dataSources:
         # https://github.com/InjectiveLabs/mainnet-config/blob/master/10001/genesis.json
         params: '{
           "deposit_params": {
-          "min_deposit": [{ "denom": "inj", "amount": "500000000000000000000"}],
-          "max_deposit_period": "172800000000000"
+            "min_deposit": [{ "denom": "inj", "amount": "500000000000000000000"}],
+            "max_deposit_period": "172800000000000"
           },
           "voting_params": {
           "voting_period": "172800000000000"
           },
           "tally_params": {
-          "quorum": "0.334000000000000000",
-          "threshold": "0.500000000000000000",
-          "veto_threshold": "0.334000000000000000"
-          }
-          }'
+            "quorum": "0.334000000000000000",
+            "threshold": "0.500000000000000000",
+            "veto_threshold": "0.334000000000000000"
+          }}'
 
     mapping:
       kind: substreams/graph-entities
