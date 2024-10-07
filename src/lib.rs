@@ -1,6 +1,7 @@
 mod blocks;
 mod client_update;
 mod community_pool_spends;
+mod messages;
 mod other_proposals;
 mod parameter_changes;
 mod pb;
@@ -10,4 +11,5 @@ mod serde_genesis;
 mod sink;
 mod software_upgrades;
 mod text;
+mod transactions;
 mod utils;

@@ -1,10 +1,10 @@
 use prost::Message;
 use prost_types::Any;
-use substreams::{log, pb::substreams::Clock};
+use substreams::pb::substreams::Clock;
 use substreams_cosmos::pb::TxResults;
 use substreams_entity_change::tables::Tables;
 
-use crate::{blocks::insert_block, pb::cosmos::gov::v1beta1::MsgVote, utils::extract_proposal_id};
+use crate::{blocks::insert_block, pb::cosmos::gov::v1beta1::MsgVote};
 
 pub fn push_proposal_vote(tables: &mut Tables, msg: &Any, tx_result: &TxResults, clock: &Clock, tx_hash: &str) {
     let proposal_votes = tx_result.events.iter().filter(|event| event.r#type == "proposal_vote");
