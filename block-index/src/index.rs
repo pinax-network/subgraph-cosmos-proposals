@@ -21,6 +21,9 @@ fn index_blocks(block: Block) -> Result<Keys, substreams::errors::Error> {
             }
         }
     }
+    if !keys.keys.is_empty() {
+        keys.keys.push("cosmos_proposals".to_string());
+    }
 
     Ok(keys)
 }
