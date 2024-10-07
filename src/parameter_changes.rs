@@ -2,7 +2,9 @@ use crate::blocks::insert_block;
 use crate::pb::cosmos::gov::v1beta1::MsgSubmitProposal;
 use crate::pb::cosmos::params::v1beta1::ParameterChangeProposal;
 use crate::proposal_deposits::insert_deposit;
-use crate::utils::{extract_authority, extract_initial_deposit, extract_proposal_id};
+use crate::utils::{
+    extract_authority, extract_initial_deposit, extract_proposal_id, insert_content_entity_json, insert_proposal_entity,
+};
 use prost_types::Any;
 use substreams::pb::substreams::Clock;
 use substreams_cosmos::pb::TxResults;
@@ -18,6 +20,7 @@ pub fn insert_parameter_change_proposal(
 ) {
     if let Ok(parameter_change_proposal) = <ParameterChangeProposal as prost::Message>::decode(content.value.as_slice())
     {
+        let type_url = content.type_url.as_str();
         let proposer = msg.proposer.as_str();
         let (deposit_denom, deposit_amount) = extract_initial_deposit(&msg.initial_deposit);
         let title = parameter_change_proposal.title.as_str();
@@ -29,15 +32,18 @@ pub fn insert_parameter_change_proposal(
 
         insert_block(tables, clock);
 
-        tables
-            .create_row("Proposal", &proposal_id)
-            .set("txHash", tx_hash)
-            .set("block", &clock.id)
-            .set("type", "ParameterChange")
-            .set("proposer", proposer)
-            .set("authority", authority)
-            .set("title", title)
-            .set("description", description);
+        insert_proposal_entity(
+            tables,
+            &proposal_id,
+            tx_hash,
+            &clock.id,
+            "ParameterChange",
+            proposer,
+            authority,
+            title,
+            description,
+            "",
+        );
 
         insert_deposit(
             tables,
@@ -49,10 +55,6 @@ pub fn insert_parameter_change_proposal(
             tx_hash,
         );
 
-        tables
-            .create_row("Content", &proposal_id)
-            .set("proposal", &proposal_id)
-            .set("typeUrl", "/cosmos.params.v1beta1.ParameterChangeProposal")
-            .set("jsonData", data);
+        insert_content_entity_json(tables, &proposal_id, type_url, &data);
     }
 }

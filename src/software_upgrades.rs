@@ -8,7 +8,7 @@ use crate::pb::cosmos::gov::v1::MsgSubmitProposal as MsgSubmitProposalV1;
 use crate::pb::cosmos::gov::v1beta1::MsgSubmitProposal as MsgSubmitProposalV1Beta1;
 use crate::pb::cosmos::upgrade::v1beta1::{MsgSoftwareUpgrade, SoftwareUpgradeProposal};
 use crate::proposal_deposits::insert_deposit;
-use crate::utils::{extract_authority, extract_initial_deposit, extract_proposal_id};
+use crate::utils::{extract_authority, extract_initial_deposit, extract_proposal_id, insert_proposal_entity};
 
 pub fn insert_message_software_upgrade(
     tables: &mut Tables,
@@ -40,16 +40,18 @@ pub fn insert_message_software_upgrade(
         insert_block(tables, clock);
 
         // Create Proposal entity
-        tables
-            .create_row("Proposal", &proposal_id)
-            .set("txHash", tx_hash)
-            .set("block", &clock.id)
-            .set("type", "SoftwareUpgrade")
-            .set("proposer", proposer)
-            .set("authority", authority)
-            .set("title", title)
-            .set("description", summary)
-            .set("metadata", metadata);
+        insert_proposal_entity(
+            tables,
+            &proposal_id,
+            tx_hash,
+            &clock.id,
+            "SoftwareUpgrade",
+            proposer,
+            authority,
+            title,
+            summary,
+            metadata,
+        );
 
         insert_deposit(
             tables,
@@ -98,16 +100,18 @@ pub fn insert_software_upgrade_proposal(
         insert_block(tables, clock);
 
         // Create Proposal entity
-        tables
-            .create_row("Proposal", &proposal_id)
-            .set("txHash", tx_hash)
-            .set("block", &clock.id)
-            .set("type", "SoftwareUpgrade")
-            .set("proposer", proposer)
-            .set("authority", authority)
-            .set("title", title)
-            .set("description", description)
-            .set("metadata", "");
+        insert_proposal_entity(
+            tables,
+            &proposal_id,
+            tx_hash,
+            &clock.id,
+            "SoftwareUpgrade",
+            proposer,
+            authority,
+            title,
+            description,
+            "",
+        );
 
         insert_deposit(
             tables,

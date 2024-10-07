@@ -10,7 +10,10 @@ use crate::{
         v1::MsgSubmitProposal as MsgSubmitProposalV1, v1beta1::MsgSubmitProposal as MsgSubmitProposalV1Beta1,
     },
     proposal_deposits::insert_deposit,
-    utils::{extract_authority, extract_initial_deposit, extract_proposal_id},
+    utils::{
+        extract_authority, extract_initial_deposit, extract_proposal_id, insert_content_entity_raw_data,
+        insert_proposal_entity,
+    },
 };
 
 pub fn insert_other_proposal_v1(
@@ -91,19 +94,22 @@ pub fn insert_other_proposal_v1beta1(
         description = partially_decoded.description;
     }
 
-    let raw_data = Hex::encode(content.value.as_slice());
+    let value = Hex::encode(content.value.as_slice());
 
     insert_block(tables, clock);
 
-    tables
-        .create_row("Proposal", &proposal_id)
-        .set("txHash", tx_hash)
-        .set("block", &clock.id)
-        .set("type", "Undecoded Proposal")
-        .set("proposer", proposer)
-        .set("authority", authority)
-        .set("title", title)
-        .set("description", description);
+    insert_proposal_entity(
+        tables,
+        &proposal_id,
+        tx_hash,
+        &clock.id,
+        "Undecoded Proposal",
+        proposer,
+        authority,
+        title.as_str(),
+        description.as_str(),
+        "",
+    );
 
     insert_deposit(
         tables,
@@ -115,11 +121,7 @@ pub fn insert_other_proposal_v1beta1(
         tx_hash,
     );
 
-    tables
-        .create_row("Content", &proposal_id)
-        .set("proposal", &proposal_id)
-        .set("typeUrl", type_url)
-        .set("value", raw_data);
+    insert_content_entity_raw_data(tables, &proposal_id, type_url, value.as_str());
 }
 
 #[allow(clippy::derive_partial_eq_without_eq)]

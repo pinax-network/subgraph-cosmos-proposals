@@ -3,7 +3,9 @@ use crate::pb::cosmos::distribution::v1beta1::{CommunityPoolSpendProposal, MsgCo
 use crate::pb::cosmos::gov::v1::MsgSubmitProposal as MsgSubmitProposalV1;
 use crate::pb::cosmos::gov::v1beta1::MsgSubmitProposal as MsgSubmitProposalV1Beta1;
 use crate::proposal_deposits::insert_deposit;
-use crate::utils::{extract_authority, extract_initial_deposit, extract_proposal_id};
+use crate::utils::{
+    extract_authority, extract_initial_deposit, extract_proposal_id, insert_content_entity_json, insert_proposal_entity,
+};
 use prost_types::Any;
 use substreams::pb::substreams::Clock;
 use substreams_cosmos::pb::TxResults;
@@ -18,6 +20,7 @@ pub fn insert_msg_community_pool_spend(
     tx_hash: &str,
 ) {
     if let Ok(msg_community_pool_spend) = <MsgCommunityPoolSpend as prost::Message>::decode(content.value.as_slice()) {
+        let type_url = content.type_url.as_str();
         let proposer = msg.proposer.as_str();
         let (deposit_denom, deposit_amount) = extract_initial_deposit(&msg.initial_deposit);
 
@@ -44,16 +47,18 @@ pub fn insert_msg_community_pool_spend(
 
         insert_block(tables, clock);
 
-        tables
-            .create_row("Proposal", &proposal_id)
-            .set("txHash", tx_hash)
-            .set("block", &clock.id)
-            .set("type", "CommunityPoolSpend")
-            .set("proposer", proposer)
-            .set("authority", authority)
-            .set("title", title)
-            .set("description", summary)
-            .set("metadata", metadata);
+        insert_proposal_entity(
+            tables,
+            &proposal_id,
+            tx_hash,
+            &clock.id,
+            "CommunityPoolSpend",
+            proposer,
+            authority,
+            title,
+            summary,
+            metadata,
+        );
 
         insert_deposit(
             tables,
@@ -65,11 +70,7 @@ pub fn insert_msg_community_pool_spend(
             tx_hash,
         );
 
-        tables
-            .create_row("Content", &proposal_id)
-            .set("typeUrl", "/cosmos.distribution.v1beta1.MsgCommunityPoolSpend")
-            .set("jsonData", data)
-            .set("proposal", &proposal_id);
+        insert_content_entity_json(tables, &proposal_id, type_url, data.as_str());
     }
 }
 
@@ -104,15 +105,19 @@ pub fn insert_community_pool_spend_proposal(
         .unwrap_or_default();
 
         insert_block(tables, clock);
-        tables
-            .create_row("Proposal", &proposal_id)
-            .set("txHash", tx_hash)
-            .set("block", &clock.id)
-            .set("type", "CommunityPoolSpend")
-            .set("title", title)
-            .set("description", description)
-            .set("proposer", proposer)
-            .set("authority", authority);
+
+        insert_proposal_entity(
+            tables,
+            &proposal_id,
+            tx_hash,
+            &clock.id,
+            "CommunityPoolSpend",
+            proposer,
+            authority,
+            title,
+            description,
+            "",
+        );
 
         insert_deposit(
             tables,
@@ -124,10 +129,6 @@ pub fn insert_community_pool_spend_proposal(
             tx_hash,
         );
 
-        tables
-            .create_row("Content", &proposal_id)
-            .set("proposal", &proposal_id)
-            .set("typeUrl", "/cosmos.gov.v1beta1.CommunityPoolSpendProposal")
-            .set("jsonData", data.as_str());
+        insert_content_entity_json(tables, &proposal_id, content.type_url.as_str(), data.as_str());
     }
 }

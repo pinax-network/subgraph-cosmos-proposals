@@ -5,6 +5,7 @@ use crate::proposal_deposits::insert_deposit;
 use crate::utils::extract_authority;
 use crate::utils::extract_initial_deposit;
 use crate::utils::extract_proposal_id;
+use crate::utils::insert_proposal_entity;
 use prost_types::Any;
 use substreams::pb::substreams::Clock;
 use substreams_cosmos::pb::TxResults;
@@ -31,15 +32,18 @@ pub fn insert_text_proposal(
 
         insert_block(tables, clock);
 
-        tables
-            .create_row("Proposal", &proposal_id)
-            .set("txHash", tx_hash)
-            .set("proposer", proposer)
-            .set("authority", authority)
-            .set("block", &clock.id)
-            .set("type", "Text")
-            .set("title", title)
-            .set("description", description);
+        insert_proposal_entity(
+            tables,
+            &proposal_id,
+            tx_hash,
+            &clock.id,
+            "Text",
+            proposer,
+            authority,
+            title,
+            description,
+            "",
+        );
 
         insert_deposit(
             tables,

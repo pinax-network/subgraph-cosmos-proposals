@@ -10,7 +10,10 @@ use crate::{
         ibc::core::client::v1::ClientUpdateProposal,
     },
     proposal_deposits::insert_deposit,
-    utils::{extract_authority, extract_initial_deposit, extract_proposal_id},
+    utils::{
+        extract_authority, extract_initial_deposit, extract_proposal_id, insert_content_entity_json,
+        insert_proposal_entity,
+    },
 };
 
 pub fn insert_client_update_proposal(
@@ -22,6 +25,7 @@ pub fn insert_client_update_proposal(
     tx_hash: &str,
 ) {
     if let Ok(client_update_proposal) = <ClientUpdateProposal as prost::Message>::decode(content.value.as_slice()) {
+        let type_url = content.type_url.as_str();
         let proposer = msg.proposer.as_str();
         let title = client_update_proposal.title.as_str();
         let description = client_update_proposal.description.as_str();
@@ -41,15 +45,18 @@ pub fn insert_client_update_proposal(
 
         insert_block(tables, clock);
 
-        tables
-            .create_row("Proposal", &proposal_id)
-            .set("txHash", tx_hash)
-            .set("block", &clock.id)
-            .set("type", "ClientUpdate")
-            .set("title", title)
-            .set("description", description)
-            .set("proposer", proposer)
-            .set("authority", authority);
+        insert_proposal_entity(
+            tables,
+            &proposal_id,
+            tx_hash,
+            &clock.id,
+            "ClientUpdate",
+            proposer,
+            authority,
+            title,
+            description,
+            "",
+        );
 
         insert_deposit(
             tables,
@@ -61,10 +68,6 @@ pub fn insert_client_update_proposal(
             tx_hash,
         );
 
-        tables
-            .create_row("Content", &proposal_id)
-            .set("proposal", &proposal_id)
-            .set("typeUrl", &content.type_url)
-            .set("jsonData", data.to_string());
+        insert_content_entity_json(tables, &proposal_id, type_url, data.to_string().as_str());
     }
 }
