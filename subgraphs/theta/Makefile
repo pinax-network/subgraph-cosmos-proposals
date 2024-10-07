@@ -19,4 +19,4 @@ publish:
 
 .PHONY: gui
 gui:
-	substreams gui ../../substreams.yaml -e theta.substreams.pinax.network:443  graph_out -s -1000
+	substreams gui ../../substreams.yaml -e theta.substreams.pinax.network:443 graph_out -s 2 -t 0 --production-mode
