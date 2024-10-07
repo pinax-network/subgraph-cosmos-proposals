@@ -1,5 +1,5 @@
 [package]
-name = "cosmos-proposals-block-index"
+name = "cosmos-block-index"
 edition = "2021"
 version = "0.0.0"
 

@@ -7,7 +7,7 @@ package:
 
 imports:
   entity_changes: https://github.com/streamingfast/substreams-sink-entity-changes/releases/download/v1.3.2/substreams-sink-entity-changes-v1.3.2.spkg
-  block_index: ./block-index/cosmos-proposals-block-index-v0.1.0.spkg
+  block_index: ./block-index/cosmos-block-index-v0.1.0.spkg
 
 binaries:
   default:
@@ -20,12 +20,12 @@ modules:
     blockFilter:
       module: block_index:index_blocks
       query:
-        string: "cosmos_proposals"
+        string: "event.type:proposal_vote || event.type:submit_proposal || event.type:proposal_deposit"
         params: false
     inputs:
       - params: string
       - source: sf.substreams.v1.Clock
-      - map: block_index:map_blocks
+      - source: sf.cosmos.type.v2.Block
     output:
       type: proto:sf.substreams.sink.entity.v1.EntityChanges
 
