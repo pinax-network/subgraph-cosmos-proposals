@@ -32,4 +32,4 @@ modules:
 params:
   # Governance Genesis Parameters as JSON
   # See /subgraphs/injective/subgraph.yaml for an example
-  graph_out: ''
+  graph_out: ""

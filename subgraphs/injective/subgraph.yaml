@@ -18,7 +18,7 @@ dataSources:
       startBlock: 0
       package:
         moduleName: graph_out
-        file: ../../cosmos-software-upgrade-v0.1.0.spkg
+        file: ../../cosmos-proposals-v0.1.0.spkg
         # Governance Genesis Parameters as JSON
         # https://github.com/InjectiveLabs/mainnet-config/blob/master/10001/genesis.json
         params: '{
