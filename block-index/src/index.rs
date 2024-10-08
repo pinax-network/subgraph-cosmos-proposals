@@ -1,6 +1,9 @@
 use std::collections::HashSet;
 use substreams::{matches_keys_in_parsed_expr, pb::sf::substreams::index::v1::Keys};
-use substreams_cosmos::{pb::TxResults, Block};
+use substreams_cosmos::{
+    pb::{Event, TxResults},
+    Block,
+};
 
 #[substreams::handlers::map]
 fn index_blocks(block: Block) -> Result<Keys, substreams::errors::Error> {
@@ -19,11 +22,18 @@ pub fn collect_transaction_keys(tx_result: &TxResults) -> Vec<String> {
     let mut keys = Vec::new();
 
     for event in tx_result.events.iter() {
-        keys.push(format!("type:{}", event.r#type));
-        event.attributes.iter().for_each(|attr| {
-            keys.push(format!("attr:{}", attr.key));
-        });
+        keys.extend(collect_event_keys(event));
     }
+    keys
+}
+
+pub fn collect_event_keys(event: &Event) -> Vec<String> {
+    let mut keys = Vec::new();
+
+    keys.push(format!("type:{}", event.r#type));
+    event.attributes.iter().for_each(|attr| {
+        keys.push(format!("attr:{}", attr.key));
+    });
     keys
 }
 

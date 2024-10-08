@@ -8,6 +8,10 @@ build:
 	substreams pack
 	substreams info
 
+.PHONY: cache
+cache:
+	substreams gui . -e mainnet.injective.streamingfast.io:443 map_blocks -s 82182057 -t 0 --production-mode
+
 .PHONY: gui
 gui:
-	substreams gui . -e mainnet.injective.streamingfast.io:443 index_blocks -s -1000 -t 0
+	substreams gui . -e mainnet.injective.streamingfast.io:443 map_blocks -s 82182057
