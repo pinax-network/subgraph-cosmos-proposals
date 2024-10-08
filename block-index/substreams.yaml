@@ -34,4 +34,6 @@ modules:
       type: proto:sf.cosmos.type.v2.Block
 
 params:
+  # Block Filter only Governance proposals events
+  # improves Substreams syncing performance when using `--production-mode`
   map_blocks: "type:proposal_vote || type:submit_proposal || type:proposal_deposit"

@@ -17,11 +17,6 @@ binaries:
 modules:
   - name: graph_out
     kind: map
-    blockFilter:
-      module: block_index:index_blocks
-      query:
-        string: "type:proposal_vote || type:submit_proposal || type:proposal_deposit"
-        params: false
     inputs:
       - params: string
       - source: sf.substreams.v1.Clock
@@ -32,5 +27,9 @@ modules:
 params:
   # Governance Genesis Parameters as JSON
   # See /subgraphs/injective/subgraph.yaml for an example
+  # Only applied on block number 1
   graph_out: ""
+
+  # Block Filter only Governance proposals events
+  # improves Substreams syncing performance when using `--production-mode`
   block_index:map_blocks: "type:proposal_vote || type:submit_proposal || type:proposal_deposit"
