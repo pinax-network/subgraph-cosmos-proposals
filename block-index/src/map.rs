@@ -53,10 +53,5 @@ fn map_blocks(params: String, mut block: Block) -> Result<Block, substreams::err
             .retain(|event| is_match(collect_event_keys(event), &params));
     }
 
-    // // remove events from tx_results
-    // block
-    //     .events
-    //     .retain(|event| is_match(collect_event_keys(event), &params));
-
     Ok(block)
 }
