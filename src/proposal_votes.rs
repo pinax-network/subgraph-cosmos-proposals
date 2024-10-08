@@ -4,7 +4,7 @@ use substreams::pb::substreams::Clock;
 use substreams_cosmos::pb::TxResults;
 use substreams_entity_change::tables::Tables;
 
-use crate::{blocks::insert_block, pb::cosmos::gov::v1beta1::MsgVote};
+use crate::{blocks::insert_order_by, pb::cosmos::gov::v1beta1::MsgVote};
 
 pub fn push_proposal_vote(tables: &mut Tables, msg: &Any, tx_result: &TxResults, clock: &Clock, tx_hash: &str) {
     let proposal_votes = tx_result.events.iter().filter(|event| event.r#type == "proposal_vote");
@@ -81,18 +81,17 @@ pub fn push_proposal_vote(tables: &mut Tables, msg: &Any, tx_result: &TxResults,
             })
             .expect("Failed to parse options and weights for the proposal vote");
 
-        insert_block(tables, clock);
-
         for (option, weight) in options_weights {
             let vote_id = format!("{}:{}:{}", tx_hash, &proposal_id, option);
-            tables
+            let row = tables
                 .create_row("Vote", &vote_id)
                 .set("txHash", tx_hash)
-                .set("block", &clock.id)
                 .set("voter", &voter)
                 .set("option", &option)
                 .set_bigdecimal("weight", &weight)
                 .set("proposal", &proposal_id);
+
+            insert_order_by(row, clock);
         }
     }
 }

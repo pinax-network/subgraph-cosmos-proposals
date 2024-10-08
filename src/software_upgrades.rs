@@ -3,7 +3,7 @@ use substreams::pb::substreams::Clock;
 use substreams_cosmos::pb::TxResults;
 use substreams_entity_change::tables::Tables;
 
-use crate::blocks::insert_block;
+use crate::blocks::insert_order_by;
 use crate::pb::cosmos::gov::v1::MsgSubmitProposal as MsgSubmitProposalV1;
 use crate::pb::cosmos::gov::v1beta1::MsgSubmitProposal as MsgSubmitProposalV1Beta1;
 use crate::pb::cosmos::upgrade::v1beta1::{MsgSoftwareUpgrade, SoftwareUpgradeProposal};
@@ -37,14 +37,12 @@ pub fn insert_message_software_upgrade(
         // So we need to filter the events and get the proposal_id from the correct one
         let proposal_id = extract_proposal_id(tx_result, clock, tx_hash);
 
-        insert_block(tables, clock);
-
         // Create Proposal entity
         insert_proposal_entity(
             tables,
             &proposal_id,
             tx_hash,
-            &clock.id,
+            clock,
             "SoftwareUpgrade",
             proposer,
             authority,
@@ -97,14 +95,12 @@ pub fn insert_software_upgrade_proposal(
 
         let proposal_id = extract_proposal_id(tx_result, clock, tx_hash);
 
-        insert_block(tables, clock);
-
         // Create Proposal entity
         insert_proposal_entity(
             tables,
             &proposal_id,
             tx_hash,
-            &clock.id,
+            clock,
             "SoftwareUpgrade",
             proposer,
             authority,
