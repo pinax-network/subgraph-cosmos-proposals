@@ -1,36 +1,41 @@
 use substreams_cosmos::Block;
 
+use crate::index::{collect_transaction_keys, is_match};
+
 #[substreams::handlers::map]
 fn map_blocks(params: String, mut block: Block) -> Result<Block, substreams::errors::Error> {
     // Filter both tx_results and txs based on the same criteria
     let mut retained_indices = Vec::new();
 
     for (index, tx_result) in block.tx_results.iter().enumerate() {
-        if tx_result.code == 0
-            && tx_result.events.iter().any(|event| {
-                event.r#type == "submit_proposal"
-                    || event.r#type == "proposal_vote"
-                    || event.r#type == "proposal_deposit"
-            })
-        {
+        // only index successful transactions
+        if tx_result.code != 0 {
+            continue;
+        };
+        // transaction keys must match event type or attributes based on provided params
+        let keys = collect_transaction_keys(tx_result);
+        if is_match(keys, &params) {
             retained_indices.push(index);
         }
     }
 
-    // Retain tx_results
-    block.tx_results = retained_indices
-        .iter()
-        .map(|&index| block.tx_results[index].clone())
+    // Retain only the tx_results at the retained indices
+    block.tx_results = block
+        .tx_results
+        .into_iter()
+        .enumerate()
+        .filter(|(index, _)| retained_indices.contains(index))
+        .map(|(_, tx_result)| tx_result)
         .collect();
 
-    // Retain txs
-    block.txs = retained_indices.iter().map(|&index| block.txs[index].clone()).collect();
-
-    // TO-DO: apply retain using `params`
-    // https://github.com/pinax-network/subgraph-cosmos-proposals/issues/4
-
-    // TO-DO: Apply filtering based on `events.attr`
-    // https://github.com/pinax-network/subgraph-cosmos-proposals/issues/9
+    // Retain only the txs at the retained indices
+    block.txs = block
+        .txs
+        .into_iter()
+        .enumerate()
+        .filter(|(index, _)| retained_indices.contains(index))
+        .map(|(_, tx)| tx)
+        .collect();
 
     Ok(block)
 }
