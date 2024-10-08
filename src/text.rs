@@ -1,4 +1,4 @@
-use crate::blocks::insert_block;
+use crate::blocks::insert_order_by;
 use crate::pb::cosmos::gov::v1beta1::MsgSubmitProposal as MsgSubmitProposalV1Beta1;
 use crate::pb::cosmos::gov::v1beta1::TextProposal;
 use crate::proposal_deposits::insert_deposit;
@@ -30,13 +30,11 @@ pub fn insert_text_proposal(
 
         let authority = extract_authority(tx_result);
 
-        insert_block(tables, clock);
-
         insert_proposal_entity(
             tables,
             &proposal_id,
             tx_hash,
-            &clock.id,
+            clock,
             "Text",
             proposer,
             authority,

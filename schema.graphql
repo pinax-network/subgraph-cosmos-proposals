@@ -36,7 +36,9 @@ type Attribute @entity {
 
 type Proposal @entity {
   id: ID!
-  block: Block!
+  blockNumber: BigInt!
+  timestamp: Timestamp!
+  blockDate: String!
   txHash: String!
   type: String!
   proposer: String!
@@ -67,7 +69,9 @@ type SoftwareUpgradeProposal @entity {
 
 type Vote @entity {
   id: ID!
-  block: Block!
+  blockNumber: BigInt!
+  timestamp: Timestamp!
+  blockDate: String!
   txHash: String!
   voter: String!
   option: String!
@@ -77,7 +81,9 @@ type Vote @entity {
 
 type Deposit @entity {
   id: ID!
-  block: Block!
+  blockNumber: BigInt!
+  timestamp: Timestamp!
+  blockDate: String!
   txHash: String!
   proposal: Proposal!
   amount: String!

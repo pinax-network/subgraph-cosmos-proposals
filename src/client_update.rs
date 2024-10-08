@@ -4,7 +4,7 @@ use substreams_cosmos::pb::TxResults;
 use substreams_entity_change::tables::Tables;
 
 use crate::{
-    blocks::insert_block,
+    blocks::insert_order_by,
     pb::{
         cosmos::gov::v1beta1::MsgSubmitProposal as MsgSubmitProposalV1Beta1,
         ibc::core::client::v1::ClientUpdateProposal,
@@ -43,13 +43,11 @@ pub fn insert_client_update_proposal(
 
         let proposal_id = extract_proposal_id(tx_result, clock, tx_hash);
 
-        insert_block(tables, clock);
-
         insert_proposal_entity(
             tables,
             &proposal_id,
             tx_hash,
-            &clock.id,
+            clock,
             "ClientUpdate",
             proposer,
             authority,

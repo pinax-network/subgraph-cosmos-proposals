@@ -1,4 +1,4 @@
-use crate::blocks::insert_block;
+use crate::blocks::insert_order_by;
 use crate::pb::cosmos::gov::v1beta1::MsgSubmitProposal;
 use crate::pb::cosmos::params::v1beta1::ParameterChangeProposal;
 use crate::proposal_deposits::insert_deposit;
@@ -30,13 +30,11 @@ pub fn insert_parameter_change_proposal(
         let data = serde_json::to_string(&serde_json::json!({"changes": parameter_change_proposal.changes}))
             .unwrap_or_default();
 
-        insert_block(tables, clock);
-
         insert_proposal_entity(
             tables,
             &proposal_id,
             tx_hash,
-            &clock.id,
+            clock,
             "ParameterChange",
             proposer,
             authority,

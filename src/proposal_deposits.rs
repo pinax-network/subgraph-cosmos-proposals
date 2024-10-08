@@ -3,7 +3,7 @@ use prost_types::Any;
 use substreams::pb::substreams::Clock;
 use substreams_entity_change::tables::Tables;
 
-use crate::{pb::cosmos::gov::v1beta1::MsgDeposit, utils::extract_initial_deposit};
+use crate::{blocks::insert_order_by, pb::cosmos::gov::v1beta1::MsgDeposit, utils::extract_initial_deposit};
 
 pub fn insert_deposit(
     tables: &mut Tables,
@@ -16,14 +16,15 @@ pub fn insert_deposit(
 ) {
     let id = format!("{}-{}", proposal_id, tx_hash);
 
-    tables
+    let row = tables
         .create_row("Deposit", &id)
-        .set("block", &clock.id)
         .set("txHash", tx_hash)
         .set("proposal", proposal_id)
         .set("amount", amount)
         .set("denom", denom)
         .set("depositor", depositor);
+
+    insert_order_by(row, clock);
 }
 
 pub fn insert_deposit_undecoded(tables: &mut Tables, msg: &Any, clock: &Clock, tx_hash: &str) {
