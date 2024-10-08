@@ -3,7 +3,6 @@ use substreams::pb::substreams::Clock;
 use substreams_cosmos::pb::TxResults;
 use substreams_entity_change::tables::Tables;
 
-use crate::blocks::insert_order_by;
 use crate::pb::cosmos::gov::v1::MsgSubmitProposal as MsgSubmitProposalV1;
 use crate::pb::cosmos::gov::v1beta1::MsgSubmitProposal as MsgSubmitProposalV1Beta1;
 use crate::pb::cosmos::upgrade::v1beta1::{MsgSoftwareUpgrade, SoftwareUpgradeProposal};

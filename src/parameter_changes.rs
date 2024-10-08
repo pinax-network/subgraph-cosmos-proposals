@@ -1,4 +1,3 @@
-use crate::blocks::insert_order_by;
 use crate::pb::cosmos::gov::v1beta1::MsgSubmitProposal;
 use crate::pb::cosmos::params::v1beta1::ParameterChangeProposal;
 use crate::proposal_deposits::insert_deposit;

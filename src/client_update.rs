@@ -4,7 +4,6 @@ use substreams_cosmos::pb::TxResults;
 use substreams_entity_change::tables::Tables;
 
 use crate::{
-    blocks::insert_order_by,
     pb::{
         cosmos::gov::v1beta1::MsgSubmitProposal as MsgSubmitProposalV1Beta1,
         ibc::core::client::v1::ClientUpdateProposal,

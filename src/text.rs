@@ -1,4 +1,3 @@
-use crate::blocks::insert_order_by;
 use crate::pb::cosmos::gov::v1beta1::MsgSubmitProposal as MsgSubmitProposalV1Beta1;
 use crate::pb::cosmos::gov::v1beta1::TextProposal;
 use crate::proposal_deposits::insert_deposit;
