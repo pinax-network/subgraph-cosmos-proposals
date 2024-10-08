@@ -2,12 +2,13 @@ use crate::content::insert_content_entity_json;
 use crate::deposits::insert_deposit;
 use crate::pb::cosmos::gov::v1beta1::MsgSubmitProposal;
 use crate::pb::cosmos::params::v1beta1::ParameterChangeProposal;
-use crate::proposals::insert_proposal_entity;
 use crate::utils::{extract_authority, extract_initial_deposit, extract_proposal_id};
 use prost_types::Any;
 use substreams::pb::substreams::Clock;
 use substreams_cosmos::pb::TxResults;
 use substreams_entity_change::tables::Tables;
+
+use super::proposals::insert_proposal_entity;
 
 pub fn insert_parameter_change_proposal(
     tables: &mut Tables,

@@ -10,9 +10,10 @@ use crate::{
         cosmos::gov::v1beta1::MsgSubmitProposal as MsgSubmitProposalV1Beta1,
         ibc::core::client::v1::ClientUpdateProposal,
     },
-    proposals::insert_proposal_entity,
     utils::{extract_authority, extract_initial_deposit, extract_proposal_id},
 };
+
+use super::proposals::insert_proposal_entity;
 
 pub fn insert_client_update_proposal(
     tables: &mut Tables,

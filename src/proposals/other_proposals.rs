@@ -10,9 +10,10 @@ use crate::{
     pb::cosmos::gov::{
         v1::MsgSubmitProposal as MsgSubmitProposalV1, v1beta1::MsgSubmitProposal as MsgSubmitProposalV1Beta1,
     },
-    proposals::insert_proposal_entity,
     utils::{extract_authority, extract_initial_deposit, extract_proposal_id},
 };
+
+use super::proposals::insert_proposal_entity;
 
 pub fn insert_other_proposal_v1(
     tables: &mut Tables,
