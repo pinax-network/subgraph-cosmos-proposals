@@ -25,7 +25,12 @@ fn map_blocks(params: String, mut block: Block) -> Result<Block, substreams::err
         .into_iter()
         .enumerate()
         .filter(|(index, _)| retained_indices.contains(index))
-        .map(|(_, tx_result)| tx_result)
+        .map(|(_, mut tx_result)| {
+            tx_result
+                .events
+                .retain(|event| is_match(collect_event_keys(event), &params));
+            tx_result
+        })
         .collect();
 
     // Retain only the txs at the retained indices
@@ -36,6 +41,17 @@ fn map_blocks(params: String, mut block: Block) -> Result<Block, substreams::err
         .filter(|(index, _)| retained_indices.contains(index))
         .map(|(_, tx)| tx)
         .collect();
+
+    // Retain block events based on params
+    block
+        .events
+        .retain(|event| is_match(collect_event_keys(event), &params));
+
+    for tx_result in block.tx_results.iter_mut() {
+        tx_result
+            .events
+            .retain(|event| is_match(collect_event_keys(event), &params));
+    }
 
     // // remove events from tx_results
     // block

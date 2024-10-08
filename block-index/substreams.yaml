@@ -6,7 +6,7 @@ package:
 
 protobuf:
   descriptorSets:
-  - localPath: generated-buf-build.binpb
+    - localPath: generated-buf-build.binpb
 
 binaries:
   default:
