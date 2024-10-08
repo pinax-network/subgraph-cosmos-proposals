@@ -14,7 +14,6 @@ rpc-cache
 localdata
 *.spkg
 *.parquet
-!block-index/*.spkg
 
 ### VisualStudioCode template
 .vscode/*
@@ -828,3 +827,4 @@ adapters/**/*.jsonl
 # Sublime Text
 *.sublime*
 .substreams.env
+block-index/cosmos-block-index-v0.1.0.spkg
