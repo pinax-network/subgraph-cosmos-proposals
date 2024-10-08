@@ -4,7 +4,7 @@ use substreams::pb::substreams::Clock;
 use substreams_cosmos::pb::TxResults;
 use substreams_entity_change::tables::Tables;
 
-use crate::{blocks::insert_order_by, pb::cosmos::gov::v1beta1::MsgVote};
+use crate::{order_by::insert_order_by, pb::cosmos::gov::v1beta1::MsgVote};
 
 pub fn push_proposal_vote(tables: &mut Tables, msg: &Any, tx_result: &TxResults, clock: &Clock, tx_hash: &str) {
     let proposal_votes = tx_result.events.iter().filter(|event| event.r#type == "proposal_vote");

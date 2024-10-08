@@ -5,14 +5,13 @@ use substreams_cosmos::pb::TxResults;
 use substreams_entity_change::tables::Tables;
 
 use crate::{
+    content::insert_content_entity_raw_data,
     pb::cosmos::gov::{
         v1::MsgSubmitProposal as MsgSubmitProposalV1, v1beta1::MsgSubmitProposal as MsgSubmitProposalV1Beta1,
     },
     proposal_deposits::insert_deposit,
-    utils::{
-        extract_authority, extract_initial_deposit, extract_proposal_id, insert_content_entity_raw_data,
-        insert_proposal_entity,
-    },
+    proposals::insert_proposal_entity,
+    utils::{extract_authority, extract_initial_deposit, extract_proposal_id},
 };
 
 pub fn insert_other_proposal_v1(

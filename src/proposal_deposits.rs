@@ -3,7 +3,7 @@ use prost_types::Any;
 use substreams::pb::substreams::Clock;
 use substreams_entity_change::tables::Tables;
 
-use crate::{blocks::insert_order_by, pb::cosmos::gov::v1beta1::MsgDeposit, utils::extract_initial_deposit};
+use crate::{order_by::insert_order_by, pb::cosmos::gov::v1beta1::MsgDeposit, utils::extract_initial_deposit};
 
 pub fn insert_deposit(
     tables: &mut Tables,

@@ -7,7 +7,8 @@ use crate::pb::cosmos::gov::v1::MsgSubmitProposal as MsgSubmitProposalV1;
 use crate::pb::cosmos::gov::v1beta1::MsgSubmitProposal as MsgSubmitProposalV1Beta1;
 use crate::pb::cosmos::upgrade::v1beta1::{MsgSoftwareUpgrade, SoftwareUpgradeProposal};
 use crate::proposal_deposits::insert_deposit;
-use crate::utils::{extract_authority, extract_initial_deposit, extract_proposal_id, insert_proposal_entity};
+use crate::proposals::insert_proposal_entity;
+use crate::utils::{extract_authority, extract_initial_deposit, extract_proposal_id};
 
 pub fn insert_message_software_upgrade(
     tables: &mut Tables,

@@ -1,12 +1,14 @@
-mod blocks;
 mod client_update;
 mod community_pool_spends;
+mod content;
 mod messages;
+mod order_by;
 mod other_proposals;
 mod parameter_changes;
 mod pb;
 mod proposal_deposits;
 mod proposal_votes;
+mod proposals;
 mod serde_genesis;
 mod sink;
 mod software_upgrades;

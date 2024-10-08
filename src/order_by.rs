@@ -1,5 +1,5 @@
 use substreams::pb::substreams::Clock;
-use substreams_entity_change::tables::{Row, Tables};
+use substreams_entity_change::tables::Row;
 
 use crate::utils::to_date;
 

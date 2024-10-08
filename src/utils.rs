@@ -1,7 +1,7 @@
 use substreams::pb::substreams::Clock;
 use substreams_entity_change::tables::Tables;
 
-use crate::{blocks::insert_order_by, pb::cosmos::base::v1beta1::Coin};
+use crate::{order_by::insert_order_by, pb::cosmos::base::v1beta1::Coin};
 
 pub fn extract_initial_deposit(initial_deposit: &[Coin]) -> (&str, &str) {
     initial_deposit
@@ -37,47 +37,6 @@ pub fn extract_authority(tx_result: &substreams_cosmos::pb::TxResults) -> &str {
         .and_then(|event| event.attributes.iter().find(|attr| attr.key == "receiver"))
         .map(|attr| attr.value.as_str())
         .unwrap_or("")
-}
-
-pub fn insert_proposal_entity(
-    tables: &mut Tables,
-    id: &str,
-    tx_hash: &str,
-    clock: &Clock,
-    proposal_type: &str,
-    proposer: &str,
-    authority: &str,
-    title: &str,
-    description: &str,
-    metadata: &str,
-) {
-    let row = tables
-        .create_row("Proposal", id)
-        .set("txHash", tx_hash)
-        .set("type", proposal_type)
-        .set("proposer", proposer)
-        .set("authority", authority)
-        .set("title", title)
-        .set("description", description)
-        .set("metadata", metadata);
-
-    insert_order_by(row, clock);
-}
-
-pub fn insert_content_entity_json(tables: &mut Tables, id: &str, type_url: &str, json_data: &str) {
-    tables
-        .create_row("Content", id)
-        .set("typeUrl", type_url)
-        .set("jsonData", json_data)
-        .set("proposal", id);
-}
-
-pub fn insert_content_entity_raw_data(tables: &mut Tables, id: &str, type_url: &str, value: &str) {
-    tables
-        .create_row("Content", id)
-        .set("typeUrl", type_url)
-        .set("value", value)
-        .set("proposal", id);
 }
 
 pub fn to_date(clock: &Clock) -> String {

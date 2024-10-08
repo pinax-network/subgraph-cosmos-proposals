@@ -1,10 +1,10 @@
+use crate::content::insert_content_entity_json;
 use crate::pb::cosmos::distribution::v1beta1::{CommunityPoolSpendProposal, MsgCommunityPoolSpend};
 use crate::pb::cosmos::gov::v1::MsgSubmitProposal as MsgSubmitProposalV1;
 use crate::pb::cosmos::gov::v1beta1::MsgSubmitProposal as MsgSubmitProposalV1Beta1;
 use crate::proposal_deposits::insert_deposit;
-use crate::utils::{
-    extract_authority, extract_initial_deposit, extract_proposal_id, insert_content_entity_json, insert_proposal_entity,
-};
+use crate::proposals::insert_proposal_entity;
+use crate::utils::{extract_authority, extract_initial_deposit, extract_proposal_id};
 use prost_types::Any;
 use substreams::pb::substreams::Clock;
 use substreams_cosmos::pb::TxResults;
