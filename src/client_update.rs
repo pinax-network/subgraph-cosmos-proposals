@@ -5,11 +5,11 @@ use substreams_entity_change::tables::Tables;
 
 use crate::{
     content::insert_content_entity_json,
+    deposits::insert_deposit,
     pb::{
         cosmos::gov::v1beta1::MsgSubmitProposal as MsgSubmitProposalV1Beta1,
         ibc::core::client::v1::ClientUpdateProposal,
     },
-    proposal_deposits::insert_deposit,
     proposals::insert_proposal_entity,
     utils::{extract_authority, extract_initial_deposit, extract_proposal_id},
 };

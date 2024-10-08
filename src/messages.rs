@@ -1,11 +1,11 @@
 use crate::client_update::insert_client_update_proposal;
 use crate::community_pool_spends::{insert_community_pool_spend_proposal, insert_msg_community_pool_spend};
+use crate::deposits::insert_deposit_undecoded;
 use crate::other_proposals::{insert_other_proposal_v1, insert_other_proposal_v1beta1};
 use crate::parameter_changes::insert_parameter_change_proposal;
 use crate::pb::cosmos::gov::v1::MsgSubmitProposal as MsgSubmitProposalV1;
 use crate::pb::cosmos::gov::v1beta1::MsgSubmitProposal as MsgSubmitProposalV1Beta1;
 use crate::pb::cosmos::tx::v1beta1::Tx;
-use crate::proposal_deposits::insert_deposit_undecoded;
 use crate::proposal_votes::push_proposal_vote;
 use crate::software_upgrades::{insert_message_software_upgrade, insert_software_upgrade_proposal};
 use crate::text::insert_text_proposal;

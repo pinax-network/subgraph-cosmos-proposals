@@ -3,10 +3,10 @@ use substreams::pb::substreams::Clock;
 use substreams_cosmos::pb::TxResults;
 use substreams_entity_change::tables::Tables;
 
+use crate::deposits::insert_deposit;
 use crate::pb::cosmos::gov::v1::MsgSubmitProposal as MsgSubmitProposalV1;
 use crate::pb::cosmos::gov::v1beta1::MsgSubmitProposal as MsgSubmitProposalV1Beta1;
 use crate::pb::cosmos::upgrade::v1beta1::{MsgSoftwareUpgrade, SoftwareUpgradeProposal};
-use crate::proposal_deposits::insert_deposit;
 use crate::proposals::insert_proposal_entity;
 use crate::utils::{extract_authority, extract_initial_deposit, extract_proposal_id};
 

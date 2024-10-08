@@ -1,7 +1,7 @@
 use crate::content::insert_content_entity_json;
+use crate::deposits::insert_deposit;
 use crate::pb::cosmos::gov::v1beta1::MsgSubmitProposal;
 use crate::pb::cosmos::params::v1beta1::ParameterChangeProposal;
-use crate::proposal_deposits::insert_deposit;
 use crate::proposals::insert_proposal_entity;
 use crate::utils::{extract_authority, extract_initial_deposit, extract_proposal_id};
 use prost_types::Any;

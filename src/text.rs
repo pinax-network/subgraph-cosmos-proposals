@@ -1,6 +1,6 @@
+use crate::deposits::insert_deposit;
 use crate::pb::cosmos::gov::v1beta1::MsgSubmitProposal as MsgSubmitProposalV1Beta1;
 use crate::pb::cosmos::gov::v1beta1::TextProposal;
-use crate::proposal_deposits::insert_deposit;
 use crate::proposals::insert_proposal_entity;
 use crate::utils::extract_authority;
 use crate::utils::extract_initial_deposit;
