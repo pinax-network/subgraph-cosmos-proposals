@@ -114,6 +114,7 @@ pub fn insert_proposal_entity(
         .create_row("Proposal", id)
         .set("txHash", tx_hash)
         .set("type", proposal_type)
+        .set("status", "voting_period")
         .set("proposer", proposer)
         .set("authority", authority)
         .set("title", title)

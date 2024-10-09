@@ -47,3 +47,11 @@ pub fn to_date(clock: &Clock) -> String {
         .expect("missing date")
         .to_string()
 }
+
+pub fn get_attribute_value(event: &substreams_cosmos::pb::Event, key: &str) -> Option<String> {
+    event
+        .attributes
+        .iter()
+        .find(|attr| attr.key == key)
+        .map(|attr| attr.value.clone())
+}

@@ -40,6 +40,7 @@ type Proposal @entity {
   timestamp: Timestamp!
   blockDate: String!
   txHash: String!
+  status: String!
   type: String!
   proposer: String!
   authority: String!

@@ -1,3 +1,4 @@
+mod block_events;
 mod content;
 mod deposits;
 mod genesis_params;

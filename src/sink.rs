@@ -1,4 +1,4 @@
-use crate::{genesis_params::push_genesis_params, transactions::push_transactions};
+use crate::{block_events::push_block_events, genesis_params::push_genesis_params, transactions::push_transactions};
 use substreams::{errors::Error, pb::substreams::Clock};
 use substreams_cosmos::Block;
 use substreams_entity_change::{pb::entity::EntityChanges, tables::Tables};
@@ -8,6 +8,8 @@ pub fn graph_out(params: String, clock: Clock, block: Block) -> Result<EntityCha
     let mut tables = Tables::new();
     // push_genesis_params(&params, &clock, &mut tables);
     push_transactions(&block, &mut tables, &clock);
+
+    push_block_events(&block, &mut tables);
 
     Ok(tables.to_entity_changes())
 }
