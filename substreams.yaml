@@ -32,4 +32,4 @@ params:
 
   # Block Filter only Governance proposals events
   # improves Substreams syncing performance when using `--production-mode`
-  block_index:map_blocks: "type:proposal_vote || type:submit_proposal || type:proposal_deposit || type:active_proposal"
+  block_index:map_blocks: "type:proposal_vote || type:submit_proposal || type:proposal_deposit || type:active_proposal || type:signal_proposal || type:inactive_proposal"
