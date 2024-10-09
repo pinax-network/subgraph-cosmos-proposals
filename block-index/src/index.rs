@@ -9,6 +9,10 @@ use substreams_cosmos::{
 fn index_blocks(block: Block) -> Result<Keys, substreams::errors::Error> {
     let mut keys = HashSet::new();
 
+    for event in block.events.iter() {
+        keys.extend(collect_event_keys(event));
+    }
+
     for tx_result in block.tx_results.iter() {
         keys.extend(collect_transaction_keys(tx_result));
     }

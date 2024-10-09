@@ -36,4 +36,4 @@ modules:
 params:
   # Block Filter only Governance proposals events
   # improves Substreams syncing performance when using `--production-mode`
-  map_blocks: "type:proposal_vote || type:submit_proposal || type:proposal_deposit || type:coin_received"
+  map_blocks: "type:proposal_vote || type:submit_proposal || type:proposal_deposit || type:active_proposal"
