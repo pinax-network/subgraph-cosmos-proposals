@@ -1,7 +1,6 @@
 use substreams::pb::substreams::Clock;
-use substreams_entity_change::tables::Tables;
 
-use crate::{order_by::insert_order_by, pb::cosmos::base::v1beta1::Coin};
+use crate::pb::cosmos::base::v1beta1::Coin;
 
 pub fn extract_initial_deposit(initial_deposit: &[Coin]) -> (&str, &str) {
     initial_deposit
