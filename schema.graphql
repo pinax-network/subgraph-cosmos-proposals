@@ -96,6 +96,69 @@ type Deposit @entity {
   proposal: Proposal!
 }
 
+type GovernanceParameters @entity {
+  id: ID!
+
+  # governance parameters
+  depositParams: DepositParams!
+  votingParams: VotingParams!
+  tallyParams: TallyParams!
+
+  # derive from
+  block: Block!
+}
+
+type DepositParams @entity {
+  id: ID!
+
+  # deposit parameters
+  minDeposit: [MinDeposit!]! @derivedFrom(field: "depositParams")
+  maxDepositPeriod: String!
+
+  # derive from
+  block: Block!
+  transaction: Transaction!
+  governanceParameters: GovernanceParameters!
+}
+
+type MinDeposit @entity {
+  id: ID!
+
+  # min deposit
+  amount: String!
+  denom: String!
+
+  # derive from
+  block: Block!
+  depositParams: DepositParams!
+}
+
+type VotingParams @entity {
+  id: ID!
+
+  # voting parameters
+  votingPeriod: String!
+
+  # derive from
+  block: Block!
+  transaction: Transaction!
+  governanceParameters: GovernanceParameters!
+}
+
+type TallyParams @entity {
+  id: ID!
+
+  # tally parameters
+  quorum: String!
+  threshold: String!
+  vetoThreshold: String!
+
+  # derive from
+  block: Block!
+  transaction: Transaction!
+  governanceParameters: GovernanceParameters!
+}
+
 type SoftwareUpgradeProposal @entity {
   id: ID!
   planName: String!
