@@ -5,6 +5,8 @@ use substreams_cosmos::{
     Block,
 };
 
+use crate::protobufs::PartialTx;
+
 #[substreams::handlers::map]
 fn index_blocks(block: Block) -> Result<Keys, substreams::errors::Error> {
     let mut keys = HashSet::new();
@@ -13,8 +15,8 @@ fn index_blocks(block: Block) -> Result<Keys, substreams::errors::Error> {
         keys.extend(collect_event_keys(event));
     }
 
-    for tx_result in block.tx_results.iter() {
-        keys.extend(collect_transaction_keys(tx_result));
+    for (index, tx_result) in block.tx_results.iter().enumerate() {
+        keys.extend(collect_transaction_keys(tx_result, &block.txs[index]));
     }
 
     Ok(Keys {
@@ -22,12 +24,15 @@ fn index_blocks(block: Block) -> Result<Keys, substreams::errors::Error> {
     })
 }
 
-pub fn collect_transaction_keys(tx_result: &TxResults) -> Vec<String> {
+pub fn collect_transaction_keys(tx_result: &TxResults, tx_as_bytes: &[u8]) -> Vec<String> {
     let mut keys = Vec::new();
 
     for event in tx_result.events.iter() {
         keys.extend(collect_event_keys(event));
     }
+
+    keys.extend(extract_message_type_urls(tx_as_bytes));
+
     keys
 }
 
@@ -41,9 +46,8 @@ pub fn collect_event_keys(event: &Event) -> Vec<String> {
     keys
 }
 
-pub fn is_match(query: Vec<String>, params: &str) -> bool {
+pub fn is_strict_match(query: Vec<String>, params: &str) -> bool {
     // match all if wildcard is used
-    // `eosio:onblock` actions are excluded from wildcard
     if query.len() > 0 && params == "*" {
         return true;
     }
@@ -58,4 +62,17 @@ pub fn is_match(query: Vec<String>, params: &str) -> bool {
             panic!("Error: {:?}", e);
         }
     };
+}
+
+pub fn extract_message_type_urls(tx_as_bytes: &[u8]) -> Vec<String> {
+    let mut type_urls = Vec::new();
+
+    if let Ok(tx) = <PartialTx as prost::Message>::decode(tx_as_bytes) {
+        if let Some(body) = tx.body {
+            for message in body.messages.iter() {
+                type_urls.push(format!("message:{}", message.type_url));
+            }
+        }
+    }
+    type_urls
 }

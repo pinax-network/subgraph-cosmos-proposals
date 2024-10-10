@@ -9,6 +9,8 @@ crate-type = ["cdylib"]
 [dependencies]
 substreams-cosmos = "0.1"
 substreams = "0.5"
+prost = "0.11"
+prost-types = "0.11"
 
 [profile.release]
 lto = true
