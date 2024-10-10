@@ -28,7 +28,7 @@ params:
   # Governance Genesis Parameters as JSON
   # See /subgraphs/injective/subgraph.yaml for an example
   # Only applied on block number 1
-  graph_out: ""
+  graph_out: '{"voting_params": {"voting_period": "172800000000000"}}'
 
   # Block Filter only Governance proposals events
   # improves Substreams syncing performance when using `--production-mode`

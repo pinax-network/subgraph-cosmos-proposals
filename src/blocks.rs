@@ -12,6 +12,6 @@ pub fn create_block(tables: &mut Tables, clock: &Clock) {
     tables
         .create_row("Block", clock.id.as_str())
         .set_bigint("number", &block_number.to_string())
-        .set("timestamp", timestamp)
+        .set_bigint("timestamp", &timestamp.seconds.to_string())
         .set("date", date);
 }

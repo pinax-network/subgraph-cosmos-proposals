@@ -1,10 +1,11 @@
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 use substreams::{log, pb::substreams::Clock};
 use substreams_entity_change::tables::Tables;
 
 pub fn push_genesis_params(params: &String, clock: &Clock, _tables: &mut Tables) {
-    let parsed: GenesisParams = serde_json::from_str(&params).expect("Failed to parse params");
-    if clock.number == 1 {
+    if params.len() > 0 && clock.number == 1 {
+        let parsed: Value = serde_json::from_str(&params).expect("failed to parse genesis params");
         log::debug!("GenesisParams: {:?}", parsed);
     }
 }

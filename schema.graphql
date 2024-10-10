@@ -1,7 +1,7 @@
 type Block @entity {
   id: ID!
   number: BigInt!
-  timestamp: Timestamp!
+  timestamp: BigInt!
   date: String!
 }
 
