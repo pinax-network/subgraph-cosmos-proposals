@@ -31,7 +31,10 @@ pub fn collect_transaction_keys(tx_result: &TxResults, tx_as_bytes: &[u8]) -> Ve
         keys.extend(collect_event_keys(event));
     }
 
-    keys.extend(extract_message_types(tx_as_bytes));
+    let msg_types = extract_message_types(tx_as_bytes);
+    let msg_types_expanded = expand_match_variations(msg_types, ".");
+
+    keys.extend(msg_types_expanded);
 
     keys
 }
@@ -46,7 +49,7 @@ pub fn collect_event_keys(event: &Event) -> Vec<String> {
     keys
 }
 
-pub fn is_strict_match(query: Vec<String>, params: &str) -> bool {
+pub fn is_match(query: Vec<String>, params: &str) -> bool {
     // match all if wildcard is used
     if query.len() > 0 && params == "*" {
         return true;
@@ -77,4 +80,20 @@ pub fn extract_message_types(tx_as_bytes: &[u8]) -> Vec<String> {
         }
     }
     msg_types
+}
+
+fn expand_match_variations(strings: Vec<String>, delimiter: &str) -> Vec<String> {
+    let mut result = Vec::new();
+    for s in strings {
+        let parts: Vec<&str> = s.split(delimiter).collect();
+        let mut current = String::new();
+        for (i, part) in parts.iter().enumerate() {
+            if i > 0 {
+                current.push_str(delimiter);
+            }
+            current.push_str(part);
+            result.push(current.clone());
+        }
+    }
+    result
 }
