@@ -64,6 +64,8 @@ enum ProposalStatus {
   Passed
   Rejected
   Failed
+  Canceled
+  Dropped
 }
 
 type Vote @entity {
