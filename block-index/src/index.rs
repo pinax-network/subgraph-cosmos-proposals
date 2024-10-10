@@ -31,7 +31,7 @@ pub fn collect_transaction_keys(tx_result: &TxResults, tx_as_bytes: &[u8]) -> Ve
         keys.extend(collect_event_keys(event));
     }
 
-    keys.extend(extract_message_type_urls(tx_as_bytes));
+    keys.extend(extract_message_types(tx_as_bytes));
 
     keys
 }
@@ -64,15 +64,17 @@ pub fn is_strict_match(query: Vec<String>, params: &str) -> bool {
     };
 }
 
-pub fn extract_message_type_urls(tx_as_bytes: &[u8]) -> Vec<String> {
-    let mut type_urls = Vec::new();
+pub fn extract_message_types(tx_as_bytes: &[u8]) -> Vec<String> {
+    let mut msg_types = Vec::new();
 
     if let Ok(tx) = <PartialTx as prost::Message>::decode(tx_as_bytes) {
         if let Some(body) = tx.body {
             for message in body.messages.iter() {
-                type_urls.push(format!("message:{}", message.type_url));
+                // Remove the leading '/' from the type URL
+                let msg_type = &message.type_url[1..];
+                msg_types.push(format!("message:{}", msg_type));
             }
         }
     }
-    type_urls
+    msg_types
 }

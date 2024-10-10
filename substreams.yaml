@@ -32,4 +32,4 @@ params:
 
   # Block Filter only Governance proposals events
   # improves Substreams syncing performance when using `--production-mode`
-  block_index:map_blocks: "message:/cosmos.gov.v1beta1 || message:/cosmos.gov.v1 || type:proposal_vote  || type:proposal_deposit || type:active_proposal || type:signal_proposal || type:inactive_proposal"
+  block_index:map_blocks: "message:cosmos.gov.v1beta1 || message:cosmos.gov.v1 || type:active_proposal || type:signal_proposal || type:inactive_proposal"
