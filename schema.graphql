@@ -118,6 +118,14 @@ type ClientUpdate @entity {
   proposal: Proposal!
 }
 
+type ParameterChange @entity {
+  id: ID!
+  subspace: String!
+  key: String!
+  value: String!
+  proposal: Proposal!
+}
+
 #type VoteStats @aggregation(intervals: ["hour", "day"], source: "Vote") {
 # id: ID!
 #  timestamp: Timestamp!
