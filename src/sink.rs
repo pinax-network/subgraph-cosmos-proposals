@@ -13,7 +13,7 @@ pub fn graph_out(params: String, clock: Clock, block: Block) -> Result<EntityCha
 
     let mut tables = Tables::new();
 
-    push_genesis_params(&params, &clock, &mut tables);
+    push_genesis_params(&mut tables, &clock, &params);
     push_transactions(&block, &mut tables, &clock);
     push_block_events(&block, &mut tables);
 

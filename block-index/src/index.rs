@@ -1,5 +1,8 @@
 use std::collections::HashSet;
-use substreams::{matches_keys_in_parsed_expr, pb::sf::substreams::index::v1::Keys};
+use substreams::{
+    matches_keys_in_parsed_expr,
+    pb::{sf::substreams::index::v1::Keys, substreams::Clock},
+};
 use substreams_cosmos::{
     pb::{Event, TxResults},
     Block,
@@ -8,8 +11,10 @@ use substreams_cosmos::{
 use crate::protobufs::PartialTx;
 
 #[substreams::handlers::map]
-fn index_blocks(block: Block) -> Result<Keys, substreams::errors::Error> {
+fn index_blocks(block: Block, clock: Clock) -> Result<Keys, substreams::errors::Error> {
     let mut keys = HashSet::new();
+
+    keys.insert(format!("block.number:{}", clock.number));
 
     for event in block.events.iter() {
         keys.extend(collect_event_keys(event));

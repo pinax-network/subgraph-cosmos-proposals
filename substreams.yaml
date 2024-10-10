@@ -28,8 +28,20 @@ params:
   # Governance Genesis Parameters as JSON
   # See /subgraphs/injective/subgraph.yaml for an example
   # Only applied on block number 1
-  graph_out: '{"voting_params": {"voting_period": "172800000000000"}}'
+  graph_out: '{
+    "deposit_params": {
+      "min_deposit": [{"denom": "uatom", "amount": "512000000"}],
+      "max_deposit_period": "1209600000000000"
+    },
+    "voting_params": {
+      "voting_period": "1209600000000000"
+    },
+    "tally_params": {
+      "quorum": "0.400000000000000000",
+      "threshold": "0.500000000000000000",
+      "veto_threshold": "0.334000000000000000"
+    }}'
 
   # Block Filter only Governance proposals events
   # improves Substreams syncing performance when using `--production-mode`
-  block_index:map_blocks: "message:cosmos.gov.v1beta1 || message:cosmos.gov.v1 || type:active_proposal || type:signal_proposal || type:inactive_proposal"
+  block_index:map_blocks: "block.number:1 || message:cosmos.gov.v1beta1 || message:cosmos.gov.v1 || type:active_proposal || type:signal_proposal || type:inactive_proposalq"
