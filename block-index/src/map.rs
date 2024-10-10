@@ -4,6 +4,7 @@ use crate::index::{collect_event_keys, collect_transaction_keys, extract_message
 
 #[substreams::handlers::map]
 fn map_blocks(params: String, mut block: Block) -> Result<Block, substreams::errors::Error> {
+    substreams::log::debug!("map_blocks: {:?}", params);
     // Filter both tx_results and txs based on the same criteria
     let retained_indices: Vec<usize> = block
         .tx_results
