@@ -7,8 +7,8 @@ indexerHints:
   prune: never
 dataSources:
   - kind: substreams
-    name: cosmoshub_proposals
-    network: cosmoshub
+    name: osmosis_proposals
+    network: osmosis
     source:
       startBlock: 0
       package:
