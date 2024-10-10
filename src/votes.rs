@@ -4,9 +4,9 @@ use substreams::pb::substreams::Clock;
 use substreams_cosmos::pb::TxResults;
 use substreams_entity_change::tables::Tables;
 
-use crate::{order_by::insert_order_by, pb::cosmos::gov::v1beta1::MsgVote};
+use crate::pb::cosmos::gov::v1beta1::MsgVote;
 
-pub fn push_proposal_vote(tables: &mut Tables, msg: &Any, tx_result: &TxResults, clock: &Clock, tx_hash: &str) {
+pub fn create_vote(tables: &mut Tables, msg: &Any, tx_result: &TxResults, clock: &Clock, tx_hash: &str) {
     let proposal_votes = tx_result.events.iter().filter(|event| event.r#type == "proposal_vote");
 
     for vote in proposal_votes {
@@ -83,15 +83,16 @@ pub fn push_proposal_vote(tables: &mut Tables, msg: &Any, tx_result: &TxResults,
 
         for (option, weight) in options_weights {
             let vote_id = format!("{}:{}:{}", tx_hash, &proposal_id, option);
-            let row = tables
+            tables
                 .create_row("Vote", &vote_id)
-                .set("txHash", tx_hash)
+                // @deriveFrom
+                .set("transaction", tx_hash)
+                .set("proposal", &proposal_id)
+                .set("block", &clock.id)
+                // vote
                 .set("voter", &voter)
                 .set("option", &option)
-                .set_bigdecimal("weight", &weight)
-                .set("proposal", &proposal_id);
-
-            insert_order_by(row, clock);
+                .set_bigdecimal("weight", &weight);
         }
     }
 }

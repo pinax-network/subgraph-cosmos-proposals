@@ -1,125 +1,129 @@
-use crate::deposits::insert_deposit_undecoded;
+use crate::deposits::create_deposit;
 use crate::pb::cosmos::gov::v1::MsgSubmitProposal as MsgSubmitProposalV1;
-use crate::pb::cosmos::gov::v1beta1::MsgSubmitProposal as MsgSubmitProposalV1Beta1;
-use crate::votes::push_proposal_vote;
+use crate::pb::cosmos::gov::v1beta1::{MsgSubmitProposal as MsgSubmitProposalV1Beta1, TextProposal};
+use crate::utils::{extract_authority, extract_proposal_id};
+use crate::votes::create_vote;
 use prost::Message;
+use prost_types::Any;
 
 use substreams::pb::substreams::Clock;
 use substreams_cosmos::pb::TxResults;
-use substreams_entity_change::tables::Tables;
+use substreams_entity_change::tables::{Row, Tables};
 
-use crate::order_by::insert_order_by;
-
-use super::client_update::insert_client_update_proposal;
-use super::community_pool_spends::{insert_community_pool_spend_proposal, insert_msg_community_pool_spend};
-use super::other_proposals::{insert_other_proposal_v1, insert_other_proposal_v1beta1};
-use super::parameter_changes::insert_parameter_change_proposal;
-use super::software_upgrades::{insert_message_software_upgrade, insert_software_upgrade_proposal};
-use super::text_proposal::insert_text_proposal;
+use super::client_update::create_client_update;
+use super::community_pool_spends::create_community_pool_spend;
+use super::parameter_changes::create_parameter_change_proposal;
+use super::software_upgrades::create_software_upgrade;
 
 pub fn handle_proposals(
-    message: &prost_types::Any,
     tables: &mut Tables,
-    tx_result: &TxResults,
     clock: &Clock,
+    message: &prost_types::Any,
+    tx_result: &TxResults,
     tx_hash: &str,
 ) {
+    let buf = message.value.as_slice();
+    let proposal_id = extract_proposal_id(tx_result, clock, tx_hash);
+
     match message.type_url.as_str() {
         "/cosmos.gov.v1.MsgSubmitProposal" => {
-            if let Ok(msg) = MsgSubmitProposalV1::decode(message.value.as_slice()) {
-                push_proposal_v1(tables, &msg, &tx_result, &clock, &tx_hash);
+            if let Ok(msg) = MsgSubmitProposalV1::decode(buf) {
+                let row = tables.create_row("Proposal", &proposal_id);
+                set_proposal_entity(row, clock, message, tx_result, tx_hash);
+                set_proposal_v1(row, &msg);
+
+                if let Some(content) = msg.content.as_ref() {
+                    match content.type_url.as_str() {
+                        "/cosmos.upgrade.v1beta1.MsgSoftwareUpgrade" => {
+                            create_software_upgrade(tables, content, &proposal_id);
+                        }
+                        "/cosmos.distribution.v1beta1.MsgCommunityPoolSpend" => {
+                            create_community_pool_spend(tables, content, &proposal_id);
+                        }
+                        _ => {}
+                    }
+                }
             }
         }
         "/cosmos.gov.v1beta1.MsgSubmitProposal" => {
-            if let Ok(msg) = MsgSubmitProposalV1Beta1::decode(message.value.as_slice()) {
-                push_proposal_v1beta1(tables, &msg, &tx_result, &clock, &tx_hash);
+            if let Ok(msg) = MsgSubmitProposalV1Beta1::decode(buf) {
+                let row = tables.create_row("Proposal", &proposal_id);
+                set_proposal_entity(row, clock, message, tx_result, tx_hash);
+                set_proposal_v1beta1(row, &msg);
+
+                if let Some(content) = msg.content.as_ref() {
+                    match content.type_url.as_str() {
+                        "/cosmos.upgrade.v1beta1.SoftwareUpgradeProposal" => {
+                            create_software_upgrade(tables, content, &proposal_id);
+                        }
+                        "/cosmos.params.v1beta1.ParameterChangeProposal" => {
+                            create_parameter_change_proposal(tables, content, &proposal_id);
+                        }
+                        "/cosmos.distribution.v1beta1.CommunityPoolSpendProposal" => {
+                            create_community_pool_spend(tables, content, &proposal_id);
+                        }
+                        "/ibc.core.client.v1.ClientUpdateProposal" => {
+                            create_client_update(tables, content, &proposal_id);
+                        }
+                        _ => {}
+                    }
+                }
             }
         }
         "/cosmos.gov.v1beta1.MsgVote" => {
-            push_proposal_vote(tables, message, &tx_result, &clock, &tx_hash);
+            create_vote(tables, message, &tx_result, &clock, &tx_hash);
         }
         "/cosmos.gov.v1beta1.MsgDeposit" => {
-            insert_deposit_undecoded(tables, message, &clock, &tx_hash);
+            create_deposit(tables, message, &clock, &tx_hash);
         }
         _ => {}
     }
 }
 
-fn push_proposal_v1beta1(
-    tables: &mut Tables,
-    msg: &MsgSubmitProposalV1Beta1,
-    tx_result: &TxResults,
-    clock: &Clock,
-    tx_hash: &str,
-) {
+fn set_proposal_v1beta1(row: &mut Row, msg: &MsgSubmitProposalV1Beta1) {
     if let Some(content) = msg.content.as_ref() {
-        match content.type_url.as_str() {
-            "/cosmos.upgrade.v1beta1.SoftwareUpgradeProposal" => {
-                insert_software_upgrade_proposal(tables, msg, content, tx_result, clock, tx_hash);
-            }
-            "/cosmos.params.v1beta1.ParameterChangeProposal" => {
-                insert_parameter_change_proposal(tables, msg, content, tx_result, clock, tx_hash);
-            }
-            "/cosmos.distribution.v1beta1.CommunityPoolSpendProposal" => {
-                insert_community_pool_spend_proposal(tables, msg, content, tx_result, clock, tx_hash);
-            }
-            "/cosmos.gov.v1beta1.TextProposal" => {
-                insert_text_proposal(tables, msg, content, tx_result, clock, tx_hash);
-            }
-            "/ibc.core.client.v1.ClientUpdateProposal" => {
-                insert_client_update_proposal(tables, msg, content, tx_result, clock, tx_hash);
-            }
-            _ => {
-                insert_other_proposal_v1beta1(tables, msg, content, tx_result, clock, tx_hash);
-            }
-        }
+        let proposer = msg.proposer.as_str();
+        let (title, summary) = decode_text_proposal(content);
+        set_proposal_metadata(row, proposer, &title, &summary, "");
     }
 }
 
-fn push_proposal_v1(
-    tables: &mut Tables,
-    msg: &MsgSubmitProposalV1,
-    tx_result: &TxResults,
-    clock: &Clock,
-    tx_hash: &str,
-) {
-    if let Some(content) = msg.content.as_ref() {
-        match content.type_url.as_str() {
-            "/cosmos.upgrade.v1beta1.MsgSoftwareUpgrade" => {
-                insert_message_software_upgrade(tables, msg, content, tx_result, clock, tx_hash);
-            }
-            "/cosmos.distribution.v1beta1.MsgCommunityPoolSpend" => {
-                insert_msg_community_pool_spend(tables, msg, content, tx_result, clock, tx_hash);
-            }
-            _ => {
-                insert_other_proposal_v1(tables, msg, content, tx_result, clock, tx_hash);
-            }
-        }
-    }
+fn set_proposal_v1(row: &mut Row, msg: &MsgSubmitProposalV1) {
+    let proposer = msg.proposer.as_str();
+    let title = msg.title.as_str();
+    let summary = msg.summary.as_str();
+    let metadata = msg.metadata.as_str();
+    set_proposal_metadata(row, proposer, title, summary, metadata);
 }
 
-pub fn insert_proposal_entity(
-    tables: &mut Tables,
-    id: &str,
-    tx_hash: &str,
-    clock: &Clock,
-    proposal_type: &str,
-    proposer: &str,
-    authority: &str,
-    title: &str,
-    description: &str,
-    metadata: &str,
-) {
-    let row = tables
-        .create_row("Proposal", id)
-        .set("txHash", tx_hash)
-        .set("type", proposal_type)
-        .set("status", "voting_period")
-        .set("proposer", proposer)
-        .set("authority", authority)
+pub fn set_proposal_metadata(row: &mut Row, proposer: &str, title: &str, summary: &str, metadata: &str) {
+    row.set("proposer", proposer)
         .set("title", title)
-        .set("description", description)
+        .set("summary", summary)
         .set("metadata", metadata);
+}
 
-    insert_order_by(row, clock);
+pub fn set_proposal_entity(
+    row: &mut Row,
+    clock: &Clock,
+    message: &prost_types::Any,
+    tx_result: &TxResults,
+    tx_hash: &str,
+) {
+    let authority = extract_authority(tx_result);
+    row.set("transaction", tx_hash)
+        .set("block", &clock.id)
+        .set("authority", authority)
+        .set("type", message.type_url.to_string())
+        .set("status", "DepositPeriod");
+}
+
+pub fn decode_text_proposal(content: &Any) -> (String, String) {
+    let mut title = "".to_string();
+    let mut description = "".to_string();
+    if let Ok(partially_decoded) = <TextProposal as prost::Message>::decode(content.value.as_slice()) {
+        title = partially_decoded.title;
+        description = partially_decoded.description;
+    }
+    (title, description)
 }

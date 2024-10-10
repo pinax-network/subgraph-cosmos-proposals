@@ -2,6 +2,7 @@ type Block @entity {
   id: ID!
   number: BigInt!
   timestamp: Timestamp!
+  date: String!
 }
 
 type Transaction @entity {
@@ -36,27 +37,60 @@ type Attribute @entity {
 
 type Proposal @entity {
   id: ID!
-  blockNumber: BigInt!
-  timestamp: Timestamp!
-  blockDate: String!
-  txHash: String!
-  status: String!
+
+  # message
   type: String!
-  proposer: String!
   authority: String!
+
+  # proposal metadata
+  proposer: String!
   title: String!
-  description: String!
+  summary: String!
   metadata: String
+
+  # proposal state
+  status: ProposalStatus!
+
+  # derive from
+  block: Block!
+  transaction: Transaction!
   votes: [Vote!]! @derivedFrom(field: "proposal")
-  contents: [Content!]! @derivedFrom(field: "proposal")
   deposits: [Deposit!]! @derivedFrom(field: "proposal")
 }
 
-type Content @entity {
+enum ProposalStatus {
+  VotingPeriod
+  DepositPeriod
+  Passed
+  Rejected
+  Failed
+}
+
+type Vote @entity {
   id: ID!
-  typeUrl: String!
-  jsonData: String
-  value: String
+
+  # vote
+  voter: String!
+  option: String!
+  weight: BigDecimal!
+
+  # derive from
+  block: Block!
+  transaction: Transaction!
+  proposal: Proposal!
+}
+
+type Deposit @entity {
+  id: ID!
+
+  # deposit
+  amount: String!
+  denom: String!
+  depositor: String!
+
+  # derive from
+  block: Block!
+  transaction: Transaction!
   proposal: Proposal!
 }
 
@@ -68,28 +102,20 @@ type SoftwareUpgradeProposal @entity {
   proposal: Proposal!
 }
 
-type Vote @entity {
+type CommunityPoolSpend @entity {
   id: ID!
-  blockNumber: BigInt!
-  timestamp: Timestamp!
-  blockDate: String!
-  txHash: String!
-  voter: String!
-  option: String!
-  weight: BigDecimal!
+  authority: String!
+  recipient: String!
+  amount: BigInt!
+  denom: String!
   proposal: Proposal!
 }
 
-type Deposit @entity {
+type ClientUpdate @entity {
   id: ID!
-  blockNumber: BigInt!
-  timestamp: Timestamp!
-  blockDate: String!
-  txHash: String!
+  subjectClientId: String!
+  substituteClientId: String!
   proposal: Proposal!
-  amount: String!
-  denom: String!
-  depositor: String!
 }
 
 #type VoteStats @aggregation(intervals: ["hour", "day"], source: "Vote") {

@@ -1,12 +1,10 @@
 mod block_events;
-mod content;
+mod blocks;
 mod deposits;
 mod genesis_params;
 mod messages;
-mod order_by;
 mod pb;
 mod proposals;
-mod serde_genesis;
 mod sink;
 mod transactions;
 mod utils;
