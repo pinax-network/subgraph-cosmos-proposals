@@ -1,6 +1,7 @@
 use sha2::{Digest, Sha256};
 use substreams::pb::substreams::Clock;
 use substreams::Hex;
+use substreams_cosmos::pb::TxResults;
 use substreams_cosmos::Block;
 use substreams_entity_change::tables::Tables;
 
@@ -10,8 +11,17 @@ pub fn push_transactions(block: &Block, tables: &mut Tables, clock: &Clock) {
     for (i, tx_result) in block.tx_results.iter().enumerate() {
         let tx_hash = compute_tx_hash(&block.txs[i]);
         let tx_as_bytes = block.txs[i].as_slice();
+
+        create_transaction(tables, tx_result, &tx_hash, clock);
         push_messages(tables, tx_result, clock, &tx_hash, tx_as_bytes);
     }
+}
+
+fn create_transaction(tables: &mut Tables, tx_result: &TxResults, tx_hash: &str, clock: &Clock) {
+    tables
+        .create_row("Transaction", tx_hash)
+        .set("codespace", &tx_result.codespace)
+        .set("block", &clock.id);
 }
 
 pub fn _code_to_string(code: u32) -> String {
