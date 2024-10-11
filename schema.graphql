@@ -161,9 +161,9 @@ type TallyParams @entity {
 
 type SoftwareUpgradeProposal @entity {
   id: ID!
-  planName: String!
-  planHeight: BigInt!
-  planInfo: String!
+  name: String!
+  height: BigInt!
+  info: String!
   proposal: Proposal!
 }
 
