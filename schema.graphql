@@ -14,16 +14,6 @@ type Transaction @entity {
   events: [Event!]! @derivedFrom(field: "transaction")
 }
 
-type Event @entity {
-  id: ID!
-  type: String!
-
-  # derive from
-  block: Block!
-  transaction: Transaction!
-  attributes: [Attribute!]! @derivedFrom(field: "event")
-}
-
 type Attribute @entity {
   id: ID!
   key: String!
@@ -50,6 +40,10 @@ type Proposal @entity {
 
   # proposal state
   status: ProposalStatus!
+
+  # content
+  content: String!
+  content_type: String!
 
   # derive from
   block: Block!
