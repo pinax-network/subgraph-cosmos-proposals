@@ -8,6 +8,7 @@ use prost::Message;
 use prost_types::Any;
 
 use substreams::pb::substreams::Clock;
+use substreams::Hex;
 use substreams_cosmos::pb::TxResults;
 use substreams_entity_change::tables::{Row, Tables};
 
@@ -95,6 +96,7 @@ fn set_proposal_v1beta1(row: &mut Row, msg: &MsgSubmitProposalV1Beta1) {
         let proposer = msg.proposer.as_str();
         let (title, summary) = decode_text_proposal(content);
         set_proposal_metadata(row, proposer, &title, &summary, "");
+        set_content(row, &content);
     }
 }
 
@@ -104,6 +106,14 @@ fn set_proposal_v1(row: &mut Row, msg: &MsgSubmitProposalV1) {
     let summary = msg.summary.as_str();
     let metadata = msg.metadata.as_str();
     set_proposal_metadata(row, proposer, title, summary, metadata);
+    if let Some(content) = msg.content.as_ref() {
+        set_content(row, &content);
+    }
+}
+
+fn set_content(row: &mut Row, content: &Any) {
+    row.set("content", Hex::encode(&content.value))
+        .set("content_type", content.type_url.as_str());
 }
 
 pub fn set_proposal_metadata(row: &mut Row, proposer: &str, title: &str, summary: &str, metadata: &str) {
@@ -121,6 +131,9 @@ pub fn set_proposal_entity(
     tx_hash: &str,
 ) {
     let authority = extract_authority(tx_result);
+    if message.type_url.to_string().len() == 0 {
+        panic!("Empty type_url in proposal");
+    }
     row.set("transaction", tx_hash)
         .set("block", &clock.id)
         .set("authority", authority)
