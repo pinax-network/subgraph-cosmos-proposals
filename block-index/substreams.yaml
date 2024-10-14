@@ -37,4 +37,4 @@ modules:
 params:
   # Block Filter only Governance proposals events
   # improves Substreams syncing performance when using `--production-mode`
-  map_blocks: "block.number:1 || message:cosmos.gov.v1beta1 || message:cosmos.gov.v1 || type:active_proposal || type:signal_proposal || type:inactive_proposal"
+  map_blocks: "message:cosmos.gov.v1beta1 || message:cosmos.gov.v1 || type:active_proposal || type:signal_proposal || type:inactive_proposal || type:submit_proposal || block.number:1"

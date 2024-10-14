@@ -1,4 +1,5 @@
 use crate::deposits::create_deposit;
+use crate::pb::cosmos::authz::v1beta1::MsgExec;
 use crate::pb::cosmos::gov::v1::MsgSubmitProposal as MsgSubmitProposalV1;
 use crate::pb::cosmos::gov::v1beta1::{MsgSubmitProposal as MsgSubmitProposalV1Beta1, TextProposal};
 use crate::utils::{extract_authority, extract_proposal_id};
@@ -66,6 +67,15 @@ pub fn handle_proposals(
                             create_client_update(tables, content, &proposal_id);
                         }
                         _ => {}
+                    }
+                }
+            }
+        }
+        "/cosmos.authz.v1beta1.MsgExec" => {
+            if let Ok(message) = MsgExec::decode(buf) {
+                for msg in message.msgs {
+                    if let Ok(msg) = MsgSubmitProposalV1::decode(msg.value.as_slice()) {
+                    } else if let Ok(msg) = MsgSubmitProposalV1Beta1::decode(msg.value.as_slice()) {
                     }
                 }
             }

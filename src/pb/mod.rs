@@ -67,6 +67,14 @@ pub mod cosmos {
             // @@protoc_insertion_point(cosmos.distribution.v1beta1)
         }
     }
+
+    pub mod authz {
+        // @@protoc_insertion_point(attribute:cosmos.authz.v1beta1)
+        pub mod v1beta1 {
+            include!("cosmos.authz.v1beta1.rs");
+            // @@protoc_insertion_point(cosmos.authz.v1beta1)
+        }
+    }
 }
 
 pub mod ibc {

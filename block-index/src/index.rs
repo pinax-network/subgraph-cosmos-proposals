@@ -81,6 +81,9 @@ pub fn extract_message_types(tx_as_bytes: &[u8]) -> Vec<String> {
                 // Remove the leading '/' from the type URL
                 let msg_type = &message.type_url[1..];
                 msg_types.push(format!("message:{}", msg_type));
+
+                message.
+                
             }
         }
     }
