@@ -52,8 +52,7 @@ fn create_deposit_params(tables: &mut Tables, clock: &Clock, min_deposit: &Vec<D
             .set_bigint("amount", &deposit.amount)
             .set("denom", &deposit.denom)
             .set("block", &clock.id)
-            .set("deposit_params", &clock.id)
-            .set("transaction", &clock.id);
+            .set("deposit_params", &clock.id);
     }
 }
 

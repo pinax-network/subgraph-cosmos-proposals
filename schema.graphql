@@ -126,7 +126,6 @@ type DepositParams @entity {
 
   # derive from
   block: Block!
-  transaction: Transaction
   governance_parameters: GovernanceParameters!
 }
 
@@ -150,7 +149,6 @@ type VotingParams @entity {
 
   # derive from
   block: Block!
-  transaction: Transaction
   governance_parameters: GovernanceParameters!
 }
 
@@ -164,7 +162,6 @@ type TallyParams @entity {
 
   # derive from
   block: Block!
-  transaction: Transaction
   governance_parameters: GovernanceParameters!
 }
 
