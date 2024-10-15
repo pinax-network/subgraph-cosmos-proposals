@@ -55,3 +55,18 @@ pub fn get_attribute_value(event: &substreams_cosmos::pb::Event, key: &str) -> O
         .find(|attr| attr.key == key)
         .map(|attr| attr.value.clone())
 }
+
+pub fn extract_proposal_status(tx_result: &substreams_cosmos::pb::TxResults) -> &'static str {
+    let voting_period_start = tx_result
+        .events
+        .iter()
+        .filter(|event| event.r#type == "submit_proposal" || event.r#type == "proposal_deposit")
+        .flat_map(|event| event.attributes.iter())
+        .find(|attr| attr.key == "voting_period_start");
+
+    if voting_period_start.is_none() {
+        "VotingPeriod"
+    } else {
+        "DepositPeriod"
+    }
+}
