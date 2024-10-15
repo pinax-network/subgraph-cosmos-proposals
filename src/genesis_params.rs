@@ -1,5 +1,4 @@
 use serde::{Deserialize, Serialize};
-use serde_json::Value;
 use substreams::{log, pb::substreams::Clock};
 use substreams_entity_change::tables::Tables;
 
@@ -24,60 +23,66 @@ pub fn push_genesis_params(tables: &mut Tables, clock: &Clock, params: &String) 
         let threshold = tally_params.threshold;
         let veto_threshold = tally_params.veto_threshold;
 
+        let block_number = clock.number.to_string();
         tables
-            .create_row("GovernanceParameters", &clock.id)
-            .set("block", &clock.id);
+            .create_row("GovernanceParameters", &block_number)
+            .set("block", &block_number);
 
-        create_deposit_params(tables, &clock, &min_deposit, &max_deposit_period);
-        create_voting_params(tables, &clock, &voting_period);
-        create_tally_params(tables, &clock, &quorum, &threshold, &veto_threshold);
+        create_deposit_params(tables, &block_number, &min_deposit, &max_deposit_period);
+        create_voting_params(tables, &block_number, &voting_period);
+        create_tally_params(tables, &block_number, &quorum, &threshold, &veto_threshold);
 
         // TO-DO: to remove for GenesisParameters
         create_block(tables, &clock);
     }
 }
 
-fn create_deposit_params(tables: &mut Tables, clock: &Clock, min_deposit: &Vec<Deposit>, max_deposit_period: &str) {
+fn create_deposit_params(
+    tables: &mut Tables,
+    block_number: &str,
+    min_deposit: &Vec<Deposit>,
+    max_deposit_period: &str,
+) {
     tables
-        .create_row("DepositParams", &clock.id)
+        .create_row("DepositParams", block_number)
         .set("max_deposit_period", max_deposit_period)
-        .set("block", &clock.id)
-        .set("governance_parameters", &clock.id);
+        .set("block", block_number)
+        .set("governance_parameters", block_number);
 
     for deposit in min_deposit {
-        let key = format!("{}-{}", clock.id, deposit.denom);
+        let key = format!("{}-{}", block_number, deposit.denom);
 
         tables
             .create_row("MinDeposit", &key)
             .set_bigint("amount", &deposit.amount)
             .set("denom", &deposit.denom)
-            .set("block", &clock.id)
-            .set("deposit_params", &clock.id);
+            .set("block", block_number)
+            .set("deposit_params", block_number);
     }
 }
 
-fn create_voting_params(tables: &mut Tables, clock: &Clock, voting_period: &str) {
+fn create_voting_params(tables: &mut Tables, block_number: &str, voting_period: &str) {
     tables
-        .create_row("VotingParams", &clock.id)
+        .create_row("VotingParams", block_number)
         .set("voting_period", voting_period)
-        .set("governance_parameters", &clock.id)
-        .set("block", &clock.id);
+        .set("governance_parameters", block_number)
+        .set("block", block_number);
 }
 
 fn create_tally_params(
     tables: &mut Tables,
-    clock: &Clock,
+    block_number: &str,
     quorum: &String,
     threshold: &String,
     veto_threshold: &String,
 ) {
     tables
-        .create_row("TallyParams", &clock.id)
+        .create_row("TallyParams", block_number)
         .set_bigdecimal("quorum", quorum)
         .set_bigdecimal("threshold", threshold)
         .set_bigdecimal("veto_threshold", veto_threshold)
-        .set("governance_parameters", &clock.id)
-        .set("block", &clock.id);
+        .set("governance_parameters", block_number)
+        .set("block", block_number);
 }
 
 #[derive(Serialize, Deserialize, Debug)]
