@@ -19,4 +19,25 @@ pub struct MsgSubmitProposal {
     /// summary is the summary of the proposal.
     #[prost(string, tag = "6")]
     pub summary: ::prost::alloc::string::String,
+    /// expedited defines if the proposal is expedited
+    #[prost(optional, bool, tag = "7")]
+    pub expedited: Option<bool>,
+    #[prost(optional, enumeration = "ProposalType", tag = "8")]
+    pub proposal_type: Option<i32>,
+}
+
+/// ProposalType defines the type of proposal.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
+#[repr(i32)]
+pub enum ProposalType {
+    /// PROPOSAL_TYPE_UNSPECIFIED defines no proposal type, which fallback to PROPOSAL_TYPE_STANDARD.
+    Unspecified = 0,
+    /// PROPOSAL_TYPE_STANDARD defines the type for a standard proposal.
+    Standard = 1,
+    /// PROPOSAL_TYPE_MULTIPLE_CHOICE defines the type for a multiple choice proposal.
+    MultipleChoice = 2,
+    /// PROPOSAL_TYPE_OPTIMISTIC defines the type for an optimistic proposal.
+    Optimistic = 3,
+    /// PROPOSAL_TYPE_EXPEDITED defines the type for an expedited proposal.
+    Expedited = 4,
 }

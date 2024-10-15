@@ -24,6 +24,7 @@ type Proposal @entity {
   title: String!
   summary: String!
   metadata: String
+  proposal_type: ProposalType!
 
   # proposal state
   status: ProposalStatus!
@@ -53,6 +54,14 @@ enum ProposalStatus {
   Failed
   Canceled
   Dropped
+}
+
+enum ProposalType {
+  Unspecified
+  Standard
+  MultipleChoice
+  Optimistic
+  Expedited
 }
 
 type Vote @entity {

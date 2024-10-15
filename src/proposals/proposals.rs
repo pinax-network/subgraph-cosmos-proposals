@@ -92,7 +92,7 @@ fn set_proposal_v1beta1(row: &mut Row, msg: &MsgSubmitProposalV1Beta1) {
     if let Some(first_message) = msg.messages.first() {
         let proposer = msg.proposer.as_str();
         let (title, summary) = decode_text_proposal(first_message);
-        set_proposal_metadata(row, proposer, &title, &summary, "");
+        set_proposal_metadata(row, proposer, &title, &summary, "", "Standard");
     }
 }
 
@@ -101,7 +101,20 @@ fn set_proposal_v1(row: &mut Row, msg: &MsgSubmitProposalV1) {
     let title = msg.title.as_str();
     let summary = msg.summary.as_str();
     let metadata = msg.metadata.as_str();
-    set_proposal_metadata(row, proposer, title, summary, metadata);
+    let proposal_type = msg.proposal_type.unwrap_or(-1);
+    let mut type_str = "Standard".to_string();
+
+    if proposal_type == -1 {
+        // expedited is deprecated, but fallback to check if the proposal is expedited
+        let expedited = msg.expedited.unwrap_or(false);
+        if expedited {
+            type_str = "Expedited".to_string();
+        }
+    } else {
+        type_str = proposal_type_to_string(proposal_type);
+    }
+
+    set_proposal_metadata(row, proposer, title, summary, metadata, &type_str);
 }
 
 fn set_proposal_messages<T>(tables: &mut Tables, msg: &T, proposal_id: &str)
@@ -135,11 +148,19 @@ impl HasMessages for MsgSubmitProposalV1Beta1 {
     }
 }
 
-pub fn set_proposal_metadata(row: &mut Row, proposer: &str, title: &str, summary: &str, metadata: &str) {
+pub fn set_proposal_metadata(
+    row: &mut Row,
+    proposer: &str,
+    title: &str,
+    summary: &str,
+    metadata: &str,
+    proposal_type: &str,
+) {
     row.set("proposer", proposer)
         .set("title", title)
         .set("summary", summary)
-        .set("metadata", metadata);
+        .set("metadata", metadata)
+        .set("proposal_type", proposal_type);
 }
 
 pub fn set_proposal_entity(
@@ -153,6 +174,7 @@ pub fn set_proposal_entity(
     if message.type_url.to_string().len() == 0 {
         panic!("Empty type_url in proposal");
     }
+
     row.set("transaction", tx_hash)
         .set("block", &clock.id)
         .set("authority", authority)
@@ -168,4 +190,16 @@ pub fn decode_text_proposal(content: &Any) -> (String, String) {
         description = partially_decoded.description;
     }
     (title, description)
+}
+
+fn proposal_type_to_string(proposal_type: i32) -> String {
+    match proposal_type {
+        // 0 : PROPOSAL_TYPE_UNSPECIFIED defines no proposal type, which fallback to PROPOSAL_TYPE_STANDARD.
+        0 => "Standard".to_string(),
+        1 => "Standard".to_string(),
+        2 => "MultipleChoice".to_string(),
+        3 => "Optimistic".to_string(),
+        4 => "Expedited".to_string(),
+        _ => "Unknown".to_string(),
+    }
 }
