@@ -121,12 +121,12 @@ type DepositParams @entity {
   id: ID!
 
   # deposit parameters
-  min_deposit: [MinDeposit!]! @derivedFrom(field: "depositParams")
+  min_deposit: [MinDeposit!]! @derivedFrom(field: "deposit_params")
   max_deposit_period: String!
 
   # derive from
   block: Block!
-  transaction: Transaction!
+  transaction: Transaction
   governance_parameters: GovernanceParameters!
 }
 
@@ -134,7 +134,7 @@ type MinDeposit @entity {
   id: ID!
 
   # min deposit
-  amount: String!
+  amount: BigInt!
   denom: String!
 
   # derive from
@@ -150,7 +150,7 @@ type VotingParams @entity {
 
   # derive from
   block: Block!
-  transaction: Transaction!
+  transaction: Transaction
   governance_parameters: GovernanceParameters!
 }
 
@@ -158,13 +158,13 @@ type TallyParams @entity {
   id: ID!
 
   # tally parameters
-  quorum: String!
-  threshold: String!
-  veto_threshold: String!
+  quorum: BigDecimal!
+  threshold: BigDecimal!
+  veto_threshold: BigDecimal!
 
   # derive from
   block: Block!
-  transaction: Transaction!
+  transaction: Transaction
   governance_parameters: GovernanceParameters!
 }
 

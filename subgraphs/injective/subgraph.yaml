@@ -15,8 +15,8 @@ dataSources:
       # startBlock: 60343991
       # startBlock: 51589432
       # startBlock: 21632894
-      # startBlock: 0
-      startBlock: 64035868
+      startBlock: 0
+      #startBlock: 64035868
       package:
         moduleName: graph_out
         file: ../../cosmos-proposals-v0.1.0.spkg
@@ -24,16 +24,16 @@ dataSources:
         # https://github.com/InjectiveLabs/mainnet-config/blob/master/10001/genesis.json
         params: '{
           "deposit_params": {
-            "min_deposit": [{ "denom": "inj", "amount": "500000000000000000000"}],
-            "max_deposit_period": "172800000000000"
+          "min_deposit": [{ "denom": "inj", "amount": "500000000000000000000"}],
+          "max_deposit_period": "172800000000000"
           },
-            "voting_params": {
-            "voting_period": "172800000000000"
+          "voting_params": {
+          "voting_period": "172800000000000"
           },
           "tally_params": {
-            "quorum": "0.334000000000000000",
-            "threshold": "0.500000000000000000",
-            "veto_threshold": "0.334000000000000000"
+          "quorum": "0.334000000000000000",
+          "threshold": "0.500000000000000000",
+          "veto_threshold": "0.334000000000000000"
           }}'
 
     mapping:
