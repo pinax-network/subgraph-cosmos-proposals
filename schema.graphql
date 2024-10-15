@@ -109,9 +109,9 @@ type GovernanceParameters @entity {
   id: ID!
 
   # governance parameters
-  depositParams: DepositParams!
-  votingParams: VotingParams!
-  tallyParams: TallyParams!
+  deposit_params: DepositParams!
+  voting_params: VotingParams!
+  tally_params: TallyParams!
 
   # derive from
   block: Block!
@@ -121,13 +121,13 @@ type DepositParams @entity {
   id: ID!
 
   # deposit parameters
-  minDeposit: [MinDeposit!]! @derivedFrom(field: "depositParams")
-  maxDepositPeriod: String!
+  min_deposit: [MinDeposit!]! @derivedFrom(field: "depositParams")
+  max_deposit_period: String!
 
   # derive from
   block: Block!
   transaction: Transaction!
-  governanceParameters: GovernanceParameters!
+  governance_parameters: GovernanceParameters!
 }
 
 type MinDeposit @entity {
@@ -139,19 +139,19 @@ type MinDeposit @entity {
 
   # derive from
   block: Block!
-  depositParams: DepositParams!
+  deposit_params: DepositParams!
 }
 
 type VotingParams @entity {
   id: ID!
 
   # voting parameters
-  votingPeriod: String!
+  voting_period: String!
 
   # derive from
   block: Block!
   transaction: Transaction!
-  governanceParameters: GovernanceParameters!
+  governance_parameters: GovernanceParameters!
 }
 
 type TallyParams @entity {
@@ -160,12 +160,12 @@ type TallyParams @entity {
   # tally parameters
   quorum: String!
   threshold: String!
-  vetoThreshold: String!
+  veto_threshold: String!
 
   # derive from
   block: Block!
   transaction: Transaction!
-  governanceParameters: GovernanceParameters!
+  governance_parameters: GovernanceParameters!
 }
 
 type SoftwareUpgradeProposal @entity {
@@ -187,8 +187,8 @@ type CommunityPoolSpend @entity {
 
 type ClientUpdate @entity {
   id: ID!
-  subjectClientId: String!
-  substituteClientId: String!
+  subject_client_id: String!
+  substitute_client_id: String!
   proposal: Proposal!
 }
 

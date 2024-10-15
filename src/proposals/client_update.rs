@@ -7,8 +7,8 @@ pub fn create_client_update(tables: &mut Tables, content: &Any, proposal_id: &st
     if let Ok(msg) = <ClientUpdateProposal as prost::Message>::decode(content.value.as_slice()) {
         tables
             .create_row("ClientUpdate", &proposal_id)
-            .set("subjectClientId", msg.subject_client_id.as_str())
-            .set("substituteClientId", msg.substitute_client_id.as_str())
+            .set("subject_client_id", msg.subject_client_id.as_str())
+            .set("substitute_client_id", msg.substitute_client_id.as_str())
             .set("proposal", proposal_id);
     }
 }
