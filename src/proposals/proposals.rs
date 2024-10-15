@@ -175,11 +175,14 @@ pub fn set_proposal_entity(
         panic!("Empty type_url in proposal");
     }
 
+    let submit_time = clock.timestamp.as_ref().expect("missing timestamp");
+
     row.set("transaction", tx_hash)
         .set("block", &clock.id)
         .set("authority", authority)
         .set("type", message.type_url.to_string())
-        .set("status", "DepositPeriod");
+        .set("status", "DepositPeriod")
+        .set("submit_time", submit_time);
 }
 
 pub fn decode_text_proposal(content: &Any) -> (String, String) {
