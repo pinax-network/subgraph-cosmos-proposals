@@ -26,8 +26,7 @@ pub fn push_genesis_params(tables: &mut Tables, clock: &Clock, params: &String) 
 
         tables
             .create_row("GovernanceParameters", &clock.id)
-            .set("block", &clock.id)
-            .set("transaction", &clock.id);
+            .set("block", &clock.id);
 
         create_deposit_params(tables, &clock, &min_deposit, &max_deposit_period);
         create_voting_params(tables, &clock, &voting_period);
