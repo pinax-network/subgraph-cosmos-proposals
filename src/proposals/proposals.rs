@@ -32,7 +32,7 @@ pub fn handle_proposals(tables: &mut Tables, clock: &Clock, message: &Any, tx_re
             handle_exec_proposal(tables, clock, message, tx_result, tx_hash, &proposal_id, &status)
         }
         "/cosmos.gov.v1beta1.MsgVote" => create_vote(tables, message, tx_result, clock, tx_hash),
-        "/cosmos.gov.v1beta1.MsgDeposit" => create_deposit(tables, message, clock, tx_hash),
+        "/cosmos.gov.v1beta1.MsgDeposit" => create_deposit(tables, message, clock, tx_result, tx_hash),
         _ => {}
     }
 }
