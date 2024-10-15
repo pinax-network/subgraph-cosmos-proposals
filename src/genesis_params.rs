@@ -24,6 +24,11 @@ pub fn push_genesis_params(tables: &mut Tables, clock: &Clock, params: &String) 
         let threshold = tally_params.threshold;
         let veto_threshold = tally_params.veto_threshold;
 
+        tables
+            .create_row("GovernanceParameters", &clock.id)
+            .set("block", &clock.id)
+            .set("transaction", &clock.id);
+
         create_deposit_params(tables, &clock, &min_deposit, &max_deposit_period);
         create_voting_params(tables, &clock, &voting_period);
         create_tally_params(tables, &clock, &quorum, &threshold, &veto_threshold);
