@@ -7,7 +7,14 @@ type Block @entity {
 
 type Transaction @entity {
   id: ID!
+  code: BigInt!
   codespace: String!
+  gas_used: BigInt!
+  gas_wanted: BigInt!
+  info: String!
+  log: String!
+  auth_info: String
+  signatures: String
   # derive from
   block: Block!
 }

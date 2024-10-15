@@ -208,6 +208,10 @@ pub fn set_proposal_entity(
         .set("type", &message.type_url)
         .set("status", status)
         .set("submit_time", submit_time);
+
+    if status == "VotingPeriod" {
+        row.set("voting_start_time", submit_time);
+    }
 }
 
 pub fn decode_text_proposal(content: &Any) -> (String, String) {

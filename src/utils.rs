@@ -65,8 +65,8 @@ pub fn extract_proposal_status(tx_result: &substreams_cosmos::pb::TxResults) -> 
         .find(|attr| attr.key == "voting_period_start");
 
     if voting_period_start.is_none() {
-        "VotingPeriod"
-    } else {
         "DepositPeriod"
+    } else {
+        "VotingPeriod"
     }
 }

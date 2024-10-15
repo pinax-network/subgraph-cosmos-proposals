@@ -1,3 +1,4 @@
+use crate::pb::cosmos::tx::v1beta1::Tx;
 use sha2::{Digest, Sha256};
 use substreams::pb::substreams::Clock;
 use substreams::Hex;
@@ -12,15 +13,28 @@ pub fn push_transactions(block: &Block, tables: &mut Tables, clock: &Clock) {
         let tx_hash = compute_tx_hash(&block.txs[i]);
         let tx_as_bytes = block.txs[i].as_slice();
 
-        create_transaction(tables, tx_result, &tx_hash, clock);
-        push_messages(tables, tx_result, clock, &tx_hash, tx_as_bytes);
+        let tx_as_bytes = tx_as_bytes;
+
+        if let Ok(tx) = <Tx as prost::Message>::decode(tx_as_bytes) {
+            create_transaction(tables, tx_result, clock, &tx_hash, &tx);
+            if let Some(body) = tx.body {
+                push_messages(tables, tx_result, clock, &tx_hash, &body.messages);
+            }
+        }
     }
 }
 
-fn create_transaction(tables: &mut Tables, tx_result: &TxResults, tx_hash: &str, clock: &Clock) {
+fn create_transaction(tables: &mut Tables, tx_result: &TxResults, clock: &Clock, tx_hash: &str, tx: &Tx) {
+    // TODO: handle auth_info and signatures
+
     tables
         .create_row("Transaction", tx_hash)
         .set("codespace", &tx_result.codespace)
+        .set("code", tx_result.code)
+        .set("gas_used", tx_result.gas_used)
+        .set("gas_wanted", tx_result.gas_wanted)
+        .set("info", tx_result.info.as_str())
+        .set("log", tx_result.log.as_str())
         .set("block", &clock.id);
 }
 

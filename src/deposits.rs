@@ -18,7 +18,7 @@ pub fn create_deposit(tables: &mut Tables, msg: &Any, clock: &Clock, tx_result: 
         let proposal_status = extract_proposal_status(tx_result);
 
         // If this deposit started the deposit period, update the proposal status
-        if proposal_status == "DepositPeriod" {
+        if proposal_status == "VotingPeriod" {
             let timestamp = clock.timestamp.as_ref().expect("timestamp not found");
             tables
                 .update_row("Proposal", &proposal_id)
