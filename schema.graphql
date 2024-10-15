@@ -28,15 +28,21 @@ type Proposal @entity {
   # proposal state
   status: ProposalStatus!
 
-  # content
-  content: String!
-  content_type: String!
-
   # derive from
   block: Block!
   transaction: Transaction!
   votes: [Vote!]! @derivedFrom(field: "proposal")
   deposits: [Deposit!]! @derivedFrom(field: "proposal")
+  messages: [ProposalMessage!]! @derivedFrom(field: "proposal")
+}
+
+type ProposalMessage @entity {
+  id: ID!
+  message_index: BigInt! # the message's index in the "messages" proposal field
+  type: String! # the message type (e.g "/cosmwasm.wasm.v1.MsgStoreCode")
+  raw_data: String! # undecoded message value in Hex
+  json_data: String # decoded JSON value
+  proposal: Proposal!
 }
 
 enum ProposalStatus {

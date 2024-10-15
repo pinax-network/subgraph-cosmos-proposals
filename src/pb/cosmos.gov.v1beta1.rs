@@ -246,8 +246,8 @@ impl ProposalStatus {
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct MsgSubmitProposal {
     /// content is the proposal's content.
-    #[prost(message, optional, tag = "1")]
-    pub content: ::core::option::Option<::prost_types::Any>,
+    #[prost(message, repeated, tag = "1")]
+    pub messages: ::prost::alloc::vec::Vec<::prost_types::Any>,
     /// initial_deposit is the deposit value that must be paid at proposal submission.
     #[prost(message, repeated, tag = "2")]
     pub initial_deposit: ::prost::alloc::vec::Vec<super::super::base::v1beta1::Coin>,

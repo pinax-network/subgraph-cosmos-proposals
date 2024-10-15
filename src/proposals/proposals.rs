@@ -33,18 +33,7 @@ pub fn handle_proposals(
                 let row = tables.create_row("Proposal", &proposal_id);
                 set_proposal_entity(row, clock, message, tx_result, tx_hash);
                 set_proposal_v1(row, &msg);
-
-                if let Some(content) = msg.content.as_ref() {
-                    match content.type_url.as_str() {
-                        "/cosmos.upgrade.v1beta1.MsgSoftwareUpgrade" => {
-                            create_software_upgrade(tables, content, &proposal_id);
-                        }
-                        "/cosmos.distribution.v1beta1.MsgCommunityPoolSpend" => {
-                            create_community_pool_spend(tables, content, &proposal_id);
-                        }
-                        _ => {}
-                    }
-                }
+                set_proposal_messages(tables, &msg, &proposal_id);
             }
         }
         "/cosmos.gov.v1beta1.MsgSubmitProposal" => {
@@ -52,20 +41,21 @@ pub fn handle_proposals(
                 let row = tables.create_row("Proposal", &proposal_id);
                 set_proposal_entity(row, clock, message, tx_result, tx_hash);
                 set_proposal_v1beta1(row, &msg);
+                set_proposal_messages(tables, &msg, &proposal_id);
 
-                if let Some(content) = msg.content.as_ref() {
-                    match content.type_url.as_str() {
+                if let Some(first_message) = msg.messages.first() {
+                    match first_message.type_url.as_str() {
                         "/cosmos.upgrade.v1beta1.SoftwareUpgradeProposal" => {
-                            create_software_upgrade(tables, content, &proposal_id);
+                            create_software_upgrade(tables, first_message, &proposal_id);
                         }
                         "/cosmos.params.v1beta1.ParameterChangeProposal" => {
-                            create_parameter_change_proposal(tables, content, &proposal_id);
+                            create_parameter_change_proposal(tables, first_message, &proposal_id);
                         }
                         "/cosmos.distribution.v1beta1.CommunityPoolSpendProposal" => {
-                            create_community_pool_spend(tables, content, &proposal_id);
+                            create_community_pool_spend(tables, first_message, &proposal_id);
                         }
                         "/ibc.core.client.v1.ClientUpdateProposal" => {
-                            create_client_update(tables, content, &proposal_id);
+                            create_client_update(tables, first_message, &proposal_id);
                         }
                         _ => {}
                     }
@@ -79,9 +69,11 @@ pub fn handle_proposals(
                     if let Ok(msg) = MsgSubmitProposalV1::decode(msg.value.as_slice()) {
                         set_proposal_entity(row, clock, message, tx_result, tx_hash);
                         set_proposal_v1(row, &msg);
+                        set_proposal_messages(tables, &msg, &proposal_id);
                     } else if let Ok(msg) = MsgSubmitProposalV1Beta1::decode(msg.value.as_slice()) {
                         set_proposal_entity(row, clock, message, tx_result, tx_hash);
                         set_proposal_v1beta1(row, &msg);
+                        set_proposal_messages(tables, &msg, &proposal_id);
                     }
                 }
             }
@@ -97,11 +89,10 @@ pub fn handle_proposals(
 }
 
 fn set_proposal_v1beta1(row: &mut Row, msg: &MsgSubmitProposalV1Beta1) {
-    if let Some(content) = msg.content.as_ref() {
+    if let Some(first_message) = msg.messages.first() {
         let proposer = msg.proposer.as_str();
-        let (title, summary) = decode_text_proposal(content);
+        let (title, summary) = decode_text_proposal(first_message);
         set_proposal_metadata(row, proposer, &title, &summary, "");
-        set_content(row, &content);
     }
 }
 
@@ -111,14 +102,37 @@ fn set_proposal_v1(row: &mut Row, msg: &MsgSubmitProposalV1) {
     let summary = msg.summary.as_str();
     let metadata = msg.metadata.as_str();
     set_proposal_metadata(row, proposer, title, summary, metadata);
-    if let Some(content) = msg.content.as_ref() {
-        set_content(row, &content);
+}
+
+fn set_proposal_messages<T>(tables: &mut Tables, msg: &T, proposal_id: &str)
+where
+    T: HasMessages,
+{
+    for (i, message) in msg.get_messages().iter().enumerate() {
+        let id = format!("{}-{}", proposal_id, i);
+        tables
+            .create_row("ProposalMessage", &id)
+            .set("message_index", i as u8)
+            .set("type", message.type_url.as_str())
+            .set("raw_data", Hex::encode(&message.value))
+            .set("proposal", proposal_id);
     }
 }
 
-fn set_content(row: &mut Row, content: &Any) {
-    row.set("content", Hex::encode(&content.value))
-        .set("content_type", content.type_url.as_str());
+trait HasMessages {
+    fn get_messages(&self) -> &Vec<prost_types::Any>;
+}
+
+impl HasMessages for MsgSubmitProposalV1 {
+    fn get_messages(&self) -> &Vec<prost_types::Any> {
+        &self.messages
+    }
+}
+
+impl HasMessages for MsgSubmitProposalV1Beta1 {
+    fn get_messages(&self) -> &Vec<prost_types::Any> {
+        &self.messages
+    }
 }
 
 pub fn set_proposal_metadata(row: &mut Row, proposer: &str, title: &str, summary: &str, metadata: &str) {
