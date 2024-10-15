@@ -109,9 +109,9 @@ type GovernanceParameters @entity {
   id: ID!
 
   # governance parameters
-  deposit_params: DepositParams!
-  voting_params: VotingParams!
-  tally_params: TallyParams!
+  deposit_params: DepositParams! @derivedFrom(field: "governance_parameters")
+  voting_params: VotingParams! @derivedFrom(field: "governance_parameters")
+  tally_params: TallyParams! @derivedFrom(field: "governance_parameters")
 
   # derive from
   block: Block!
