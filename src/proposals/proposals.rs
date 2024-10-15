@@ -73,10 +73,15 @@ pub fn handle_proposals(
             }
         }
         "/cosmos.authz.v1beta1.MsgExec" => {
-            if let Ok(message) = MsgExec::decode(buf) {
-                for msg in message.msgs {
+            if let Ok(msg_exec) = MsgExec::decode(buf) {
+                for msg in msg_exec.msgs {
+                    let row = tables.create_row("Proposal", &proposal_id);
                     if let Ok(msg) = MsgSubmitProposalV1::decode(msg.value.as_slice()) {
+                        set_proposal_entity(row, clock, message, tx_result, tx_hash);
+                        set_proposal_v1(row, &msg);
                     } else if let Ok(msg) = MsgSubmitProposalV1Beta1::decode(msg.value.as_slice()) {
+                        set_proposal_entity(row, clock, message, tx_result, tx_hash);
+                        set_proposal_v1beta1(row, &msg);
                     }
                 }
             }

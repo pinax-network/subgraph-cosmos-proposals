@@ -17,7 +17,7 @@ fn update_proposal_status(event: &substreams_cosmos::pb::Event, tables: &mut Tab
         get_attribute_value(event, "proposal_result"),
     ) {
         let frm_status = format_proposal_status(&status);
-        tables.update_row("Proposal", proposal_id).set("status", frm_status);
+        // tables.update_row("Proposal", proposal_id).set("status", frm_status);
     }
 }
 

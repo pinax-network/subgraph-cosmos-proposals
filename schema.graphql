@@ -8,21 +8,8 @@ type Block @entity {
 type Transaction @entity {
   id: ID!
   codespace: String!
-
   # derive from
   block: Block!
-  events: [Event!]! @derivedFrom(field: "transaction")
-}
-
-type Attribute @entity {
-  id: ID!
-  key: String!
-  value: String!
-
-  # derive from
-  block: Block!
-  transaction: Transaction!
-  event: Event!
 }
 
 type Proposal @entity {
