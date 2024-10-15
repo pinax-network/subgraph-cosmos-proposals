@@ -23,7 +23,7 @@ pub fn create_deposit(tables: &mut Tables, msg: &Any, clock: &Clock, tx_result: 
             tables
                 .update_row("Proposal", &proposal_id)
                 .set("status", proposal_status)
-                .set("deposit_start_time", timestamp);
+                .set("voting_start_time", timestamp);
         }
 
         let id = format!("{}-{}", proposal_id, tx_hash);

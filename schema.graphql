@@ -28,7 +28,6 @@ type Proposal @entity {
 
   # timestamp
   submit_time: Timestamp!
-  deposit_start_time: Timestamp
   deposit_end_time: Timestamp
   voting_start_time: Timestamp
   voting_end_time: Timestamp
