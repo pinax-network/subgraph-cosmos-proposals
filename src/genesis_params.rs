@@ -9,7 +9,6 @@ pub fn push_genesis_params(tables: &mut Tables, clock: &Clock, params: &String) 
         create_block(tables, clock);
 
         let parsed: GenesisParams = serde_json::from_str(&params).expect("failed to parse genesis params");
-        log::debug!("GenesisParams: {:?}", parsed);
 
         let deposit_params = parsed.deposit_params;
         let min_deposit = deposit_params.min_deposit;
@@ -32,7 +31,6 @@ pub fn push_genesis_params(tables: &mut Tables, clock: &Clock, params: &String) 
         create_voting_params(tables, &block_number, &voting_period);
         create_tally_params(tables, &block_number, &quorum, &threshold, &veto_threshold);
 
-        // TO-DO: to remove for GenesisParameters
         create_block(tables, &clock);
     }
 }
