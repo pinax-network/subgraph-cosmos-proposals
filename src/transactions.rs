@@ -1,4 +1,5 @@
 use crate::pb::cosmos::tx::v1beta1::Tx;
+use base64::prelude::*;
 use sha2::{Digest, Sha256};
 use substreams::pb::substreams::Clock;
 use substreams::Hex;
@@ -25,7 +26,7 @@ pub fn push_transactions(block: &Block, tables: &mut Tables, clock: &Clock) {
 }
 
 fn create_transaction(tables: &mut Tables, tx_result: &TxResults, clock: &Clock, tx_hash: &str, tx: &Tx) {
-    // TODO: handle auth_info and signatures
+    // TODO: handle auth_info
 
     tables
         .create_row("Transaction", tx_hash)
@@ -36,6 +37,19 @@ fn create_transaction(tables: &mut Tables, tx_result: &TxResults, clock: &Clock,
         .set("info", tx_result.info.as_str())
         .set("log", tx_result.log.as_str())
         .set("block", &clock.id);
+
+    create_signatures(tables, tx_hash, tx);
+}
+
+fn create_signatures(tables: &mut Tables, tx_hash: &str, tx: &Tx) {
+    for (index, signature) in tx.signatures.iter().enumerate() {
+        let signature_id = format!("{}-{}", tx_hash, index);
+        let encoded = BASE64_STANDARD.encode(signature.as_slice());
+        tables
+            .create_row("Signature", &signature_id)
+            .set("signature", encoded)
+            .set("transaction", tx_hash);
+    }
 }
 
 pub fn _code_to_string(code: u32) -> String {

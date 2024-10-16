@@ -13,10 +13,17 @@ type Transaction @entity {
   gas_wanted: BigInt!
   info: String!
   log: String!
+  signatures: [Signature!]! @derivedFrom(field: "transaction")
   auth_info: String
-  signatures: String
+
   # derive from
   block: Block!
+}
+
+type Signature @entity {
+  id: ID!
+  signature: String!
+  transaction: Transaction!
 }
 
 type Proposal @entity {
