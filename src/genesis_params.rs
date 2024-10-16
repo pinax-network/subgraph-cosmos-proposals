@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use substreams::{log, pb::substreams::Clock};
+use substreams::pb::substreams::Clock;
 use substreams_entity_change::tables::Tables;
 
 use crate::blocks::create_block;
@@ -24,7 +24,7 @@ pub fn push_genesis_params(tables: &mut Tables, clock: &Clock, params: &String) 
 
         let block_number = clock.number.to_string();
         tables
-            .create_row("GovernanceParameters", &block_number)
+            .create_row("GovernanceParameter", &block_number)
             .set("block", &block_number);
 
         create_deposit_params(tables, &block_number, &min_deposit, &max_deposit_period);
@@ -42,7 +42,7 @@ fn create_deposit_params(
     max_deposit_period: &str,
 ) {
     tables
-        .create_row("DepositParams", block_number)
+        .create_row("DepositParam", block_number)
         .set("max_deposit_period", max_deposit_period)
         .set("block", block_number)
         .set("governance_parameters", block_number);
@@ -61,7 +61,7 @@ fn create_deposit_params(
 
 fn create_voting_params(tables: &mut Tables, block_number: &str, voting_period: &str) {
     tables
-        .create_row("VotingParams", block_number)
+        .create_row("VotingParam", block_number)
         .set("voting_period", voting_period)
         .set("governance_parameters", block_number)
         .set("block", block_number);
@@ -75,7 +75,7 @@ fn create_tally_params(
     veto_threshold: &String,
 ) {
     tables
-        .create_row("TallyParams", block_number)
+        .create_row("TallyParam", block_number)
         .set_bigdecimal("quorum", quorum)
         .set_bigdecimal("threshold", threshold)
         .set_bigdecimal("veto_threshold", veto_threshold)

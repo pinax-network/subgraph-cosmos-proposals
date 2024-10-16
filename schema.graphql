@@ -112,7 +112,7 @@ type Deposit @entity {
   proposal: Proposal!
 }
 
-type GovernanceParameters @entity {
+type GovernanceParameter @entity {
   id: ID!
 
   # governance parameters
@@ -124,7 +124,7 @@ type GovernanceParameters @entity {
   block: Block!
 }
 
-type DepositParams @entity {
+type DepositParam @entity {
   id: ID!
 
   # deposit parameters
@@ -148,7 +148,7 @@ type MinDeposit @entity {
   deposit_params: DepositParams!
 }
 
-type VotingParams @entity {
+type VotingParam @entity {
   id: ID!
 
   # voting parameters
@@ -159,7 +159,7 @@ type VotingParams @entity {
   governance_parameters: GovernanceParameters!
 }
 
-type TallyParams @entity {
+type TallyParam @entity {
   id: ID!
 
   # tally parameters
