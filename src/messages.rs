@@ -1,4 +1,3 @@
-use crate::pb::cosmos::tx::v1beta1::TxBody;
 use crate::proposals::proposals::handle_proposals;
 use substreams::pb::substreams::Clock;
 use substreams_cosmos::pb::TxResults;
