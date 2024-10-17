@@ -1,5 +1,5 @@
 specVersion: 1.1.0
-description: Cosmos Governance Proposals
+description: Injective Governance Proposals
 repository: https://github.com/pinax-network/subgraph-cosmos-proposals
 schema:
   file: ../../schema.graphql
@@ -7,7 +7,7 @@ indexerHints:
   prune: never
 dataSources:
   - kind: substreams
-    name: cosmos_proposals
+    name: injective_proposals
     network: injective
     source:
       # startBlock: 82182057
