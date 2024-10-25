@@ -116,9 +116,9 @@ type GovernanceParameter @entity {
   id: ID!
 
   # governance parameters
-  deposit_params: DepositParams! @derivedFrom(field: "governance_parameters")
-  voting_params: VotingParams! @derivedFrom(field: "governance_parameters")
-  tally_params: TallyParams! @derivedFrom(field: "governance_parameters")
+  deposit_params: DepositParam! @derivedFrom(field: "governance_parameter")
+  voting_params: VotingParam! @derivedFrom(field: "governance_parameter")
+  tally_params: TallyParam! @derivedFrom(field: "governance_parameter")
 
   # derive from
   block: Block!
@@ -128,35 +128,23 @@ type DepositParam @entity {
   id: ID!
 
   # deposit parameters
-  min_deposit: [MinDeposit!]! @derivedFrom(field: "deposit_params")
-  max_deposit_period: String!
+  min_deposit: [String!]! # 512000000 uatom
+  max_deposit_period: BigInt!
 
-  # derive from
+  # deriveFrom
   block: Block!
-  governance_parameters: GovernanceParameters!
-}
-
-type MinDeposit @entity {
-  id: ID!
-
-  # min deposit
-  amount: BigInt!
-  denom: String!
-
-  # derive from
-  block: Block!
-  deposit_params: DepositParams!
+  governance_parameter: GovernanceParameter!
 }
 
 type VotingParam @entity {
   id: ID!
 
   # voting parameters
-  voting_period: String!
+  voting_period: BigInt!
 
-  # derive from
+  # deriveFrom
   block: Block!
-  governance_parameters: GovernanceParameters!
+  governance_parameter: GovernanceParameter!
 }
 
 type TallyParam @entity {
@@ -167,9 +155,9 @@ type TallyParam @entity {
   threshold: BigDecimal!
   veto_threshold: BigDecimal!
 
-  # derive from
+  # deriveFrom
   block: Block!
-  governance_parameters: GovernanceParameters!
+  governance_parameter: GovernanceParameter!
 }
 
 type SoftwareUpgradeProposal @entity {
