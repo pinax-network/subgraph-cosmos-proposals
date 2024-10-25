@@ -1,4 +1,5 @@
 use substreams::pb::substreams::Clock;
+use substreams_cosmos::pb::TxResults;
 
 use crate::pb::cosmos::base::v1beta1::Coin;
 
@@ -26,6 +27,16 @@ pub fn extract_proposal_id(
                 clock.number, tx_hash
             )
         })
+}
+
+pub fn extract_proposal_id_from_tx(tx_result: &TxResults) -> Option<String> {
+    tx_result
+        .events
+        .iter()
+        .filter(|event| event.r#type == "submit_proposal")
+        .flat_map(|event| event.attributes.iter())
+        .find(|attr| attr.key == "proposal_id")
+        .map(|attr| attr.value.clone())
 }
 
 pub fn extract_authority(tx_result: &substreams_cosmos::pb::TxResults) -> &str {

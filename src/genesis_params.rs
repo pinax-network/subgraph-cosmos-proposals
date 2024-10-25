@@ -8,7 +8,7 @@ pub fn push_genesis_params(tables: &mut Tables, clock: &Clock, params: &String) 
     if params.len() > 0 && clock.number == 1 {
         create_block(tables, clock);
 
-        let parsed: GenesisParams = serde_json::from_str(&params).expect("failed to parse genesis params");
+        let parsed: GovParams = serde_json::from_str(&params).expect("failed to parse genesis params");
 
         let deposit_params = parsed.deposit_params;
         let min_deposit = deposit_params.min_deposit;
@@ -108,7 +108,7 @@ pub struct TallyParams {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct GenesisParams {
+pub struct GovParams {
     pub deposit_params: DepositParams,
     pub voting_params: VotingParams,
     pub tally_params: TallyParams,

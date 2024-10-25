@@ -2,6 +2,7 @@ mod block_events;
 mod blocks;
 mod deposits;
 mod genesis_params;
+mod gov_params_store;
 mod messages;
 mod pb;
 mod proposals;
