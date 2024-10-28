@@ -267,9 +267,9 @@ pub fn set_proposal_entity(
         .set("status", status)
         .set("submit_time", submit_time)
         .set("deposit_end_time", deposit_end_time)
-        .set("quorum", quorum)
-        .set("threshold", threshold)
-        .set("veto_threshold", veto_threshold)
+        .set_bigdecimal("quorum", quorum)
+        .set_bigdecimal("threshold", threshold)
+        .set_bigdecimal("veto_threshold", veto_threshold)
         .set("min_deposit", min_deposit_str)
         .set_bigint("max_deposit_period", &max_deposit_period)
         .set_bigint("voting_period", &voting_period);
