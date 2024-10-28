@@ -1,3 +1,4 @@
+use prost_types::Timestamp;
 use substreams::pb::substreams::Clock;
 use substreams_cosmos::pb::TxResults;
 
@@ -79,5 +80,17 @@ pub fn extract_proposal_status(tx_result: &substreams_cosmos::pb::TxResults) -> 
         "DepositPeriod"
     } else {
         "VotingPeriod"
+    }
+}
+
+pub fn add_nanoseconds_to_timestamp(timestamp: &Timestamp, nanoseconds: &str) -> Timestamp {
+    let nanoseconds = nanoseconds.parse::<u128>().expect("Failed to parse nanoseconds");
+
+    let total_nanos = timestamp.nanos as u128 + (nanoseconds % 1_000_000_000);
+    let extra_seconds = total_nanos / 1_000_000_000;
+
+    Timestamp {
+        seconds: timestamp.seconds + (nanoseconds / 1_000_000_000) as i64 + extra_seconds as i64,
+        nanos: timestamp.nanos,
     }
 }

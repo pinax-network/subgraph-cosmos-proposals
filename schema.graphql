@@ -1,4 +1,4 @@
-type Block @entity {
+àtype Block @entity {
   id: ID!
   number: BigInt!
   timestamp: BigInt!
@@ -39,6 +39,14 @@ type Proposal @entity {
   summary: String!
   metadata: String
   proposal_type: ProposalType!
+
+  # governance parameters
+  quorum: BigDecimal!
+  threshold: BigDecimal!
+  veto_threshold: BigDecimal!
+  min_deposit: [String!]!
+  max_deposit_period: BigInt!
+  voting_period: BigInt!
 
   # timestamp
   submit_time: Timestamp!

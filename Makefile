@@ -10,7 +10,7 @@ build:
 
 .PHONY: gui
 gui:
-	substreams gui . -e mainnet.injective.streamingfast.io:443 graph_out -s 82182057
+	substreams gui . -e mainnet.injective.streamingfast.io:443 graph_out -s 8982722 -t 9157418
 
 .PHONY: cache
 cache:
