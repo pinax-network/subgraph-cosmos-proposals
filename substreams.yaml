@@ -23,6 +23,12 @@ modules:
       - map: block_index:map_blocks
     output:
       type: proto:sf.substreams.sink.entity.v1.EntityChanges
+  - name: custom_events
+    kind: map
+    inputs:
+      - source: sf.cosmos.type.v2.Block
+    output:
+      type: proto:custom_events.ProposalEvents
 
 params:
   # Governance Genesis Parameters as JSON

@@ -14,10 +14,7 @@ crate-type = ["cdylib"]
 [dependencies]
 substreams = "0.6"
 substreams-entity-change = "2.0"
-# substreams-cosmos = "0.2"
-substreams-cosmos = { git = "https://github.com/pinax-network/substreams-cosmos", branch = "hotfix/bump-neoeinstein-prost", package = "substreams-cosmos" }
-# substreams-entity-change = { git = "https://github.com/streamingfast/substreams-sink-entity-changes", branch = "develop", package = "substreams-entity-change" }
-sha2 = "0.10.8"
+substreams-cosmos = "0.2"
 prost = "0.13"
 prost-types = "0.13"
 serde = { version = "1.0", features = ["derive"] }
