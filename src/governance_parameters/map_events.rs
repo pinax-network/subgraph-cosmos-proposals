@@ -1,38 +1,37 @@
-use prost::Message;
-use serde::Deserialize;
-use serde::Serialize;
-use substreams::pb::substreams::Clock;
-use substreams::store::Appender;
-use substreams::store::StoreAppend;
-use substreams_cosmos::pb::TxResults;
-use substreams_cosmos::Block;
-
-use crate::pb::cosmos::params::v1beta1::ParameterChangeProposal;
-use crate::pb::cosmos::tx::v1beta1::Tx;
-use crate::utils::extract_proposal_id_from_tx;
-use crate::utils::get_attribute_value;
+use substreams_cosmos::{pb::TxResults, Block};
 
 use crate::pb::cosmos::gov::v1beta1::MsgSubmitProposal as MsgSubmitProposalV1Beta1;
+use crate::pb::cosmos::params::v1beta1::ParameterChangeProposal;
+use crate::pb::cosmos::tx::v1beta1::Tx;
+use crate::utils::{extract_proposal_id_from_tx, get_attribute_value};
 
-#[substreams::handlers::store]
-pub fn store_gov_params(genesis_params: String, clock: Clock, block: Block, store: StoreAppend<String>) {
-    if clock.number == 1 {
-        store.append(0, "genesis_params", genesis_params);
-        return;
+#[substreams::handlers::map]
+pub fn map_events(block: Block) -> ProposalEvents {
+    let proposal_events = ProposalEvents {
+        gov_params_changes: extract_param_change_proposals(&block),
+        passed_proposal_ids: extract_passed_proposal_ids(&block),
+    };
+
+    proposal_events
+}
+
+fn extract_passed_proposal_ids(block: &Block) -> Vec<String> {
+    let mut proposals_passed = Vec::new();
+
+    let proposal_updates = block.events.iter().filter(|event| event.r#type == "active_proposal");
+
+    for proposal_update in proposal_updates {
+        if let (Some(proposal_id), Some(status)) = (
+            get_attribute_value(proposal_update, "proposal_id"),
+            get_attribute_value(proposal_update, "proposal_result"),
+        ) {
+            if status == "proposal_passed" {
+                proposals_passed.push(proposal_id);
+            }
+        }
     }
 
-    let param_change_proposals = extract_param_change_proposals(&block);
-    let passed_proposal_ids = extract_passed_proposal_ids(&block);
-
-    // Store the proposals that change the governance parameters
-    for proposal in param_change_proposals {
-        store.append(0, "gov_param_proposals", serde_json::to_string(&proposal).unwrap());
-    }
-
-    // Store the IDs of the proposals that passed
-    for proposal_id in passed_proposal_ids {
-        store.append(0, "passed_proposal_ids", proposal_id);
-    }
+    proposals_passed
 }
 
 fn extract_param_change_proposals(block: &Block) -> Vec<GovParamsOptional> {
@@ -85,25 +84,6 @@ fn extract_parameter_change_proposal(tx_result: &TxResults, tx_bytes: &[u8]) -> 
     None
 }
 
-fn extract_passed_proposal_ids(block: &Block) -> Vec<String> {
-    let mut proposals_passed = Vec::new();
-
-    let proposal_updates = block.events.iter().filter(|event| event.r#type == "active_proposal");
-
-    for proposal_update in proposal_updates {
-        if let (Some(proposal_id), Some(status)) = (
-            get_attribute_value(proposal_update, "proposal_id"),
-            get_attribute_value(proposal_update, "proposal_result"),
-        ) {
-            if status == "proposal_passed" {
-                proposals_passed.push(proposal_id);
-            }
-        }
-    }
-
-    proposals_passed
-}
-
 fn process_proposal_changes(proposal: &ParameterChangeProposal, proposal_id: String) -> Option<GovParamsOptional> {
     let gov_changes = proposal
         .changes
@@ -116,7 +96,7 @@ fn process_proposal_changes(proposal: &ParameterChangeProposal, proposal_id: Str
     }
 
     let mut gov_params = GovParamsOptional {
-        proposal_id: Some(proposal_id),
+        proposal_id: proposal_id,
         deposit_params: None,
         voting_params: None,
         tally_params: None,
@@ -138,36 +118,4 @@ fn process_proposal_changes(proposal: &ParameterChangeProposal, proposal_id: Str
     }
 
     Some(gov_params)
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-pub struct DepositParamsOptional {
-    pub min_deposit: Option<Vec<Deposit>>,
-    pub max_deposit_period: Option<String>,
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-pub struct Deposit {
-    pub denom: String,
-    pub amount: String,
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-pub struct VotingParamsOptional {
-    pub voting_period: Option<String>,
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-pub struct TallyParamsOptional {
-    pub quorum: Option<String>,
-    pub threshold: Option<String>,
-    pub veto_threshold: Option<String>,
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-pub struct GovParamsOptional {
-    pub proposal_id: Option<String>,
-    pub deposit_params: Option<DepositParamsOptional>,
-    pub voting_params: Option<VotingParamsOptional>,
-    pub tally_params: Option<TallyParamsOptional>,
 }

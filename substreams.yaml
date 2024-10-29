@@ -21,36 +21,14 @@ modules:
       - params: string
       - source: sf.substreams.v1.Clock
       - map: block_index:map_blocks
-      - store: store_gov_params
     output:
       type: proto:sf.substreams.sink.entity.v1.EntityChanges
-  - name: store_gov_params
-    kind: store
-    updatePolicy: append
-    valueType: string
-    inputs:
-      - params: string
-      - source: sf.substreams.v1.Clock
-      - map: block_index:map_blocks
 
 params:
   # Governance Genesis Parameters as JSON
   # See /subgraphs/injective/subgraph.yaml for an example
   # Only applied on block number 1
   graph_out: '{
-    "deposit_params": {
-    "min_deposit": [{"denom": "uatom", "amount": "512000000"}],
-    "max_deposit_period": "1209600000000000"
-    },
-    "voting_params": {
-    "voting_period": "1209600000000000"
-    },
-    "tally_params": {
-    "quorum": "0.400000000000000000",
-    "threshold": "0.500000000000000000",
-    "veto_threshold": "0.334000000000000000"
-    }}'
-  store_gov_params: '{
     "deposit_params": {
     "min_deposit": [{"denom": "uatom", "amount": "512000000"}],
     "max_deposit_period": "1209600000000000"
