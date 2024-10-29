@@ -15,6 +15,7 @@ crate-type = ["cdylib"]
 substreams = "0.6"
 substreams-entity-change = "2.0"
 substreams-cosmos = "0.2"
+sha2 = "0.10.8"
 prost = "0.13"
 prost-types = "0.13"
 serde = { version = "1.0", features = ["derive"] }
