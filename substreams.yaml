@@ -21,6 +21,7 @@ modules:
       - params: string
       - source: sf.substreams.v1.Clock
       - map: block_index:map_blocks
+      - store: gov_params
     output:
       type: proto:sf.substreams.sink.entity.v1.EntityChanges
   - name: custom_events
@@ -29,12 +30,25 @@ modules:
       - source: sf.cosmos.type.v2.Block
     output:
       type: proto:custom_events.ProposalEvents
-
+  - name: pending_gov_params
+    kind: store
+    updatePolicy: set
+    valueType: string
+    inputs:
+      - source: custom_events.ProposalEvents
+  - name: gov_params
+    kind: store
+    updatePolicy: set
+    valueType: string
+    inputs:
+      - params: string
+      - source: sf.substreams.v1.Clock
+      - store: pending_gov_params
 params:
   # Governance Genesis Parameters as JSON
   # See /subgraphs/injective/subgraph.yaml for an example
   # Only applied on block number 1
-  graph_out: '{
+  gov_params: '{
     "deposit_params": {
     "min_deposit": [{"denom": "uatom", "amount": "512000000"}],
     "max_deposit_period": "1209600000000000"
