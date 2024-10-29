@@ -35,7 +35,7 @@ modules:
     updatePolicy: set
     valueType: string
     inputs:
-      - source: custom_events.ProposalEvents
+      - map: custom_events
   - name: gov_params
     kind: store
     updatePolicy: set
