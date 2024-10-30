@@ -1,4 +1,3 @@
-use cosmos_proposals::pb::cosmos::custom_events::{GovParamsOptional, ProposalEvents};
 use prost::Message;
 use substreams::errors::Error;
 use substreams_cosmos::{pb::TxResults, Block};
@@ -7,6 +6,8 @@ use cosmos_proposals::pb::cosmos::gov::v1beta1::MsgSubmitProposal as MsgSubmitPr
 use cosmos_proposals::pb::cosmos::params::v1beta1::ParameterChangeProposal;
 use cosmos_proposals::pb::cosmos::tx::v1beta1::Tx;
 use cosmos_proposals::utils::{extract_proposal_id_from_tx, get_attribute_value};
+
+use crate::pb::cosmos::custom_events::{GovParamsOptional, ProposalEvents};
 
 #[substreams::handlers::map]
 pub fn map_events(block: Block) -> Result<ProposalEvents, Error> {
