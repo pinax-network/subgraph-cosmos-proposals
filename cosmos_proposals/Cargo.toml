@@ -4,6 +4,9 @@ edition = { workspace = true }
 version = { workspace = true }
 
 
+[lib]
+crate-type = ["cdylib", "lib"]
+
 [dependencies]
 substreams.workspace = true
 substreams-entity-change.workspace = true

@@ -7,12 +7,11 @@ package:
 
 imports:
   entity_changes: https://github.com/streamingfast/substreams-sink-entity-changes/releases/download/v1.3.2/substreams-sink-entity-changes-v1.3.2.spkg
-  block_index: ./block-index/cosmos-block-index-v0.1.0.spkg
 
 binaries:
   default:
     type: wasm/rust-v1
-    file: target/wasm32-unknown-unknown/release/cosmos_governance_parameters.wasm
+    file: ../target/wasm32-unknown-unknown/release/cosmos_governance_parameters.wasm
 
 modules:
   - name: map_events
