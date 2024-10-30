@@ -19,7 +19,7 @@ modules:
     inputs:
       - source: sf.cosmos.type.v2.Block
     output:
-      type: proto:cosmos.events.ProposalEvents
+      type: proto:pb.events.ProposalEvents
   - name: pending_gov_params
     kind: store
     updatePolicy: set

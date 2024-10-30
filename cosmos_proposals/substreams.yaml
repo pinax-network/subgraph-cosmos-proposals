@@ -8,6 +8,7 @@ package:
 imports:
   entity_changes: https://github.com/streamingfast/substreams-sink-entity-changes/releases/download/v1.3.2/substreams-sink-entity-changes-v1.3.2.spkg
   block_index: ../block-index/cosmos-block-index-v0.1.0.spkg
+  cosmos_governance_parameters: ../cosmos_governance_parameters/cosmos-governance-parameters-v0.1.0.spkg
 
 binaries:
   default:
@@ -21,48 +22,10 @@ modules:
       - params: string
       - source: sf.substreams.v1.Clock
       - map: block_index:map_blocks
-      - store: gov_params
+      - store: cosmos_governance_parameters:gov_params
     output:
       type: proto:sf.substreams.sink.entity.v1.EntityChanges
-  - name: map_events
-    kind: map
-    inputs:
-      - source: sf.cosmos.type.v2.Block
-    output:
-      type: proto:cosmos.events.ProposalEvents
-  - name: pending_gov_params
-    kind: store
-    updatePolicy: set
-    valueType: string
-    inputs:
-      - map: map_events
-  - name: gov_params
-    kind: store
-    updatePolicy: set
-    valueType: string
-    inputs:
-      - params: string
-      - source: sf.substreams.v1.Clock
-      - map: map_events
-      - store: pending_gov_params
 params:
-  # Governance Genesis Parameters as JSON
-  # See /subgraphs/injective/subgraph.yaml for an example
-  # Only applied on block number 1
-  gov_params: '{
-    "deposit_params": {
-    "min_deposit": [{"denom": "uatom", "amount": "512000000"}],
-    "max_deposit_period": "1209600000000000"
-    },
-    "voting_params": {
-    "voting_period": "1209600000000000"
-    },
-    "tally_params": {
-    "quorum": "0.400000000000000000",
-    "threshold": "0.500000000000000000",
-    "veto_threshold": "0.334000000000000000"
-    }}'
-
   # Block Filter only Governance proposals events
   # improves Substreams syncing performance when using `--production-mode`
   block_index:map_blocks: "message:cosmos.gov.v1beta1 || message:cosmos.gov.v1 || type:active_proposal || type:signal_proposal || type:inactive_proposal || type:submit_proposal || block.number:1"
