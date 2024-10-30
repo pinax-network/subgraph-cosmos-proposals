@@ -13,7 +13,7 @@ pub fn gov_params(
     gov_params: StoreSetString,
 ) {
     if clock.number == 1 {
-        return set_genesis_params(&gov_params, &genesis_params);
+        set_genesis_params(&gov_params, &genesis_params);
     }
 
     for passed_proposal_id in proposal_events.passed_proposal_ids {

@@ -1,18 +1,19 @@
+use substreams::errors::Error;
 use substreams_cosmos::{pb::TxResults, Block};
 
-use crate::pb::cosmos::gov::v1beta1::MsgSubmitProposal as MsgSubmitProposalV1Beta1;
 use crate::pb::cosmos::params::v1beta1::ParameterChangeProposal;
 use crate::pb::cosmos::tx::v1beta1::Tx;
 use crate::utils::{extract_proposal_id_from_tx, get_attribute_value};
+use cosmos_proposals::pb::cosmos::gov::v1beta1::MsgSubmitProposal as MsgSubmitProposalV1Beta1;
 
 #[substreams::handlers::map]
-pub fn map_events(block: Block) -> ProposalEvents {
+pub fn map_events(block: Block) -> Result<ProposalEvents, Error> {
     let proposal_events = ProposalEvents {
         gov_params_changes: extract_param_change_proposals(&block),
         passed_proposal_ids: extract_passed_proposal_ids(&block),
     };
 
-    proposal_events
+    Ok(proposal_events)
 }
 
 fn extract_passed_proposal_ids(block: &Block) -> Vec<String> {

@@ -1,4 +1,7 @@
 pub mod cosmos {
+    pub mod custom_events {
+        include!("cosmos.custom_events.rs");
+    }
     pub mod tx {
         pub mod signing {
             // @@protoc_insertion_point(attribute:cosmos.tx.signing.v1beta1)

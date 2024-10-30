@@ -1,7 +1,7 @@
 # requires substreams v1.7.1 and above
 specVersion: v0.1.0
 package:
-  name: cosmos_proposals
+  name: cosmos_governance_parameters
   version: v0.1.0
   url: https://github.com/pinax-network/subgraph-cosmos-proposals
 
@@ -15,15 +15,6 @@ binaries:
     file: target/wasm32-unknown-unknown/release/cosmos_proposals.wasm
 
 modules:
-  - name: graph_out
-    kind: map
-    inputs:
-      - params: string
-      - source: sf.substreams.v1.Clock
-      - map: block_index:map_blocks
-      - store: gov_params
-    output:
-      type: proto:sf.substreams.sink.entity.v1.EntityChanges
   - name: map_events
     kind: map
     inputs:
@@ -46,9 +37,6 @@ modules:
       - map: map_events
       - store: pending_gov_params
 params:
-  # Governance Genesis Parameters as JSON
-  # See /subgraphs/injective/subgraph.yaml for an example
-  # Only applied on block number 1
   gov_params: '{
     "deposit_params": {
     "min_deposit": [{"denom": "uatom", "amount": "512000000"}],
@@ -62,7 +50,3 @@ params:
     "threshold": "0.500000000000000000",
     "veto_threshold": "0.334000000000000000"
     }}'
-
-  # Block Filter only Governance proposals events
-  # improves Substreams syncing performance when using `--production-mode`
-  block_index:map_blocks: "message:cosmos.gov.v1beta1 || message:cosmos.gov.v1 || type:active_proposal || type:signal_proposal || type:inactive_proposal || type:submit_proposal || block.number:1"

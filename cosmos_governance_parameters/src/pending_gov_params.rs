@@ -1,3 +1,4 @@
+use cosmos_proposals::pb::cosmos::custom_events::ProposalEvents;
 use substreams::store::StoreNew;
 use substreams::store::StoreSet;
 use substreams::store::StoreSetString;
