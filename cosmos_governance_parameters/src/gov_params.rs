@@ -1,8 +1,14 @@
 use substreams::pb::substreams::Clock;
 use substreams::store::StoreGet;
 use substreams::store::StoreGetString;
+use substreams::store::StoreNew;
 
-use crate::genesis_params::GovParams;
+use cosmos_proposals::genesis_params::GovParams;
+use substreams::store::StoreSet;
+use substreams::store::StoreSetString;
+
+use crate::pb::pb::events::GovParamsOptional;
+use crate::pb::pb::events::ProposalEvents;
 
 #[substreams::handlers::store]
 pub fn gov_params(

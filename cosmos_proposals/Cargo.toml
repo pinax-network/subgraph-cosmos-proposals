@@ -3,8 +3,6 @@ name = "cosmos_proposals"
 edition = { workspace = true }
 version = { workspace = true }
 
-[lib]
-crate-type = ["cdylib"]
 
 [dependencies]
 substreams.workspace = true
