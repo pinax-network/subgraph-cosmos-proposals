@@ -18,6 +18,8 @@ pub fn gov_params(
     pending_gov_params: StoreGetString,
     gov_params: StoreSetString,
 ) {
+    gov_params.set(0, "test", &"test");
+
     if clock.number == 1 {
         set_genesis_params(&gov_params, &genesis_params);
     }

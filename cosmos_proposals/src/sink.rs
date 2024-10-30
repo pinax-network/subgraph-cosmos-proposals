@@ -14,12 +14,13 @@ pub fn graph_out(
     block: Block,
     gov_params: StoreGetString,
 ) -> Result<EntityChanges, Error> {
-    let min_deposit = gov_params.get_first("min_deposit");
-    let max_deposit_period = gov_params.get_first("max_deposit_period");
-    let voting_period = gov_params.get_first("voting_period");
-    let quorum = gov_params.get_first("quorum");
-    let threshold = gov_params.get_first("threshold");
-    let veto_threshold = gov_params.get_first("veto_threshold");
+    let min_deposit = gov_params.get_at(0, "min_deposit");
+    let max_deposit_period = gov_params.get_at(0, "max_deposit_period");
+    let voting_period = gov_params.get_at(0, "voting_period");
+    let quorum = gov_params.get_at(0, "quorum");
+    let threshold = gov_params.get_at(0, "threshold");
+    let veto_threshold = gov_params.get_at(0, "veto_threshold");
+    let test = gov_params.get_at(0, "test");
 
     substreams::log::debug!("min_deposit: {:?}", min_deposit);
     substreams::log::debug!("max_deposit_period: {:?}", max_deposit_period);
@@ -27,7 +28,7 @@ pub fn graph_out(
     substreams::log::debug!("quorum: {:?}", quorum);
     substreams::log::debug!("threshold: {:?}", threshold);
     substreams::log::debug!("veto_threshold: {:?}", veto_threshold);
-    substreams::log::debug!("test: {:?}", gov_params.get_first("test"));
+    substreams::log::debug!("test: {:?}", test);
 
     let mut tables = Tables::new();
 
