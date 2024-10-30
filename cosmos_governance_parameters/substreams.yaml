@@ -5,6 +5,12 @@ package:
   version: v0.1.0
   url: https://github.com/pinax-network/subgraph-cosmos-proposals
 
+protobuf:
+  files:
+    - events.proto
+  importPaths:
+    - ./proto
+
 binaries:
   default:
     type: wasm/rust-v1
@@ -16,7 +22,7 @@ modules:
     inputs:
       - source: sf.cosmos.type.v2.Block
     output:
-      type: proto:pb.events.ProposalEvents
+      type: proto:cosmos.custom_events.ProposalEvents
   - name: pending_gov_params
     kind: store
     updatePolicy: set
