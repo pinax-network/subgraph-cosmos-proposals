@@ -5,9 +5,6 @@ package:
   version: v0.1.0
   url: https://github.com/pinax-network/subgraph-cosmos-proposals
 
-imports:
-  entity_changes: https://github.com/streamingfast/substreams-sink-entity-changes/releases/download/v2.0.0/substreams-entity-change-v2.0.0.spkg
-
 binaries:
   default:
     type: wasm/rust-v1
