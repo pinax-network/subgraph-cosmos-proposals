@@ -12,7 +12,7 @@ imports:
 binaries:
   default:
     type: wasm/rust-v1
-    file: target/wasm32-unknown-unknown/release/cosmos_proposals.wasm
+    file: target/wasm32-unknown-unknown/release/cosmos_governance_parameters.wasm
 
 modules:
   - name: map_events
