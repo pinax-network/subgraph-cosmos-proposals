@@ -16,19 +16,19 @@ dataSources:
         file: ../../cosmos_proposals/cosmos-proposals-v0.1.0.spkg
         # Governance Genesis Parameters as JSON
         # https://github.com/cosmos/testnets/blob/master/release/genesis.json.gz
-        params: '{
-          "deposit_params": {
-          "min_deposit": [{"amount": "1","denom": "uatom"}],
-          "max_deposit_period": "1209600000000"
-          },
-          "voting_params": {
-          "voting_period": "60000000"
-          },
-          "tally_params": {
-          "quorum": "0.000000000000000001",
-          "threshold": "0.000000000000000001",
-          "veto_threshold": "0.334000000000000000"
-          }}'
+        # params: '{
+        #   "deposit_params": {
+        #   "min_deposit": [{"amount": "1","denom": "uatom"}],
+        #   "max_deposit_period": "1209600000000"
+        #   },
+        #   "voting_params": {
+        #   "voting_period": "60000000"
+        #   },
+        #   "tally_params": {
+        #   "quorum": "0.000000000000000001",
+        #   "threshold": "0.000000000000000001",
+        #   "veto_threshold": "0.334000000000000000"
+        #   }}'
 
     mapping:
       kind: substreams/graph-entities

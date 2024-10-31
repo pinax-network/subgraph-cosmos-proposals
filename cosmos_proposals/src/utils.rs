@@ -1,5 +1,8 @@
 use prost_types::Timestamp;
+use sha2::{Digest, Sha256};
 use substreams::pb::substreams::Clock;
+use substreams::prelude::StoreGetString;
+use substreams::store::StoreGet;
 use substreams_cosmos::pb::TxResults;
 
 use crate::pb::cosmos::base::v1beta1::Coin;
@@ -93,4 +96,58 @@ pub fn add_nanoseconds_to_timestamp(timestamp: &Timestamp, nanoseconds: &str) ->
         seconds: timestamp.seconds + (nanoseconds / 1_000_000_000) as i64 + extra_seconds as i64,
         nanos: timestamp.nanos,
     }
+}
+
+pub fn extract_gov_params(gov_params: &StoreGetString) -> GovernanceParamsFlat {
+    let min_deposit = gov_params.get_at(0, "min_deposit").expect("missing min_deposit");
+    let min_deposit_arr = build_min_deposit_array(&min_deposit);
+
+    let max_deposit_period = gov_params
+        .get_at(0, "max_deposit_period")
+        .expect("missing max_deposit_period");
+    let voting_period = gov_params.get_at(0, "voting_period").expect("missing voting_period");
+    let quorum = gov_params.get_at(0, "quorum").expect("missing quorum");
+    let threshold = gov_params.get_at(0, "threshold").expect("missing threshold");
+    let veto_threshold = gov_params.get_at(0, "veto_threshold").expect("missing veto_threshold");
+
+    let concatenated = format!(
+        "{}{}{}{}{}{}",
+        min_deposit, max_deposit_period, voting_period, quorum, threshold, veto_threshold
+    );
+
+    let hashed_id = format!("{:x}", Sha256::digest(concatenated.as_bytes()));
+
+    GovernanceParamsFlat {
+        hashed_id,
+        min_deposit: min_deposit_arr,
+        max_deposit_period,
+        voting_period,
+        quorum,
+        threshold,
+        veto_threshold,
+    }
+}
+
+fn build_min_deposit_array(min_deposit: &str) -> Vec<String> {
+    serde_json::from_str::<Vec<serde_json::Value>>(min_deposit)
+        .expect("invalid min_deposit format")
+        .iter()
+        .map(|item| {
+            format!(
+                "{} {}",
+                item["amount"].as_str().unwrap_or_default(),
+                item["denom"].as_str().unwrap_or_default()
+            )
+        })
+        .collect()
+}
+
+pub struct GovernanceParamsFlat {
+    pub hashed_id: String,
+    pub min_deposit: Vec<String>,
+    pub max_deposit_period: String,
+    pub voting_period: String,
+    pub quorum: String,
+    pub threshold: String,
+    pub veto_threshold: String,
 }

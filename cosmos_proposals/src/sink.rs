@@ -1,38 +1,20 @@
+use crate::utils::extract_gov_params;
 use crate::{
-    block_events::push_block_events, blocks::create_block, genesis_params::push_genesis_params,
+    block_events::push_block_events, blocks::create_block, genesis_params::push_gov_params,
     transactions::push_transactions,
 };
-use substreams::store::{StoreGet, StoreGetArray, StoreGetString};
+use substreams::store::{StoreGet, StoreGetString};
 use substreams::{errors::Error, pb::substreams::Clock};
 use substreams_cosmos::Block;
 use substreams_entity_change::{pb::entity::EntityChanges, tables::Tables};
 
 #[substreams::handlers::map]
-pub fn graph_out(
-    params: String,
-    clock: Clock,
-    block: Block,
-    gov_params: StoreGetString,
-) -> Result<EntityChanges, Error> {
-    let min_deposit = gov_params.get_at(0, "min_deposit");
-    let max_deposit_period = gov_params.get_at(0, "max_deposit_period");
-    let voting_period = gov_params.get_at(0, "voting_period");
-    let quorum = gov_params.get_at(0, "quorum");
-    let threshold = gov_params.get_at(0, "threshold");
-    let veto_threshold = gov_params.get_at(0, "veto_threshold");
-    let test = gov_params.get_at(0, "test");
-
-    substreams::log::debug!("min_deposit: {:?}", min_deposit);
-    substreams::log::debug!("max_deposit_period: {:?}", max_deposit_period);
-    substreams::log::debug!("voting_period: {:?}", voting_period);
-    substreams::log::debug!("quorum: {:?}", quorum);
-    substreams::log::debug!("threshold: {:?}", threshold);
-    substreams::log::debug!("veto_threshold: {:?}", veto_threshold);
-    substreams::log::debug!("test: {:?}", test);
-
+pub fn graph_out(clock: Clock, block: Block, gov_params_store: StoreGetString) -> Result<EntityChanges, Error> {
     let mut tables = Tables::new();
 
-    push_genesis_params(&mut tables, &clock, &params);
+    let gov_params = extract_gov_params(&gov_params_store);
+
+    push_gov_params(&mut tables, &clock, &gov_params);
     push_transactions(&block, &mut tables, &clock, &gov_params);
     push_block_events(&block, &mut tables);
 

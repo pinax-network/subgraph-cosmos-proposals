@@ -1,4 +1,5 @@
 use crate::pb::cosmos::tx::v1beta1::Tx;
+use crate::utils::GovernanceParamsFlat;
 use base64::prelude::*;
 use sha2::{Digest, Sha256};
 use substreams::pb::substreams::Clock;
@@ -10,7 +11,7 @@ use substreams_entity_change::tables::Tables;
 
 use crate::messages::push_messages;
 
-pub fn push_transactions(block: &Block, tables: &mut Tables, clock: &Clock, gov_params: &StoreGetString) {
+pub fn push_transactions(block: &Block, tables: &mut Tables, clock: &Clock, gov_params: &GovernanceParamsFlat) {
     for (i, tx_result) in block.tx_results.iter().enumerate() {
         let tx_hash = compute_tx_hash(&block.txs[i]);
         let tx_as_bytes = block.txs[i].as_slice();
@@ -20,7 +21,7 @@ pub fn push_transactions(block: &Block, tables: &mut Tables, clock: &Clock, gov_
         if let Ok(tx) = <Tx as prost::Message>::decode(tx_as_bytes) {
             create_transaction(tables, tx_result, clock, &tx_hash, &tx);
             if let Some(body) = tx.body {
-                push_messages(tables, tx_result, clock, &tx_hash, &body.messages, gov_params);
+                push_messages(tables, tx_result, clock, &tx_hash, &body.messages, &gov_params);
             }
         }
     }
