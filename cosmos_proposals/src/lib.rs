@@ -1,7 +1,7 @@
 mod block_events;
 mod blocks;
 mod deposits;
-pub mod genesis_params;
+pub mod governance_params;
 mod messages;
 pub mod pb;
 mod proposals;

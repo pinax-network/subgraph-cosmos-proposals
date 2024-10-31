@@ -5,14 +5,11 @@ use crate::pb::cosmos::{
     gov::v1beta1::{MsgSubmitProposal as MsgSubmitProposalV1Beta1, TextProposal},
 };
 use crate::utils::{
-    add_nanoseconds_to_timestamp, extract_authority, extract_gov_params, extract_proposal_id, extract_proposal_status,
-    GovernanceParamsFlat,
+    add_nanoseconds_to_timestamp, extract_authority, extract_proposal_id, extract_proposal_status, GovernanceParamsFlat,
 };
 use crate::votes::create_vote;
 use prost::Message;
 use prost_types::{Any, Timestamp};
-use substreams::store::StoreGet;
-use substreams::store::StoreGetString;
 use substreams::{pb::substreams::Clock, Hex};
 use substreams_cosmos::pb::TxResults;
 use substreams_entity_change::tables::{Row, Tables};

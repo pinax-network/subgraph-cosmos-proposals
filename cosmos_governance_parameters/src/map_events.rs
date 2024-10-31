@@ -1,6 +1,5 @@
 use prost::Message;
 use substreams::errors::Error;
-use substreams::pb::substreams::Clock;
 use substreams_cosmos::{pb::TxResults, Block};
 
 use cosmos_proposals::pb::cosmos::gov::v1beta1::MsgSubmitProposal as MsgSubmitProposalV1Beta1;

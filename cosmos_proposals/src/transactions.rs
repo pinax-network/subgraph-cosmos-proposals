@@ -3,7 +3,6 @@ use crate::utils::GovernanceParamsFlat;
 use base64::prelude::*;
 use sha2::{Digest, Sha256};
 use substreams::pb::substreams::Clock;
-use substreams::store::StoreGetString;
 use substreams::Hex;
 use substreams_cosmos::pb::TxResults;
 use substreams_cosmos::Block;
