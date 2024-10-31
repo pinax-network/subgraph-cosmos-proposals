@@ -1,5 +1,4 @@
 use crate::deposits::create_deposit;
-use crate::genesis_params::GovParams;
 use crate::pb::cosmos::{
     authz::v1beta1::MsgExec,
     gov::v1::MsgSubmitProposal as MsgSubmitProposalV1,
@@ -9,6 +8,8 @@ use crate::utils::{add_nanoseconds_to_timestamp, extract_authority, extract_prop
 use crate::votes::create_vote;
 use prost::Message;
 use prost_types::Any;
+use substreams::store::StoreGet;
+use substreams::store::StoreGetString;
 use substreams::{pb::substreams::Clock, Hex};
 use substreams_cosmos::pb::TxResults;
 use substreams_entity_change::tables::{Row, Tables};
@@ -18,22 +19,50 @@ use super::{
     parameter_changes::create_parameter_change_proposal, software_upgrades::create_software_upgrade,
 };
 
-pub fn handle_proposals(tables: &mut Tables, clock: &Clock, message: &Any, tx_result: &TxResults, tx_hash: &str) {
+pub fn handle_proposals(
+    tables: &mut Tables,
+    clock: &Clock,
+    message: &Any,
+    tx_result: &TxResults,
+    tx_hash: &str,
+    gov_params: &StoreGetString,
+) {
     let proposal_id = extract_proposal_id(tx_result, clock, tx_hash);
     let status = extract_proposal_status(tx_result);
 
     match message.type_url.as_str() {
-        "/cosmos.gov.v1.MsgSubmitProposal" => {
-            handle_v1_proposal(tables, clock, message, tx_result, tx_hash, &proposal_id, &status)
-        }
-        "/cosmos.gov.v1beta1.MsgSubmitProposal" => {
-            handle_v1beta1_proposal(tables, clock, message, tx_result, tx_hash, &proposal_id, &status)
-        }
-        "/cosmos.authz.v1beta1.MsgExec" => {
-            handle_exec_proposal(tables, clock, message, tx_result, tx_hash, &proposal_id, &status)
-        }
+        "/cosmos.gov.v1.MsgSubmitProposal" => handle_v1_proposal(
+            tables,
+            clock,
+            message,
+            tx_result,
+            tx_hash,
+            &proposal_id,
+            &status,
+            gov_params,
+        ),
+        "/cosmos.gov.v1beta1.MsgSubmitProposal" => handle_v1beta1_proposal(
+            tables,
+            clock,
+            message,
+            tx_result,
+            tx_hash,
+            &proposal_id,
+            &status,
+            gov_params,
+        ),
+        "/cosmos.authz.v1beta1.MsgExec" => handle_exec_proposal(
+            tables,
+            clock,
+            message,
+            tx_result,
+            tx_hash,
+            &proposal_id,
+            &status,
+            gov_params,
+        ),
         "/cosmos.gov.v1beta1.MsgVote" => create_vote(tables, message, tx_result, clock, tx_hash),
-        "/cosmos.gov.v1beta1.MsgDeposit" => create_deposit(tables, message, clock, tx_result, tx_hash),
+        "/cosmos.gov.v1beta1.MsgDeposit" => create_deposit(tables, message, clock, tx_result, tx_hash, gov_params),
         _ => {}
     }
 }
@@ -46,10 +75,11 @@ fn handle_v1_proposal(
     tx_hash: &str,
     proposal_id: &str,
     status: &str,
+    gov_params: &StoreGetString,
 ) {
     if let Ok(msg) = MsgSubmitProposalV1::decode(message.value.as_slice()) {
         let row = tables.create_row("Proposal", proposal_id);
-        set_proposal_entity(row, clock, message, tx_result, tx_hash, status);
+        set_proposal_entity(row, clock, message, tx_result, tx_hash, status, gov_params);
         set_proposal_v1(row, &msg);
         set_proposal_messages(tables, &msg, proposal_id);
     }
@@ -63,10 +93,11 @@ fn handle_v1beta1_proposal(
     tx_hash: &str,
     proposal_id: &str,
     status: &str,
+    gov_params: &StoreGetString,
 ) {
     if let Ok(msg) = MsgSubmitProposalV1Beta1::decode(message.value.as_slice()) {
         let row = tables.create_row("Proposal", proposal_id);
-        set_proposal_entity(row, clock, message, tx_result, tx_hash, status);
+        set_proposal_entity(row, clock, message, tx_result, tx_hash, status, gov_params);
         set_proposal_v1beta1(row, &msg);
         set_proposal_messages(tables, &msg, proposal_id);
 
@@ -84,11 +115,12 @@ fn handle_exec_proposal(
     tx_hash: &str,
     proposal_id: &str,
     status: &str,
+    gov_params: &StoreGetString,
 ) {
     if let Ok(msg_exec) = MsgExec::decode(message.value.as_slice()) {
         for msg in msg_exec.msgs {
             let row = tables.create_row("Proposal", proposal_id);
-            set_proposal_entity(row, clock, message, tx_result, tx_hash, status);
+            set_proposal_entity(row, clock, message, tx_result, tx_hash, status, gov_params);
 
             if let Ok(msg) = MsgSubmitProposalV1::decode(msg.value.as_slice()) {
                 set_proposal_v1(row, &msg);
@@ -195,12 +227,12 @@ pub fn set_proposal_entity(
     tx_result: &TxResults,
     tx_hash: &str,
     status: &str,
+    gov_params: &StoreGetString,
 ) {
     let authority = extract_authority(tx_result);
     if message.type_url.is_empty() {
         panic!("Empty type_url in proposal");
     }
-    let submit_time = clock.timestamp.as_ref().expect("missing timestamp");
 
     row.set("transaction", tx_hash)
         .set("block", &clock.id)
@@ -208,8 +240,32 @@ pub fn set_proposal_entity(
         .set("type", &message.type_url)
         .set("status", status);
 
+    set_proposal_gov_params(row, gov_params, clock, status);
+}
+
+fn set_proposal_gov_params(row: &mut Row, gov_params: &StoreGetString, clock: &Clock, status: &str) {
+    let submit_time = clock.timestamp.as_ref().expect("missing submit_time");
+    let max_deposit_period = gov_params
+        .get_at(0, "max_deposit_period")
+        .expect("missing max_deposit_period");
+    let voting_period = gov_params.get_at(0, "voting_period").expect("missing voting_period");
+    let quorum = gov_params.get_at(0, "quorum").expect("missing quorum");
+    let threshold = gov_params.get_at(0, "threshold").expect("missing threshold");
+    let veto_threshold = gov_params.get_at(0, "veto_threshold").expect("missing veto_threshold");
+
+    let deposit_end_time = add_nanoseconds_to_timestamp(submit_time, &max_deposit_period);
+
+    row.set("max_deposit_period", &max_deposit_period)
+        .set("voting_period", &voting_period)
+        .set("quorum", &quorum)
+        .set("threshold", &threshold)
+        .set("veto_threshold", &veto_threshold)
+        .set("deposit_end_time", &deposit_end_time);
+
     if status == "VotingPeriod" {
-        row.set("voting_start_time", submit_time);
+        let voting_end_time = add_nanoseconds_to_timestamp(submit_time, &voting_period);
+        row.set("voting_start_time", submit_time)
+            .set("voting_end_time", &voting_end_time);
     }
 }
 

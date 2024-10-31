@@ -33,7 +33,7 @@ pub fn graph_out(
     let mut tables = Tables::new();
 
     push_genesis_params(&mut tables, &clock, &params);
-    push_transactions(&block, &mut tables, &clock);
+    push_transactions(&block, &mut tables, &clock, &gov_params);
     push_block_events(&block, &mut tables);
 
     // only emit block Entity if previous entities were emitted

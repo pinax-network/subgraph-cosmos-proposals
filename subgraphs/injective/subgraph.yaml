@@ -19,21 +19,21 @@ dataSources:
       startBlock: 0
       package:
         moduleName: graph_out
-        file: ../../cosmos-proposals-v0.1.0.spkg
+        file: ../../cosmos_proposals/cosmos-proposals-v0.1.0.spkg
         # Governance Genesis Parameters as JSON
         # https://github.com/InjectiveLabs/mainnet-config/blob/master/10001/genesis.json
         params: '{
           "deposit_params": {
-            "min_deposit": [{ "denom": "inj", "amount": "500000000000000000000"}],
-            "max_deposit_period": "172800000000000"
+          "min_deposit": [{ "denom": "inj", "amount": "500000000000000000000"}],
+          "max_deposit_period": "172800000000000"
           },
           "voting_params": {
-            "voting_period": "172800000000000"
+          "voting_period": "172800000000000"
           },
           "tally_params": {
-            "quorum": "0.334000000000000000",
-            "threshold": "0.500000000000000000",
-            "veto_threshold": "0.334000000000000000"
+          "quorum": "0.334000000000000000",
+          "threshold": "0.500000000000000000",
+          "veto_threshold": "0.334000000000000000"
           }}'
 
     mapping:
