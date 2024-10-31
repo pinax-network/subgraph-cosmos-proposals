@@ -7,7 +7,7 @@ use crate::pb::cosmos::{
 use crate::utils::{add_nanoseconds_to_timestamp, extract_authority, extract_proposal_id, extract_proposal_status};
 use crate::votes::create_vote;
 use prost::Message;
-use prost_types::Any;
+use prost_types::{Any, Timestamp};
 use substreams::store::StoreGet;
 use substreams::store::StoreGetString;
 use substreams::{pb::substreams::Clock, Hex};
@@ -234,39 +234,57 @@ pub fn set_proposal_entity(
         panic!("Empty type_url in proposal");
     }
 
+    let submit_time = clock.timestamp.as_ref().expect("missing submit_time");
+
     row.set("transaction", tx_hash)
         .set("block", &clock.id)
         .set("authority", authority)
         .set("type", &message.type_url)
-        .set("status", status);
+        .set("status", status)
+        .set("submit_time", submit_time);
 
-    set_proposal_gov_params(row, gov_params, clock, status);
+    set_proposal_gov_params(row, gov_params, submit_time, status);
 }
 
-fn set_proposal_gov_params(row: &mut Row, gov_params: &StoreGetString, clock: &Clock, status: &str) {
-    let submit_time = clock.timestamp.as_ref().expect("missing submit_time");
+fn set_proposal_gov_params(row: &mut Row, gov_params: &StoreGetString, submit_time: &Timestamp, status: &str) {
     let max_deposit_period = gov_params
         .get_at(0, "max_deposit_period")
         .expect("missing max_deposit_period");
+    let min_deposit_str = gov_params.get_at(0, "min_deposit").expect("missing min_deposit");
+    let min_deposit_arr = build_min_deposit_array(&min_deposit_str);
     let voting_period = gov_params.get_at(0, "voting_period").expect("missing voting_period");
     let quorum = gov_params.get_at(0, "quorum").expect("missing quorum");
     let threshold = gov_params.get_at(0, "threshold").expect("missing threshold");
     let veto_threshold = gov_params.get_at(0, "veto_threshold").expect("missing veto_threshold");
-
     let deposit_end_time = add_nanoseconds_to_timestamp(submit_time, &max_deposit_period);
 
-    row.set("max_deposit_period", &max_deposit_period)
-        .set("voting_period", &voting_period)
-        .set("quorum", &quorum)
-        .set("threshold", &threshold)
-        .set("veto_threshold", &veto_threshold)
-        .set("deposit_end_time", &deposit_end_time);
+    row.set_bigint("max_deposit_period", &max_deposit_period)
+        .set_bigint("voting_period", &voting_period)
+        .set_bigdecimal("quorum", &quorum)
+        .set_bigdecimal("threshold", &threshold)
+        .set_bigdecimal("veto_threshold", &veto_threshold)
+        .set("deposit_end_time", &deposit_end_time)
+        .set("min_deposit", &min_deposit_arr);
 
     if status == "VotingPeriod" {
         let voting_end_time = add_nanoseconds_to_timestamp(submit_time, &voting_period);
         row.set("voting_start_time", submit_time)
             .set("voting_end_time", &voting_end_time);
     }
+}
+
+fn build_min_deposit_array(min_deposit: &str) -> Vec<String> {
+    serde_json::from_str::<Vec<serde_json::Value>>(min_deposit)
+        .expect("invalid min_deposit format")
+        .iter()
+        .map(|item| {
+            format!(
+                "{} {}",
+                item["amount"].as_str().unwrap_or_default(),
+                item["denom"].as_str().unwrap_or_default()
+            )
+        })
+        .collect()
 }
 
 pub fn decode_text_proposal(content: &Any) -> (String, String) {
