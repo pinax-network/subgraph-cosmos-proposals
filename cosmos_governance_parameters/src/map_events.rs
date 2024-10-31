@@ -1,18 +1,28 @@
+use prost::Message;
+use substreams::errors::Error;
+use substreams::pb::substreams::Clock;
 use substreams_cosmos::{pb::TxResults, Block};
 
-use crate::pb::cosmos::gov::v1beta1::MsgSubmitProposal as MsgSubmitProposalV1Beta1;
-use crate::pb::cosmos::params::v1beta1::ParameterChangeProposal;
-use crate::pb::cosmos::tx::v1beta1::Tx;
-use crate::utils::{extract_proposal_id_from_tx, get_attribute_value};
+use cosmos_proposals::pb::cosmos::gov::v1beta1::MsgSubmitProposal as MsgSubmitProposalV1Beta1;
+use cosmos_proposals::pb::cosmos::params::v1beta1::ParameterChangeProposal;
+use cosmos_proposals::pb::cosmos::tx::v1beta1::Tx;
+use cosmos_proposals::utils::{extract_proposal_id_from_tx, get_attribute_value};
+
+use crate::pb::cosmos::custom_events::{GovParamsOptional, ProposalEvents};
 
 #[substreams::handlers::map]
-pub fn map_events(block: Block) -> ProposalEvents {
-    let proposal_events = ProposalEvents {
+pub fn map_events(block: Block) -> Result<ProposalEvents, Error> {
+    let mut proposal_events = ProposalEvents {
         gov_params_changes: extract_param_change_proposals(&block),
         passed_proposal_ids: extract_passed_proposal_ids(&block),
     };
 
-    proposal_events
+    // Allows for gov_params to push the genesis parameters
+    if block.height == 1 {
+        proposal_events.passed_proposal_ids.push("-1".to_string());
+    }
+
+    Ok(proposal_events)
 }
 
 fn extract_passed_proposal_ids(block: &Block) -> Vec<String> {

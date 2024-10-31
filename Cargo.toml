@@ -1,17 +1,12 @@
-[package]
-name = "cosmos_proposals"
-version = "0.0.0"
+[workspace]
+members = ["cosmos_governance_parameters", "cosmos_proposals"]
+resolver = "2"
+
+[workspace.package]
 edition = "2021"
+version = "0.0.0"
 
-[profile.release]
-lto = true
-opt-level = "z"
-strip = "debuginfo"
-
-[lib]
-crate-type = ["cdylib"]
-
-[dependencies]
+[workspace.dependencies]
 substreams = "0.6"
 substreams-entity-change = "2.0"
 substreams-cosmos = "0.2"
@@ -21,3 +16,8 @@ prost-types = "0.13"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 base64 = "0.22.1"
+
+[profile.release]
+lto = true
+opt-level = "z"
+strip = "debuginfo"

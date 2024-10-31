@@ -1,8 +1,14 @@
 use substreams::pb::substreams::Clock;
 use substreams::store::StoreGet;
 use substreams::store::StoreGetString;
+use substreams::store::StoreNew;
 
-use crate::genesis_params::GovParams;
+use cosmos_proposals::genesis_params::GovParams;
+use substreams::store::StoreSet;
+use substreams::store::StoreSetString;
+
+use crate::pb::cosmos::custom_events::ProposalEvents;
+use crate::serde_structs::GovParamsOptional as GovParamsSerializable;
 
 #[substreams::handlers::store]
 pub fn gov_params(
@@ -12,8 +18,10 @@ pub fn gov_params(
     pending_gov_params: StoreGetString,
     gov_params: StoreSetString,
 ) {
+    gov_params.set(0, "test", &"test");
+
     if clock.number == 1 {
-        return set_genesis_params(&gov_params, &genesis_params);
+        set_genesis_params(&gov_params, &genesis_params);
     }
 
     for passed_proposal_id in proposal_events.passed_proposal_ids {
@@ -45,7 +53,8 @@ fn set_genesis_params(gov_params: &StoreSetString, genesis_params: &String) {
 }
 
 fn set_new_gov_params(gov_params: &StoreSetString, gov_param_proposal_str: &String) {
-    let parsed: GovParamsOptional = serde_json::from_str(&gov_param_proposal_str).expect("Failed to parse gov params");
+    let parsed: GovParamsSerializable =
+        serde_json::from_str(&gov_param_proposal_str).expect("Failed to parse gov params");
 
     if let Some(deposit_params) = parsed.deposit_params {
         if deposit_params.min_deposit.len() > 0 {
