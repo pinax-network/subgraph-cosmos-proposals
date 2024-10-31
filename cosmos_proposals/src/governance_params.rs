@@ -1,24 +1,23 @@
 use serde::{Deserialize, Serialize};
-use substreams::pb::substreams::Clock;
 use substreams_entity_change::tables::{Row, Tables};
 
 use crate::utils::GovernanceParamsFlat;
 
-pub fn push_gov_params(tables: &mut Tables, clock: &Clock, gov_params: &GovernanceParamsFlat) {
-    let block_number = clock.number.to_string();
+pub fn push_governance_params(tables: &mut Tables, gov_params: &GovernanceParamsFlat) {
+    let block_id = &gov_params.block_id_last_updated;
 
     tables
         .create_row("GovernanceParameter", &gov_params.hashed_id)
         .set("id", &gov_params.hashed_id)
-        .set("block", &block_number);
+        .set("block", block_id);
 
-    create_deposit_params(tables, &block_number, gov_params);
-    create_voting_params(tables, &block_number, gov_params);
-    create_tally_params(tables, &block_number, gov_params);
+    create_deposit_params(tables, block_id, gov_params);
+    create_voting_params(tables, block_id, gov_params);
+    create_tally_params(tables, block_id, gov_params);
 }
 
-fn add_governance_parameter_derive_from(row: &mut Row, block_number: &str, id: &str) {
-    row.set("block", block_number).set("governance_parameter", id);
+fn add_governance_parameter_derive_from(row: &mut Row, block_id: &str, id: &str) {
+    row.set("block", block_id).set("governance_parameter", id);
 }
 
 fn create_deposit_params(tables: &mut Tables, block_number: &str, gov_params: &GovernanceParamsFlat) {

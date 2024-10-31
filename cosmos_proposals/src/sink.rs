@@ -1,6 +1,6 @@
 use crate::utils::extract_gov_params;
 use crate::{
-    block_events::push_block_events, blocks::create_block, genesis_params::push_gov_params,
+    block_events::push_block_events, blocks::create_block, governance_params::push_governance_params,
     transactions::push_transactions,
 };
 use substreams::store::{StoreGet, StoreGetString};
@@ -14,7 +14,7 @@ pub fn graph_out(clock: Clock, block: Block, gov_params_store: StoreGetString) -
 
     let gov_params = extract_gov_params(&gov_params_store);
 
-    push_gov_params(&mut tables, &clock, &gov_params);
+    push_governance_params(&mut tables, &gov_params);
     push_transactions(&block, &mut tables, &clock, &gov_params);
     push_block_events(&block, &mut tables);
 

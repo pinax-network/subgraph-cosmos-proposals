@@ -109,6 +109,9 @@ pub fn extract_gov_params(gov_params: &StoreGetString) -> GovernanceParamsFlat {
     let quorum = gov_params.get_at(0, "quorum").expect("missing quorum");
     let threshold = gov_params.get_at(0, "threshold").expect("missing threshold");
     let veto_threshold = gov_params.get_at(0, "veto_threshold").expect("missing veto_threshold");
+    let block_id_last_updated = gov_params
+        .get_at(0, "block_id_last_updated")
+        .expect("missing block_id_last_updated");
 
     let concatenated = format!(
         "{}{}{}{}{}{}",
@@ -119,6 +122,7 @@ pub fn extract_gov_params(gov_params: &StoreGetString) -> GovernanceParamsFlat {
 
     GovernanceParamsFlat {
         hashed_id,
+        block_id_last_updated,
         min_deposit: min_deposit_arr,
         max_deposit_period,
         voting_period,
@@ -144,6 +148,7 @@ fn build_min_deposit_array(min_deposit: &str) -> Vec<String> {
 
 pub struct GovernanceParamsFlat {
     pub hashed_id: String,
+    pub block_id_last_updated: String,
     pub min_deposit: Vec<String>,
     pub max_deposit_period: String,
     pub voting_period: String,

@@ -3,7 +3,7 @@ use substreams::store::StoreGet;
 use substreams::store::StoreGetString;
 use substreams::store::StoreNew;
 
-use cosmos_proposals::genesis_params::GovParams;
+use cosmos_proposals::governance_params::GovParams;
 use substreams::store::StoreSet;
 use substreams::store::StoreSetString;
 
@@ -22,12 +22,14 @@ pub fn gov_params(
 
     if clock.number == 1 {
         set_genesis_params(&gov_params, &genesis_params);
+        gov_params.set(0, "block_id_last_updated", &clock.id);
     }
 
     for passed_proposal_id in proposal_events.passed_proposal_ids {
         let gov_param_proposal_str = pending_gov_params.get_at(0, &passed_proposal_id);
 
         if let Some(gov_param_proposal_str) = gov_param_proposal_str {
+            gov_params.set(0, "block_id_last_updated", &clock.id);
             set_new_gov_params(&gov_params, &gov_param_proposal_str);
         }
     }
