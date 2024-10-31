@@ -3,8 +3,8 @@ syntax = "proto3";
 package cosmos.custom_events;
 
 message ProposalEvents {
-    repeated GovParamsOptional gov_params_changes = 1;
-    repeated string passed_proposal_ids = 2;
+    repeated GovParamsOptional gov_params_changes = 2;
+    repeated string passed_proposal_ids = 3;
 }
 
 message DepositParamsOptional {

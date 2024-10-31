@@ -1,5 +1,6 @@
 use prost::Message;
 use substreams::errors::Error;
+use substreams::pb::substreams::Clock;
 use substreams_cosmos::{pb::TxResults, Block};
 
 use cosmos_proposals::pb::cosmos::gov::v1beta1::MsgSubmitProposal as MsgSubmitProposalV1Beta1;
@@ -11,10 +12,15 @@ use crate::pb::cosmos::custom_events::{GovParamsOptional, ProposalEvents};
 
 #[substreams::handlers::map]
 pub fn map_events(block: Block) -> Result<ProposalEvents, Error> {
-    let proposal_events = ProposalEvents {
+    let mut proposal_events = ProposalEvents {
         gov_params_changes: extract_param_change_proposals(&block),
         passed_proposal_ids: extract_passed_proposal_ids(&block),
     };
+
+    // Allows for gov_params to push the genesis parameters
+    if block.height == 1 {
+        proposal_events.passed_proposal_ids.push("-1".to_string());
+    }
 
     Ok(proposal_events)
 }

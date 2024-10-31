@@ -3,7 +3,6 @@ use substreams::store::StoreSet;
 use substreams::store::StoreSetString;
 
 use crate::pb::cosmos::custom_events::ProposalEvents;
-use crate::serde_structs::GovParamsOptional;
 
 #[substreams::handlers::store]
 pub fn pending_gov_params(proposal_events: ProposalEvents, store: StoreSetString) {
