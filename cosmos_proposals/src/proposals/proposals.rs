@@ -4,7 +4,10 @@ use crate::pb::cosmos::{
     gov::v1::MsgSubmitProposal as MsgSubmitProposalV1,
     gov::v1beta1::{MsgSubmitProposal as MsgSubmitProposalV1Beta1, TextProposal},
 };
-use crate::utils::{add_nanoseconds_to_timestamp, extract_authority, extract_proposal_id, extract_proposal_status};
+use crate::utils::{
+    add_nanoseconds_to_timestamp, extract_authority, extract_gov_params, extract_proposal_id, extract_proposal_status,
+    GovernanceParamsFlat,
+};
 use crate::votes::create_vote;
 use prost::Message;
 use prost_types::{Any, Timestamp};
@@ -25,7 +28,7 @@ pub fn handle_proposals(
     message: &Any,
     tx_result: &TxResults,
     tx_hash: &str,
-    gov_params: &StoreGetString,
+    gov_params: &GovernanceParamsFlat,
 ) {
     let proposal_id = extract_proposal_id(tx_result, clock, tx_hash);
     let status = extract_proposal_status(tx_result);
@@ -75,7 +78,7 @@ fn handle_v1_proposal(
     tx_hash: &str,
     proposal_id: &str,
     status: &str,
-    gov_params: &StoreGetString,
+    gov_params: &GovernanceParamsFlat,
 ) {
     if let Ok(msg) = MsgSubmitProposalV1::decode(message.value.as_slice()) {
         let row = tables.create_row("Proposal", proposal_id);
@@ -93,7 +96,7 @@ fn handle_v1beta1_proposal(
     tx_hash: &str,
     proposal_id: &str,
     status: &str,
-    gov_params: &StoreGetString,
+    gov_params: &GovernanceParamsFlat,
 ) {
     if let Ok(msg) = MsgSubmitProposalV1Beta1::decode(message.value.as_slice()) {
         let row = tables.create_row("Proposal", proposal_id);
@@ -115,7 +118,7 @@ fn handle_exec_proposal(
     tx_hash: &str,
     proposal_id: &str,
     status: &str,
-    gov_params: &StoreGetString,
+    gov_params: &GovernanceParamsFlat,
 ) {
     if let Ok(msg_exec) = MsgExec::decode(message.value.as_slice()) {
         for msg in msg_exec.msgs {
@@ -227,7 +230,7 @@ pub fn set_proposal_entity(
     tx_result: &TxResults,
     tx_hash: &str,
     status: &str,
-    gov_params: &StoreGetString,
+    gov_params: &GovernanceParamsFlat,
 ) {
     let authority = extract_authority(tx_result);
     if message.type_url.is_empty() {
@@ -246,45 +249,17 @@ pub fn set_proposal_entity(
     set_proposal_gov_params(row, gov_params, submit_time, status);
 }
 
-fn set_proposal_gov_params(row: &mut Row, gov_params: &StoreGetString, submit_time: &Timestamp, status: &str) {
-    let max_deposit_period = gov_params
-        .get_at(0, "max_deposit_period")
-        .expect("missing max_deposit_period");
-    let min_deposit_str = gov_params.get_at(0, "min_deposit").expect("missing min_deposit");
-    let min_deposit_arr = build_min_deposit_array(&min_deposit_str);
-    let voting_period = gov_params.get_at(0, "voting_period").expect("missing voting_period");
-    let quorum = gov_params.get_at(0, "quorum").expect("missing quorum");
-    let threshold = gov_params.get_at(0, "threshold").expect("missing threshold");
-    let veto_threshold = gov_params.get_at(0, "veto_threshold").expect("missing veto_threshold");
-    let deposit_end_time = add_nanoseconds_to_timestamp(submit_time, &max_deposit_period);
+fn set_proposal_gov_params(row: &mut Row, gov_params: &GovernanceParamsFlat, submit_time: &Timestamp, status: &str) {
+    let deposit_end_time = add_nanoseconds_to_timestamp(submit_time, &gov_params.max_deposit_period);
 
-    row.set_bigint("max_deposit_period", &max_deposit_period)
-        .set_bigint("voting_period", &voting_period)
-        .set_bigdecimal("quorum", &quorum)
-        .set_bigdecimal("threshold", &threshold)
-        .set_bigdecimal("veto_threshold", &veto_threshold)
-        .set("deposit_end_time", &deposit_end_time)
-        .set("min_deposit", &min_deposit_arr);
+    row.set("deposit_end_time", &deposit_end_time)
+        .set("governance_parameter", &gov_params.hashed_id);
 
     if status == "VotingPeriod" {
-        let voting_end_time = add_nanoseconds_to_timestamp(submit_time, &voting_period);
+        let voting_end_time = add_nanoseconds_to_timestamp(submit_time, &gov_params.voting_period);
         row.set("voting_start_time", submit_time)
             .set("voting_end_time", &voting_end_time);
     }
-}
-
-fn build_min_deposit_array(min_deposit: &str) -> Vec<String> {
-    serde_json::from_str::<Vec<serde_json::Value>>(min_deposit)
-        .expect("invalid min_deposit format")
-        .iter()
-        .map(|item| {
-            format!(
-                "{} {}",
-                item["amount"].as_str().unwrap_or_default(),
-                item["denom"].as_str().unwrap_or_default()
-            )
-        })
-        .collect()
 }
 
 pub fn decode_text_proposal(content: &Any) -> (String, String) {

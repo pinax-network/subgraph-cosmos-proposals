@@ -40,13 +40,7 @@ type Proposal @entity {
   metadata: String
   proposal_type: ProposalType!
 
-  # governance parameters
-  quorum: BigDecimal!
-  threshold: BigDecimal!
-  veto_threshold: BigDecimal!
-  min_deposit: [String!]!
-  max_deposit_period: BigInt!
-  voting_period: BigInt!
+  governance_parameter: GovernanceParameter!
 
   # timestamp
   submit_time: Timestamp!

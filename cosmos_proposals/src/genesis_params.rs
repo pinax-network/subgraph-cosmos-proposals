@@ -2,56 +2,55 @@ use serde::{Deserialize, Serialize};
 use substreams::pb::substreams::Clock;
 use substreams_entity_change::tables::{Row, Tables};
 
-pub fn push_genesis_params(tables: &mut Tables, clock: &Clock, params: &String) {
-    if params.len() > 0 && clock.number == 1 {
-        let parsed: GovParams = serde_json::from_str(&params).expect("failed to parse genesis params");
-        let block_number = clock.number.to_string();
-        tables
-            .create_row("GovernanceParameter", &block_number)
-            .set("block", &block_number);
+use crate::utils::GovernanceParamsFlat;
 
-        create_deposit_params(tables, &block_number, &parsed.deposit_params);
-        create_voting_params(tables, &block_number, &parsed.voting_params);
-        create_tally_params(tables, &block_number, &parsed.tally_params);
-    }
+pub fn push_gov_params(tables: &mut Tables, clock: &Clock, gov_params: &GovernanceParamsFlat) {
+    let block_number = clock.number.to_string();
+
+    tables
+        .create_row("GovernanceParameter", &gov_params.hashed_id)
+        .set("id", &gov_params.hashed_id)
+        .set("block", &block_number);
+
+    create_deposit_params(tables, &block_number, gov_params);
+    create_voting_params(tables, &block_number, gov_params);
+    create_tally_params(tables, &block_number, gov_params);
 }
 
-fn add_governance_parameter_derive_from(row: &mut Row, block_number: &str) {
-    row.set("block", block_number);
-    row.set("governance_parameter", block_number);
+fn add_governance_parameter_derive_from(row: &mut Row, block_number: &str, id: &str) {
+    row.set("block", block_number).set("governance_parameter", id);
 }
 
-fn create_deposit_params(tables: &mut Tables, block_number: &str, deposit_params: &DepositParams) {
-    let mut min_deposit: Vec<String> = vec![];
-    for deposit in &deposit_params.min_deposit {
-        min_deposit.push(format! {"{} {}", deposit.amount, deposit.denom});
-    }
+fn create_deposit_params(tables: &mut Tables, block_number: &str, gov_params: &GovernanceParamsFlat) {
     add_governance_parameter_derive_from(
         tables
-            .create_row("DepositParam", block_number)
-            .set("min_deposit", min_deposit)
-            .set_bigint("max_deposit_period", &deposit_params.max_deposit_period),
-        block_number,
+            .create_row("DepositParam", &gov_params.hashed_id)
+            .set("min_deposit", &gov_params.min_deposit)
+            .set_bigint("max_deposit_period", &gov_params.max_deposit_period),
+        &block_number,
+        &gov_params.hashed_id,
     );
 }
 
-fn create_voting_params(tables: &mut Tables, block_number: &str, voting_params: &VotingParams) {
+fn create_voting_params(tables: &mut Tables, block_number: &str, gov_params: &GovernanceParamsFlat) {
     add_governance_parameter_derive_from(
         tables
-            .create_row("VotingParam", block_number)
-            .set_bigint("voting_period", &voting_params.voting_period.to_string()),
-        block_number,
+            .create_row("VotingParam", &gov_params.hashed_id)
+            .set_bigint("voting_period", &gov_params.voting_period),
+        &block_number,
+        &gov_params.hashed_id,
     );
 }
 
-fn create_tally_params(tables: &mut Tables, block_number: &str, tally_params: &TallyParams) {
+fn create_tally_params(tables: &mut Tables, block_number: &str, gov_params: &GovernanceParamsFlat) {
     add_governance_parameter_derive_from(
         tables
-            .create_row("TallyParam", block_number)
-            .set_bigdecimal("quorum", &tally_params.quorum)
-            .set_bigdecimal("threshold", &tally_params.threshold)
-            .set_bigdecimal("veto_threshold", &tally_params.veto_threshold),
-        block_number,
+            .create_row("TallyParam", &gov_params.hashed_id)
+            .set_bigdecimal("quorum", &gov_params.quorum)
+            .set_bigdecimal("threshold", &gov_params.threshold)
+            .set_bigdecimal("veto_threshold", &gov_params.veto_threshold),
+        &block_number,
+        &gov_params.hashed_id,
     );
 }
 
