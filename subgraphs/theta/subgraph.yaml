@@ -2,7 +2,7 @@ specVersion: 1.1.0
 description: Cosmos Governance Proposals
 repository: https://github.com/pinax-network/subgraph-cosmos-proposals
 schema:
-  file: ../../schema.graphql
+  file: ../../cosmos_proposals/schema.graphql
 indexerHints:
   prune: never
 dataSources:
