@@ -250,7 +250,7 @@ fn set_proposal_gov_params(row: &mut Row, gov_params: &GovernanceParamsFlat, sub
     let deposit_end_time = add_nanoseconds_to_timestamp(submit_time, &gov_params.max_deposit_period);
 
     row.set("deposit_end_time", &deposit_end_time)
-        .set("governance_parameter", &gov_params.hashed_id);
+        .set("governance_parameter", &gov_params.block_id_last_updated);
 
     if status == "VotingPeriod" {
         let voting_end_time = add_nanoseconds_to_timestamp(submit_time, &gov_params.voting_period);

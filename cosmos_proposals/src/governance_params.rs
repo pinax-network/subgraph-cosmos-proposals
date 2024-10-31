@@ -7,8 +7,8 @@ pub fn push_governance_params(tables: &mut Tables, gov_params: &GovernanceParams
     let block_id = &gov_params.block_id_last_updated;
 
     tables
-        .create_row("GovernanceParameter", &gov_params.hashed_id)
-        .set("id", &gov_params.hashed_id)
+        .create_row("GovernanceParameter", &gov_params.block_id_last_updated)
+        .set("id", &gov_params.block_id_last_updated)
         .set("block", block_id);
 
     create_deposit_params(tables, block_id, gov_params);
@@ -23,33 +23,33 @@ fn add_governance_parameter_derive_from(row: &mut Row, block_id: &str, id: &str)
 fn create_deposit_params(tables: &mut Tables, block_number: &str, gov_params: &GovernanceParamsFlat) {
     add_governance_parameter_derive_from(
         tables
-            .create_row("DepositParam", &gov_params.hashed_id)
+            .create_row("DepositParam", &gov_params.block_id_last_updated)
             .set("min_deposit", &gov_params.min_deposit)
             .set_bigint("max_deposit_period", &gov_params.max_deposit_period),
         &block_number,
-        &gov_params.hashed_id,
+        &gov_params.block_id_last_updated,
     );
 }
 
 fn create_voting_params(tables: &mut Tables, block_number: &str, gov_params: &GovernanceParamsFlat) {
     add_governance_parameter_derive_from(
         tables
-            .create_row("VotingParam", &gov_params.hashed_id)
+            .create_row("VotingParam", &gov_params.block_id_last_updated)
             .set_bigint("voting_period", &gov_params.voting_period),
         &block_number,
-        &gov_params.hashed_id,
+        &gov_params.block_id_last_updated,
     );
 }
 
 fn create_tally_params(tables: &mut Tables, block_number: &str, gov_params: &GovernanceParamsFlat) {
     add_governance_parameter_derive_from(
         tables
-            .create_row("TallyParam", &gov_params.hashed_id)
+            .create_row("TallyParam", &gov_params.block_id_last_updated)
             .set_bigdecimal("quorum", &gov_params.quorum)
             .set_bigdecimal("threshold", &gov_params.threshold)
             .set_bigdecimal("veto_threshold", &gov_params.veto_threshold),
         &block_number,
-        &gov_params.hashed_id,
+        &gov_params.block_id_last_updated,
     );
 }
 

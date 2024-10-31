@@ -1,5 +1,4 @@
 use prost_types::Timestamp;
-use sha2::{Digest, Sha256};
 use substreams::pb::substreams::Clock;
 use substreams::prelude::StoreGetString;
 use substreams::store::StoreGet;
@@ -113,15 +112,7 @@ pub fn extract_gov_params(gov_params: &StoreGetString) -> GovernanceParamsFlat {
         .get_at(0, "block_id_last_updated")
         .expect("missing block_id_last_updated");
 
-    let concatenated = format!(
-        "{}{}{}{}{}{}",
-        min_deposit, max_deposit_period, voting_period, quorum, threshold, veto_threshold
-    );
-
-    let hashed_id = format!("{:x}", Sha256::digest(concatenated.as_bytes()));
-
     GovernanceParamsFlat {
-        hashed_id,
         block_id_last_updated,
         min_deposit: min_deposit_arr,
         max_deposit_period,
@@ -147,7 +138,6 @@ fn build_min_deposit_array(min_deposit: &str) -> Vec<String> {
 }
 
 pub struct GovernanceParamsFlat {
-    pub hashed_id: String,
     pub block_id_last_updated: String,
     pub min_deposit: Vec<String>,
     pub max_deposit_period: String,
