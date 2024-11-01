@@ -11,6 +11,17 @@ These are the expressions that can be used in queries:
 
 Queries can include `&&` and `||` logical operands, as well as `(` and `)` parenthesis.
 
+## Graph
+
+```mermaid
+graph TD;
+  sf.cosmos.type.v2.Block[source: sf.cosmos.type.v2.Block] --> index_blocks;
+  sf.substreams.v1.Clock[source: sf.substreams.v1.Clock] --> index_blocks;
+  map_blocks[map: map_blocks];
+  map_blocks:params[params] --> map_blocks;
+  sf.cosmos.type.v2.Block[source: sf.cosmos.type.v2.Block] --> map_blocks;
+```
+
 ## Modules
 
 ```bash

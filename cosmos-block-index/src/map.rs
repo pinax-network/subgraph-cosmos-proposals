@@ -1,6 +1,6 @@
 use substreams_cosmos::Block;
 
-use crate::index::{collect_event_keys, collect_transaction_keys, extract_message_types, is_match};
+use crate::index::{collect_event_keys, collect_transaction_keys, is_match};
 
 #[substreams::handlers::map]
 fn map_blocks(params: String, mut block: Block) -> Result<Block, substreams::errors::Error> {
