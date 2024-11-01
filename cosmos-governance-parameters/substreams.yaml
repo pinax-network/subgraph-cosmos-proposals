@@ -5,11 +5,8 @@ package:
   version: v0.1.0
   url: https://github.com/pinax-network/subgraph-cosmos-proposals
 
-protobuf:
-  files:
-    - events.proto
-  importPaths:
-    - ./proto
+imports:
+  events: ../cosmos-proposals-events/cosmos-proposals-events-v0.1.0.spkg
 
 binaries:
   default:
@@ -17,18 +14,12 @@ binaries:
     file: ../target/wasm32-unknown-unknown/release/cosmos_governance_parameters.wasm
 
 modules:
-  - name: map_events
-    kind: map
-    inputs:
-      - source: sf.cosmos.type.v2.Block
-    output:
-      type: proto:cosmos.custom_events.ProposalEvents
   - name: pending_gov_params
     kind: store
     updatePolicy: set
     valueType: string
     inputs:
-      - map: map_events
+      - map: events:map_events
   - name: gov_params
     kind: store
     updatePolicy: set
@@ -36,19 +27,19 @@ modules:
     inputs:
       - params: string
       - source: sf.substreams.v1.Clock
-      - map: map_events
+      - map: events:map_events
       - store: pending_gov_params
 params:
   gov_params: '{
     "deposit_params": {
-    "min_deposit": [{"denom": "uatom", "amount": "512000000"}],
-    "max_deposit_period": "1209600000000000"
+      "min_deposit": [{"denom": "uatom", "amount": "512000000"}],
+      "max_deposit_period": "1209600000000000"
     },
     "voting_params": {
-    "voting_period": "1209600000000000"
+      "voting_period": "1209600000000000"
     },
     "tally_params": {
-    "quorum": "0.400000000000000000",
-    "threshold": "0.500000000000000000",
-    "veto_threshold": "0.334000000000000000"
+      "quorum": "0.400000000000000000",
+      "threshold": "0.500000000000000000",
+      "veto_threshold": "0.334000000000000000"
     }}'

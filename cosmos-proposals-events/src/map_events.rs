@@ -1,4 +1,5 @@
 use prost::Message;
+use serde_json::json;
 use substreams::errors::Error;
 use substreams_cosmos::{pb::TxResults, Block};
 
@@ -7,21 +8,21 @@ use cosmos_proposals::pb::cosmos::params::v1beta1::ParameterChangeProposal;
 use cosmos_proposals::pb::cosmos::tx::v1beta1::Tx;
 use cosmos_proposals::utils::{extract_proposal_id_from_tx, get_attribute_value};
 
-use crate::pb::cosmos::custom_events::{GovParamsOptional, ProposalEvents};
+use cosmos_proposals_protobuf::pb::cosmos::proposals::v1::{Events, GovParamsChanges};
 
 #[substreams::handlers::map]
-pub fn map_events(block: Block) -> Result<ProposalEvents, Error> {
-    let mut proposal_events = ProposalEvents {
+pub fn map_events(block: Block) -> Result<Events, Error> {
+    let mut events = Events {
         gov_params_changes: extract_param_change_proposals(&block),
         passed_proposal_ids: extract_passed_proposal_ids(&block),
     };
 
     // Allows for gov_params to push the genesis parameters
     if block.height == 1 {
-        proposal_events.passed_proposal_ids.push("-1".to_string());
+        events.passed_proposal_ids.push("-1".to_string());
     }
 
-    Ok(proposal_events)
+    Ok(events)
 }
 
 fn extract_passed_proposal_ids(block: &Block) -> Vec<String> {
@@ -43,8 +44,8 @@ fn extract_passed_proposal_ids(block: &Block) -> Vec<String> {
     proposals_passed
 }
 
-fn extract_param_change_proposals(block: &Block) -> Vec<GovParamsOptional> {
-    let mut param_change_proposals: Vec<GovParamsOptional> = Vec::new();
+fn extract_param_change_proposals(block: &Block) -> Vec<GovParamsChanges> {
+    let mut param_change_proposals: Vec<GovParamsChanges> = Vec::new();
 
     for (i, tx_result) in block.tx_results.iter().enumerate() {
         if let Some(proposal) = extract_parameter_change_proposal(tx_result, &block.txs[i]) {
@@ -93,7 +94,7 @@ fn extract_parameter_change_proposal(tx_result: &TxResults, tx_bytes: &[u8]) -> 
     None
 }
 
-fn process_proposal_changes(proposal: &ParameterChangeProposal, proposal_id: String) -> Option<GovParamsOptional> {
+fn process_proposal_changes(proposal: &ParameterChangeProposal, proposal_id: String) -> Option<GovParamsChanges> {
     let gov_changes = proposal
         .changes
         .iter()
@@ -104,27 +105,18 @@ fn process_proposal_changes(proposal: &ParameterChangeProposal, proposal_id: Str
         return None;
     }
 
-    let mut gov_params = GovParamsOptional {
-        proposal_id: proposal_id,
-        deposit_params: None,
-        voting_params: None,
-        tally_params: None,
-    };
-
+    let mut params = json!({});
     for gov_change in gov_changes {
         match gov_change.key.as_str() {
-            "depositparams" => {
-                gov_params.deposit_params = serde_json::from_str(gov_change.value.as_str()).ok();
-            }
-            "votingparams" => {
-                gov_params.voting_params = serde_json::from_str(gov_change.value.as_str()).ok();
-            }
-            "tallyparams" => {
-                gov_params.tally_params = serde_json::from_str(gov_change.value.as_str()).ok();
-            }
-            _ => {}
+            "depositparams" => params["deposit_params"] = gov_change.value.clone().into(),
+            "votingparams" => params["voting_params"] = gov_change.value.clone().into(),
+            "tallyparams" => params["tally_params"] = gov_change.value.clone().into(),
+            _ => continue,
         }
     }
 
-    Some(gov_params)
+    Some(GovParamsChanges {
+        proposal_id,
+        params: params.to_string(),
+    })
 }

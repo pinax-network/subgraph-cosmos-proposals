@@ -15,6 +15,11 @@ localdata
 *.spkg
 *.parquet
 
+### Substreams used in production mode cache
+!cosmos-block-index/*.spkg
+!cosmos-proposals-events/*.spkg
+!cosmos-governance-parameters/*.spkg
+
 ### VisualStudioCode template
 .vscode/*
 !.vscode/settings.json
@@ -827,4 +832,3 @@ adapters/**/*.jsonl
 # Sublime Text
 *.sublime*
 .substreams.env
-block-index/cosmos-block-index-v0.1.0.spkg

@@ -1,31 +1,27 @@
+use cosmos_proposals_protobuf::pb::cosmos::proposals::v1::Events;
+use cosmos_proposals_protobuf::pb::cosmos::proposals::v1::GovParamsOptional;
 use substreams::pb::substreams::Clock;
 use substreams::store::StoreGet;
 use substreams::store::StoreGetString;
 use substreams::store::StoreNew;
 
-use cosmos_proposals::governance_params::GovParams;
 use substreams::store::StoreSet;
 use substreams::store::StoreSetString;
-
-use crate::pb::cosmos::custom_events::ProposalEvents;
-use crate::serde_structs::GovParamsOptional as GovParamsSerializable;
 
 #[substreams::handlers::store]
 pub fn gov_params(
     genesis_params: String,
     clock: Clock,
-    proposal_events: ProposalEvents,
+    events: Events,
     pending_gov_params: StoreGetString,
     gov_params: StoreSetString,
 ) {
-    gov_params.set(0, "test", &"test");
-
     if clock.number == 1 {
-        set_genesis_params(&gov_params, &genesis_params);
+        set_new_gov_params(&gov_params, &genesis_params);
         gov_params.set(0, "block_id_last_updated", &clock.id);
     }
 
-    for passed_proposal_id in proposal_events.passed_proposal_ids {
+    for passed_proposal_id in events.passed_proposal_ids {
         let gov_param_proposal_str = pending_gov_params.get_at(0, &passed_proposal_id);
 
         if let Some(gov_param_proposal_str) = gov_param_proposal_str {
@@ -35,28 +31,8 @@ pub fn gov_params(
     }
 }
 
-fn set_genesis_params(gov_params: &StoreSetString, genesis_params: &String) {
-    let parsed: GovParams = serde_json::from_str(&genesis_params).expect("Failed to parse genesis parameters");
-
-    let min_deposit: String =
-        serde_json::to_string(&parsed.deposit_params.min_deposit).expect("Failed to serialize min deposit");
-    let max_deposit_period: String = parsed.deposit_params.max_deposit_period;
-    let voting_period: String = parsed.voting_params.voting_period.to_string();
-    let quorum: String = parsed.tally_params.quorum;
-    let threshold: String = parsed.tally_params.threshold;
-    let veto_threshold: String = parsed.tally_params.veto_threshold;
-
-    gov_params.set(0, "min_deposit", &min_deposit);
-    gov_params.set(0, "max_deposit_period", &max_deposit_period);
-    gov_params.set(0, "voting_period", &voting_period);
-    gov_params.set(0, "quorum", &quorum);
-    gov_params.set(0, "threshold", &threshold);
-    gov_params.set(0, "veto_threshold", &veto_threshold);
-}
-
 fn set_new_gov_params(gov_params: &StoreSetString, gov_param_proposal_str: &String) {
-    let parsed: GovParamsSerializable =
-        serde_json::from_str(&gov_param_proposal_str).expect("Failed to parse gov params");
+    let parsed: GovParamsOptional = serde_json::from_str(&gov_param_proposal_str).expect("Failed to parse gov params");
 
     if let Some(deposit_params) = parsed.deposit_params {
         if deposit_params.min_deposit.len() > 0 {

@@ -7,6 +7,7 @@ build:
 	cargo build --target wasm32-unknown-unknown --release
 	substreams pack
 	substreams info
+	substreams graph
 
 .PHONY: gui
 gui:

@@ -1,0 +1,13 @@
+[package]
+name = "cosmos-block-index"
+edition = { workspace = true }
+version = { workspace = true }
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+substreams-cosmos = { workspace = true }
+substreams = { workspace = true }
+prost = { workspace = true }
+prost-types = { workspace = true }
