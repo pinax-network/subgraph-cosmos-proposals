@@ -2,7 +2,7 @@ specVersion: 1.1.0
 description: Cosmos Governance Proposals
 repository: https://github.com/pinax-network/subgraph-cosmos-proposals
 schema:
-  file: ../../cosmos_proposals/schema.graphql
+  file: ../../cosmos-proposals/schema.graphql
 indexerHints:
   prune: never
 dataSources:
@@ -13,7 +13,7 @@ dataSources:
       startBlock: 0
       package:
         moduleName: graph_out
-        file: ../../cosmos_proposals/cosmos-proposals-v0.1.0.spkg
+        file: ../../cosmos-proposals/cosmos-proposals-v0.1.0.spkg
         # Governance Genesis Parameters as JSON
         # https://github.com/cosmos/mainnet/blob/master/genesis/genesis.cosmoshub-2.json
         # params: '{
