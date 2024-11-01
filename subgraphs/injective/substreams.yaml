@@ -1,0 +1,30 @@
+specVersion: v0.1.0
+package:
+  name: injective_proposals
+  version: v0.1.0
+  url: https://github.com/pinax-network/subgraph-cosmos-proposals
+
+imports:
+  events: ../../cosmos-proposals/cosmos-proposals-v0.1.0.spkg
+
+binaries:
+  default:
+    type: wasm/rust-v1
+    file: ../../target/wasm32-unknown-unknown/release/cosmos_proposals.wasm
+
+network: injective
+
+params:
+  events:gov_params:gov_params: '{
+    "deposit_params": {
+      "min_deposit": [{ "denom": "inj", "amount": "500000000000000000000"}],
+      "max_deposit_period": "172800000000000"
+    },
+    "voting_params": {
+      "voting_period": "172800000000000"
+    },
+    "tally_params": {
+      "quorum": "0.334000000000000000",
+      "threshold": "0.500000000000000000",
+      "veto_threshold": "0.334000000000000000"
+    }}'

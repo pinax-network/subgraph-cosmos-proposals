@@ -4,6 +4,8 @@ all:
 
 .PHONY: build
 build:
+	substreams pack
+	substreams info
 	graph build
 
 .PHONY: deploy
@@ -15,7 +17,7 @@ deploy:
 .PHONY: publish
 publish:
 	graph build
-	graph publish --subgraph-id ??
+	graph publish --subgraph-id 2aYHh1GtHqHTU782VMxg5Hzpzsc4q4WdxniKW7MAvBBj
 
 .PHONY: gui
 gui:
