@@ -43,7 +43,6 @@ modules:
       - map: block_index:map_blocks
     output:
       type: proto:cosmos.proposals.v1.Events
-
 # params:
 #   # Block Filter only Governance proposals events
 #   # improves Substreams syncing performance when using `--production-mode`
