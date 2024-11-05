@@ -13,7 +13,7 @@ pub struct PartialTxBody {
     pub messages: ::prost::alloc::vec::Vec<::prost_types::Any>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, ::prost::Message, serde::Serialize, serde::Deserialize)]
 pub struct Events {
     #[prost(message, repeated, tag = "1")]
     pub gov_params_changes: ::prost::alloc::vec::Vec<GovParamsChanges>,
@@ -21,7 +21,7 @@ pub struct Events {
     pub passed_proposal_ids: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, ::prost::Message, serde::Serialize, serde::Deserialize)]
 pub struct GovParamsChanges {
     #[prost(string, tag = "1")]
     pub proposal_id: ::prost::alloc::string::String,
@@ -29,23 +29,23 @@ pub struct GovParamsChanges {
     pub params: ::prost::alloc::string::String,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
-#[derive(Clone, PartialEq, ::prost::Message, serde::Deserialize)]
+#[derive(Clone, PartialEq, ::prost::Message, serde::Serialize, serde::Deserialize)]
 pub struct GovParamsOptional {
     #[prost(message, optional, tag = "1")]
-    pub voting_params: ::core::option::Option<VotingParamsOptional>,
+    pub votingparams: ::core::option::Option<VotingParamsOptional>,
     #[prost(message, optional, tag = "2")]
-    pub tally_params: ::core::option::Option<TallyParamsOptional>,
+    pub tallyparams: ::core::option::Option<TallyParamsOptional>,
     #[prost(message, optional, tag = "3")]
-    pub deposit_params: ::core::option::Option<DepositParamsOptional>,
+    pub depositparams: ::core::option::Option<DepositParamsOptional>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
-#[derive(Clone, PartialEq, ::prost::Message, serde::Deserialize)]
+#[derive(Clone, PartialEq, ::prost::Message, serde::Serialize, serde::Deserialize)]
 pub struct VotingParamsOptional {
     #[prost(string, optional, tag = "1")]
     pub voting_period: ::core::option::Option<::prost::alloc::string::String>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
-#[derive(Clone, PartialEq, ::prost::Message, serde::Deserialize)]
+#[derive(Clone, PartialEq, ::prost::Message, serde::Serialize, serde::Deserialize)]
 pub struct TallyParamsOptional {
     #[prost(string, optional, tag = "1")]
     pub quorum: ::core::option::Option<::prost::alloc::string::String>,
@@ -55,7 +55,7 @@ pub struct TallyParamsOptional {
     pub veto_threshold: ::core::option::Option<::prost::alloc::string::String>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
-#[derive(Clone, PartialEq, ::prost::Message, serde::Deserialize, serde::Serialize)]
+#[derive(Clone, PartialEq, ::prost::Message, serde::Serialize, serde::Deserialize)]
 pub struct DepositParamsOptional {
     #[prost(message, repeated, tag = "1")]
     pub min_deposit: ::prost::alloc::vec::Vec<Deposit>,
@@ -63,7 +63,7 @@ pub struct DepositParamsOptional {
     pub max_deposit_period: ::core::option::Option<::prost::alloc::string::String>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
-#[derive(Clone, PartialEq, ::prost::Message, serde::Deserialize, serde::Serialize)]
+#[derive(Clone, PartialEq, ::prost::Message, serde::Serialize, serde::Deserialize)]
 pub struct Deposit {
     #[prost(string, tag = "1")]
     pub denom: ::prost::alloc::string::String,

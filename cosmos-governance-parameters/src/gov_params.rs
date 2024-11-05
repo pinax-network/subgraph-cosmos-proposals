@@ -34,7 +34,7 @@ pub fn gov_params(
 fn set_new_gov_params(gov_params: &StoreSetString, gov_param_proposal_str: &String) {
     let parsed: GovParamsOptional = serde_json::from_str(&gov_param_proposal_str).expect("Failed to parse gov params");
 
-    if let Some(deposit_params) = parsed.deposit_params {
+    if let Some(deposit_params) = parsed.depositparams {
         if deposit_params.min_deposit.len() > 0 {
             let min_deposit_str: String =
                 serde_json::to_string(&deposit_params.min_deposit).expect("Failed to serialize min deposit");
@@ -45,13 +45,13 @@ fn set_new_gov_params(gov_params: &StoreSetString, gov_param_proposal_str: &Stri
         }
     }
 
-    if let Some(voting_params) = parsed.voting_params {
+    if let Some(voting_params) = parsed.votingparams {
         if let Some(voting_period) = voting_params.voting_period {
             gov_params.set(0, "voting_period", &voting_period);
         }
     }
 
-    if let Some(tally_params) = parsed.tally_params {
+    if let Some(tally_params) = parsed.tallyparams {
         if let Some(quorum) = tally_params.quorum {
             gov_params.set(0, "quorum", &quorum);
         }

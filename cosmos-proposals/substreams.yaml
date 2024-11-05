@@ -8,7 +8,7 @@ package:
 imports:
   entity_changes: https://github.com/streamingfast/substreams-sink-entity-changes/releases/download/v2.0.0/substreams-entity-change-v2.0.0.spkg
   block_index: ../cosmos-block-index/cosmos-block-index-v0.1.0.spkg
-  gov_params: ../cosmos-governance-parameters/cosmos-governance-parameters-v0.1.0.spkg
+  cosmos_governance_parameters: ../cosmos-governance-parameters/cosmos-governance-parameters-v0.1.0.spkg
 
 binaries:
   default:
@@ -21,10 +21,9 @@ modules:
     inputs:
       - source: sf.substreams.v1.Clock
       - map: block_index:map_blocks
-      - store: gov_params:gov_params
+      - store: cosmos_governance_parameters:gov_params
     output:
       type: proto:sf.substreams.sink.entity.v1.EntityChanges
-
 # params:
 #   # Block Filter only Governance proposals events
 #   # improves Substreams syncing performance when using `--production-mode`

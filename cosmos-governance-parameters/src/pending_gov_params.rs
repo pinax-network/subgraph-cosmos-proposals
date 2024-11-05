@@ -7,6 +7,7 @@ use substreams::store::StoreSetString;
 pub fn pending_gov_params(events: Events, store: StoreSetString) {
     for event in events.gov_params_changes {
         let proposal_id = &event.proposal_id;
+
         store.set(0, proposal_id, &event.params);
     }
 }
