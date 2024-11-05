@@ -32,11 +32,11 @@ pub struct GovParamsChanges {
 #[derive(Clone, PartialEq, ::prost::Message, serde::Serialize, serde::Deserialize)]
 pub struct GovParamsOptional {
     #[prost(message, optional, tag = "1")]
-    pub votingparams: ::core::option::Option<VotingParamsOptional>,
+    pub voting_params: ::core::option::Option<VotingParamsOptional>,
     #[prost(message, optional, tag = "2")]
-    pub tallyparams: ::core::option::Option<TallyParamsOptional>,
+    pub tally_params: ::core::option::Option<TallyParamsOptional>,
     #[prost(message, optional, tag = "3")]
-    pub depositparams: ::core::option::Option<DepositParamsOptional>,
+    pub deposit_params: ::core::option::Option<DepositParamsOptional>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message, serde::Serialize, serde::Deserialize)]

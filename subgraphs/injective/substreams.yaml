@@ -16,14 +16,14 @@ network: injective
 
 params:
   cosmos_proposals:cosmos_governance_parameters:gov_params: '{
-    "depositparams": {
+    "deposit_params": {
     "min_deposit": [{ "denom": "inj", "amount": "500000000000000000000"}],
     "max_deposit_period": "172800000000000"
     },
-    "votingparams": {
+    "voting_params": {
     "voting_period": "172800000000000"
     },
-    "tallyparams": {
+    "tally_params": {
     "quorum": "0.334000000000000000",
     "threshold": "0.500000000000000000",
     "veto_threshold": "0.334000000000000000"
