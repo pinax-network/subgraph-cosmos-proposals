@@ -1,6 +1,5 @@
 use cosmos_proposals_protobuf::pb::cosmos::proposals::v1::Events;
 use cosmos_proposals_protobuf::pb::cosmos::proposals::v1::GovParamsOptional;
-use serde_json::Value;
 use substreams::pb::substreams::Clock;
 use substreams::store::StoreGet;
 use substreams::store::StoreGetString;
@@ -33,8 +32,7 @@ pub fn gov_params(
 }
 
 fn set_new_gov_params(gov_params: &StoreSetString, gov_param_proposal_str: &String) {
-    let value_serde: Value = serde_json::from_str(&gov_param_proposal_str).expect("Failed to parse serde json");
-    let parsed: GovParamsOptional = serde_json::from_value(value_serde).expect("Failed to parse gov params");
+    let parsed: GovParamsOptional = serde_json::from_str(&gov_param_proposal_str).expect("Failed to parse gov params");
 
     if let Some(deposit_params) = parsed.deposit_params {
         if deposit_params.min_deposit.len() > 0 {

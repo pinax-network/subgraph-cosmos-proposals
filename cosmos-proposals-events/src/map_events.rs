@@ -8,7 +8,7 @@ use cosmos_proposals::pb::cosmos::params::v1beta1::ParameterChangeProposal;
 use cosmos_proposals::pb::cosmos::tx::v1beta1::Tx;
 use cosmos_proposals::utils::{extract_proposal_id_from_tx, get_attribute_value};
 
-use cosmos_proposals_protobuf::pb::cosmos::proposals::v1::{Events, GovParamsChanges};
+use cosmos_proposals_protobuf::pb::cosmos::proposals::v1::{Events, GovParamsChanges, GovParamsOptional};
 
 #[substreams::handlers::map]
 pub fn map_events(block: Block) -> Result<Events, Error> {
@@ -93,7 +93,6 @@ fn extract_parameter_change_proposal(tx_result: &TxResults, tx_bytes: &[u8]) -> 
 
     None
 }
-
 fn process_proposal_changes(proposal: &ParameterChangeProposal, proposal_id: String) -> Option<GovParamsChanges> {
     let gov_changes = proposal
         .changes
@@ -105,18 +104,31 @@ fn process_proposal_changes(proposal: &ParameterChangeProposal, proposal_id: Str
         return None;
     }
 
-    let mut params = json!({});
+    let mut param_changes = GovParamsChanges {
+        proposal_id: proposal_id,
+        params: Some(GovParamsOptional {
+            deposit_params: None,
+            voting_params: None,
+            tally_params: None,
+        }),
+    };
+
     for gov_change in gov_changes {
-        match gov_change.key.as_str() {
-            "depositparams" => params["deposit_params"] = gov_change.value.clone().into(),
-            "votingparams" => params["voting_params"] = gov_change.value.clone().into(),
-            "tallyparams" => params["tally_params"] = gov_change.value.clone().into(),
-            _ => continue,
+        if let Some(params) = &mut param_changes.params {
+            match gov_change.key.as_str() {
+                "depositparams" => {
+                    params.deposit_params = serde_json::from_str(gov_change.value.as_str()).ok();
+                }
+                "votingparams" => {
+                    params.voting_params = serde_json::from_str(gov_change.value.as_str()).ok();
+                }
+                "tallyparams" => {
+                    params.tally_params = serde_json::from_str(gov_change.value.as_str()).ok();
+                }
+                _ => {}
+            }
         }
     }
 
-    Some(GovParamsChanges {
-        proposal_id,
-        params: params.to_string(),
-    })
+    Some(param_changes)
 }

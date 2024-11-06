@@ -14,7 +14,7 @@ message Events {
 
 message GovParamsChanges {
   string proposal_id = 1;
-  string params = 2;
+  GovParamsOptional params = 2;
 }
 
 message GovParamsOptional {
