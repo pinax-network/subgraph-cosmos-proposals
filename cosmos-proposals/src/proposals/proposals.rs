@@ -1,4 +1,4 @@
-use crate::deposits::create_deposit;
+use crate::deposits::{create_deposit_msg, create_initial_deposit};
 use crate::pb::cosmos::{
     authz::v1beta1::MsgExec,
     gov::v1::MsgSubmitProposal as MsgSubmitProposalV1,
@@ -62,7 +62,7 @@ pub fn handle_proposals(
             gov_params,
         ),
         "/cosmos.gov.v1beta1.MsgVote" => create_vote(tables, message, tx_result, clock, tx_hash),
-        "/cosmos.gov.v1beta1.MsgDeposit" => create_deposit(tables, message, clock, tx_result, tx_hash, gov_params),
+        "/cosmos.gov.v1beta1.MsgDeposit" => create_deposit_msg(tables, message, clock, tx_result, tx_hash, gov_params),
         _ => {}
     }
 }
@@ -82,6 +82,7 @@ fn handle_v1_proposal(
         set_proposal_entity(row, clock, message, tx_result, tx_hash, status, gov_params);
         set_proposal_v1(row, &msg);
         set_proposal_messages(tables, &msg, proposal_id);
+        create_initial_deposit(tables, clock, tx_result, tx_hash, proposal_id);
     }
 }
 
@@ -129,6 +130,7 @@ fn handle_exec_proposal(
                 set_proposal_v1beta1(row, &msg);
                 set_proposal_messages(tables, &msg, proposal_id);
             }
+            create_initial_deposit(tables, clock, tx_result, tx_hash, proposal_id);
         }
     }
 }
