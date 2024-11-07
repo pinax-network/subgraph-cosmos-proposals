@@ -101,6 +101,7 @@ fn handle_v1beta1_proposal(
         set_proposal_entity(row, clock, message, tx_result, tx_hash, status, gov_params);
         set_proposal_v1beta1(row, &msg);
         set_proposal_messages(tables, &msg, proposal_id);
+        create_initial_deposit(tables, clock, tx_result, tx_hash, proposal_id);
 
         if let Some(first_message) = msg.messages.first() {
             handle_specific_proposal(tables, first_message, proposal_id);
