@@ -65,6 +65,7 @@ pub fn create_initial_deposit(
     tx_result: &TxResults,
     tx_hash: &str,
     proposal_id: &str,
+    depositor: &str,
 ) {
     let (denom, amount) = extract_initial_deposit(&tx_result).unwrap();
 
@@ -75,7 +76,8 @@ pub fn create_initial_deposit(
         .set("transaction", tx_hash)
         .set("proposal", proposal_id)
         .set("denom", denom)
-        .set("amount", amount);
+        .set("amount", amount)
+        .set("depositor", depositor);
 }
 
 fn extract_initial_deposit(tx_result: &TxResults) -> Option<(String, String)> {
