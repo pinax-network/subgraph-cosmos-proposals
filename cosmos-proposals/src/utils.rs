@@ -77,6 +77,19 @@ pub fn extract_proposal_status(tx_result: &substreams_cosmos::pb::TxResults) -> 
     }
 }
 
+pub fn determine_voting_end_time(
+    gov_params: &GovernanceParamsStore,
+    start_timestamp: &Timestamp,
+    proposal_type: &str,
+) -> Timestamp {
+    let voting_period = if proposal_type == "Expedited" {
+        &gov_params.expedited_voting_period
+    } else {
+        &gov_params.voting_period
+    };
+    add_nanoseconds_to_timestamp(start_timestamp, voting_period)
+}
+
 pub fn add_nanoseconds_to_timestamp(timestamp: &Timestamp, nanoseconds: &str) -> Timestamp {
     let nanoseconds = nanoseconds.parse::<u128>().expect("Failed to parse nanoseconds");
 
@@ -89,30 +102,56 @@ pub fn add_nanoseconds_to_timestamp(timestamp: &Timestamp, nanoseconds: &str) ->
     }
 }
 
-pub fn extract_gov_params(gov_params: &StoreGetString) -> GovernanceParamsFlat {
+pub fn extract_gov_params(gov_params: StoreGetString) -> GovernanceParamsStore {
     let min_deposit = gov_params.get_at(0, "min_deposit").expect("missing min_deposit");
     let min_deposit_arr = build_min_deposit_array(&min_deposit);
+    let expedited_min_deposit = gov_params
+        .get_at(0, "expedited_min_deposit")
+        .expect("missing expedited_min_deposit");
+    let expedited_min_deposit_arr = build_min_deposit_array(&expedited_min_deposit);
 
     let max_deposit_period = gov_params
         .get_at(0, "max_deposit_period")
         .expect("missing max_deposit_period");
     let voting_period = gov_params.get_at(0, "voting_period").expect("missing voting_period");
+    let expedited_voting_period = gov_params
+        .get_at(0, "expedited_voting_period")
+        .expect("missing expedited_voting_period");
     let quorum = gov_params.get_at(0, "quorum").expect("missing quorum");
+
+    // Osmosis doesn't have "expedited_quorum", so we set it to empty string
+    let expedited_quorum = gov_params.get_at(0, "expedited_quorum").unwrap_or("".to_string());
+
     let threshold = gov_params.get_at(0, "threshold").expect("missing threshold");
+    let expedited_threshold = gov_params
+        .get_at(0, "expedited_threshold")
+        .expect("missing expedited_threshold");
     let veto_threshold = gov_params.get_at(0, "veto_threshold").expect("missing veto_threshold");
     let block_id_last_updated = gov_params
         .get_at(0, "block_id_last_updated")
         .expect("missing block_id_last_updated");
 
-    GovernanceParamsFlat {
+    GovernanceParamsStore {
         block_id_last_updated,
         min_deposit: min_deposit_arr,
+        expedited_min_deposit: expedited_min_deposit_arr,
         max_deposit_period,
         voting_period,
+        expedited_voting_period,
         quorum,
+        expedited_quorum,
         threshold,
+        expedited_threshold,
         veto_threshold,
+        store_get_string: gov_params,
     }
+}
+
+pub fn get_proposal_type(gov_params: &GovernanceParamsStore, proposal_id: &str) -> String {
+    gov_params
+        .store_get_string
+        .get_at(0, format!("proposal_id_type:{}", proposal_id))
+        .expect("missing proposal_id_type")
 }
 
 fn build_min_deposit_array(min_deposit: &str) -> Vec<String> {
@@ -129,12 +168,19 @@ fn build_min_deposit_array(min_deposit: &str) -> Vec<String> {
         .collect()
 }
 
-pub struct GovernanceParamsFlat {
+pub struct GovernanceParamsStore {
     pub block_id_last_updated: String,
     pub min_deposit: Vec<String>,
+    pub expedited_min_deposit: Vec<String>,
     pub max_deposit_period: String,
     pub voting_period: String,
+    pub expedited_voting_period: String,
     pub quorum: String,
+    pub expedited_quorum: String,
     pub threshold: String,
+    pub expedited_threshold: String,
     pub veto_threshold: String,
+    // StoreGetString is used to get proposal types (e.g Standard, MultipleChoice, Optimistic, Expedited)
+    // Example : store.get_string(0, "proposal_id_type:234")
+    pub store_get_string: StoreGetString,
 }

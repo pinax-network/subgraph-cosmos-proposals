@@ -19,6 +19,8 @@ pub struct Events {
     pub gov_params_changes: ::prost::alloc::vec::Vec<GovParamsChanges>,
     #[prost(string, repeated, tag = "2")]
     pub passed_proposal_ids: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
+    #[prost(message, repeated, tag = "3")]
+    pub new_proposals_with_types: ::prost::alloc::vec::Vec<NewProposalWithType>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message, serde::Serialize, serde::Deserialize)]
@@ -27,6 +29,14 @@ pub struct GovParamsChanges {
     pub proposal_id: ::prost::alloc::string::String,
     #[prost(message, optional, tag = "2")]
     pub params: ::core::option::Option<GovParamsOptional>,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message, serde::Serialize, serde::Deserialize)]
+pub struct NewProposalWithType {
+    #[prost(string, tag = "1")]
+    pub proposal_id: ::prost::alloc::string::String,
+    #[prost(string, tag = "2")]
+    pub proposal_type: ::prost::alloc::string::String,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message, serde::Serialize, serde::Deserialize)]

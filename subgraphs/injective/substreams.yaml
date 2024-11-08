@@ -23,7 +23,7 @@ params:
     },
     "voting_params": {
     "voting_period": "172800000000000",
-    "expedited_voting_period": "86400000000000",
+    "expedited_voting_period": "86400000000000"
     },
     "tally_params": {
     "quorum": "0.334000000000000000",

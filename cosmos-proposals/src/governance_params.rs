@@ -1,9 +1,9 @@
 use serde::{Deserialize, Serialize};
 use substreams_entity_change::tables::{Row, Tables};
 
-use crate::utils::GovernanceParamsFlat;
+use crate::utils::GovernanceParamsStore;
 
-pub fn push_governance_params(tables: &mut Tables, gov_params: &GovernanceParamsFlat) {
+pub fn push_governance_params(tables: &mut Tables, gov_params: &GovernanceParamsStore) {
     let block_id = &gov_params.block_id_last_updated;
 
     tables
@@ -20,7 +20,7 @@ fn add_governance_parameter_derive_from(row: &mut Row, block_id: &str, id: &str)
     row.set("block", block_id).set("governance_parameter", id);
 }
 
-fn create_deposit_params(tables: &mut Tables, block_number: &str, gov_params: &GovernanceParamsFlat) {
+fn create_deposit_params(tables: &mut Tables, block_number: &str, gov_params: &GovernanceParamsStore) {
     add_governance_parameter_derive_from(
         tables
             .create_row("DepositParam", &gov_params.block_id_last_updated)
@@ -31,7 +31,7 @@ fn create_deposit_params(tables: &mut Tables, block_number: &str, gov_params: &G
     );
 }
 
-fn create_voting_params(tables: &mut Tables, block_number: &str, gov_params: &GovernanceParamsFlat) {
+fn create_voting_params(tables: &mut Tables, block_number: &str, gov_params: &GovernanceParamsStore) {
     add_governance_parameter_derive_from(
         tables
             .create_row("VotingParam", &gov_params.block_id_last_updated)
@@ -41,7 +41,7 @@ fn create_voting_params(tables: &mut Tables, block_number: &str, gov_params: &Go
     );
 }
 
-fn create_tally_params(tables: &mut Tables, block_number: &str, gov_params: &GovernanceParamsFlat) {
+fn create_tally_params(tables: &mut Tables, block_number: &str, gov_params: &GovernanceParamsStore) {
     add_governance_parameter_derive_from(
         tables
             .create_row("TallyParam", &gov_params.block_id_last_updated)

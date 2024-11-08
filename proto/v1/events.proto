@@ -10,11 +10,17 @@ message PartialTxBody { repeated google.protobuf.Any messages = 1; }
 message Events {
   repeated GovParamsChanges gov_params_changes = 1;
   repeated string passed_proposal_ids = 2;
+  repeated NewProposalWithType new_proposals_with_types = 3;
 }
 
 message GovParamsChanges {
   string proposal_id = 1;
   GovParamsOptional params = 2;
+}
+
+message NewProposalWithType {
+  string proposal_id = 1;
+  string proposal_type = 2;
 }
 
 message GovParamsOptional {

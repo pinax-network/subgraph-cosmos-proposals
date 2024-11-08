@@ -5,7 +5,7 @@ use substreams_cosmos::pb::TxResults;
 use substreams_entity_change::tables::Tables;
 
 use crate::pb::cosmos::base::v1beta1::Coin;
-use crate::utils::GovernanceParamsFlat;
+use crate::utils::{determine_voting_end_time, get_proposal_type, GovernanceParamsStore};
 use crate::{
     pb::cosmos::gov::v1beta1::MsgDeposit,
     utils::{add_nanoseconds_to_timestamp, extract_proposal_status},
@@ -17,7 +17,7 @@ pub fn create_deposit_msg(
     clock: &Clock,
     tx_result: &TxResults,
     tx_hash: &str,
-    gov_params: &GovernanceParamsFlat,
+    gov_params: &GovernanceParamsStore,
 ) {
     if let Ok(msg_deposit) = MsgDeposit::decode(msg.value.as_slice()) {
         let proposal_id = msg_deposit.proposal_id.to_string();
@@ -26,11 +26,13 @@ pub fn create_deposit_msg(
 
         let proposal_status = extract_proposal_status(tx_result);
 
-        // If this deposit started the deposit period, update the proposal status
+        // If this deposit started the voting period, update the proposal status
         if proposal_status == "VotingPeriod" {
             let timestamp = clock.timestamp.as_ref().expect("timestamp not found");
 
-            let voting_end_time = add_nanoseconds_to_timestamp(timestamp, &gov_params.voting_period);
+            let proposal_type = get_proposal_type(gov_params, &proposal_id);
+
+            let voting_end_time = determine_voting_end_time(gov_params, timestamp, &proposal_type);
 
             tables
                 .update_row("Proposal", &proposal_id)

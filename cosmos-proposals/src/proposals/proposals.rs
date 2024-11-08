@@ -5,7 +5,8 @@ use crate::pb::cosmos::{
     gov::v1beta1::{MsgSubmitProposal as MsgSubmitProposalV1Beta1, TextProposal},
 };
 use crate::utils::{
-    add_nanoseconds_to_timestamp, extract_authority, extract_proposal_id, extract_proposal_status, GovernanceParamsFlat,
+    add_nanoseconds_to_timestamp, determine_voting_end_time, extract_authority, extract_proposal_id,
+    extract_proposal_status, get_proposal_type, GovernanceParamsStore,
 };
 use crate::votes::create_vote;
 use prost::Message;
@@ -25,7 +26,7 @@ pub fn handle_proposals(
     message: &Any,
     tx_result: &TxResults,
     tx_hash: &str,
-    gov_params: &GovernanceParamsFlat,
+    gov_params: &GovernanceParamsStore,
 ) {
     let proposal_id = extract_proposal_id(tx_result, clock, tx_hash);
     let status = extract_proposal_status(tx_result);
@@ -75,11 +76,11 @@ fn handle_v1_proposal(
     tx_hash: &str,
     proposal_id: &str,
     status: &str,
-    gov_params: &GovernanceParamsFlat,
+    gov_params: &GovernanceParamsStore,
 ) {
     if let Ok(msg) = MsgSubmitProposalV1::decode(message.value.as_slice()) {
         let row = tables.create_row("Proposal", proposal_id);
-        set_proposal_entity(row, clock, message, tx_result, tx_hash, status, gov_params);
+        set_proposal_entity(row, clock, message, tx_result, tx_hash, proposal_id, status, gov_params);
         set_proposal_v1(row, &msg);
         set_proposal_messages(tables, &msg, proposal_id);
         create_initial_deposit(tables, clock, tx_result, tx_hash, proposal_id, &msg.proposer);
@@ -94,11 +95,11 @@ fn handle_v1beta1_proposal(
     tx_hash: &str,
     proposal_id: &str,
     status: &str,
-    gov_params: &GovernanceParamsFlat,
+    gov_params: &GovernanceParamsStore,
 ) {
     if let Ok(msg) = MsgSubmitProposalV1Beta1::decode(message.value.as_slice()) {
         let row = tables.create_row("Proposal", proposal_id);
-        set_proposal_entity(row, clock, message, tx_result, tx_hash, status, gov_params);
+        set_proposal_entity(row, clock, message, tx_result, tx_hash, proposal_id, status, gov_params);
         set_proposal_v1beta1(row, &msg);
         set_proposal_messages(tables, &msg, proposal_id);
         create_initial_deposit(tables, clock, tx_result, tx_hash, proposal_id, &msg.proposer);
@@ -117,12 +118,12 @@ fn handle_exec_proposal(
     tx_hash: &str,
     proposal_id: &str,
     status: &str,
-    gov_params: &GovernanceParamsFlat,
+    gov_params: &GovernanceParamsStore,
 ) {
     if let Ok(msg_exec) = MsgExec::decode(message.value.as_slice()) {
         for msg in msg_exec.msgs {
             let row = tables.create_row("Proposal", proposal_id);
-            set_proposal_entity(row, clock, message, tx_result, tx_hash, status, gov_params);
+            set_proposal_entity(row, clock, message, tx_result, tx_hash, proposal_id, status, gov_params);
 
             if let Ok(msg) = MsgSubmitProposalV1::decode(msg.value.as_slice()) {
                 set_proposal_v1(row, &msg);
@@ -155,7 +156,7 @@ fn set_proposal_v1beta1(row: &mut Row, msg: &MsgSubmitProposalV1Beta1) {
     if let Some(first_message) = msg.messages.first() {
         let proposer = msg.proposer.as_str();
         let (title, summary) = decode_text_proposal(first_message);
-        set_proposal_metadata(row, proposer, &title, &summary, "", "Standard");
+        set_proposal_metadata(row, proposer, &title, &summary, "");
     }
 }
 
@@ -164,21 +165,7 @@ fn set_proposal_v1(row: &mut Row, msg: &MsgSubmitProposalV1) {
     let title = msg.title.as_str();
     let summary = msg.summary.as_str();
     let metadata = msg.metadata.as_str();
-    let type_str = determine_proposal_type(msg);
-    set_proposal_metadata(row, proposer, title, summary, metadata, &type_str);
-}
-
-fn determine_proposal_type(msg: &MsgSubmitProposalV1) -> String {
-    match msg.proposal_type.unwrap_or(-1) {
-        -1 => {
-            if msg.expedited.unwrap_or(false) {
-                "Expedited".to_string()
-            } else {
-                "Standard".to_string()
-            }
-        }
-        proposal_type => proposal_type_to_string(proposal_type),
-    }
+    set_proposal_metadata(row, proposer, title, summary, metadata);
 }
 
 fn set_proposal_messages<T: HasMessages>(tables: &mut Tables, msg: &T, proposal_id: &str) {
@@ -209,19 +196,11 @@ impl HasMessages for MsgSubmitProposalV1Beta1 {
     }
 }
 
-pub fn set_proposal_metadata(
-    row: &mut Row,
-    proposer: &str,
-    title: &str,
-    summary: &str,
-    metadata: &str,
-    proposal_type: &str,
-) {
+pub fn set_proposal_metadata(row: &mut Row, proposer: &str, title: &str, summary: &str, metadata: &str) {
     row.set("proposer", proposer)
         .set("title", title)
         .set("summary", summary)
-        .set("metadata", metadata)
-        .set("proposal_type", proposal_type);
+        .set("metadata", metadata);
 }
 
 pub fn set_proposal_entity(
@@ -230,8 +209,9 @@ pub fn set_proposal_entity(
     message: &Any,
     tx_result: &TxResults,
     tx_hash: &str,
+    proposal_id: &str,
     status: &str,
-    gov_params: &GovernanceParamsFlat,
+    gov_params: &GovernanceParamsStore,
 ) {
     let authority = extract_authority(tx_result);
     if message.type_url.is_empty() {
@@ -240,24 +220,35 @@ pub fn set_proposal_entity(
 
     let submit_time = clock.timestamp.as_ref().expect("missing submit_time");
 
+    let proposal_type = &get_proposal_type(gov_params, proposal_id);
+
     row.set("transaction", tx_hash)
         .set("block", &clock.id)
         .set("authority", authority)
         .set("type", &message.type_url)
         .set("status", status)
-        .set("submit_time", submit_time);
+        .set("submit_time", submit_time)
+        .set("proposal_type", proposal_type);
 
-    set_proposal_gov_params(row, gov_params, submit_time, status);
+    set_proposal_gov_params(row, gov_params, submit_time, status, proposal_type);
 }
 
-fn set_proposal_gov_params(row: &mut Row, gov_params: &GovernanceParamsFlat, submit_time: &Timestamp, status: &str) {
+fn set_proposal_gov_params(
+    row: &mut Row,
+    gov_params: &GovernanceParamsStore,
+    submit_time: &Timestamp,
+    status: &str,
+    proposal_type: &str,
+) {
     let deposit_end_time = add_nanoseconds_to_timestamp(submit_time, &gov_params.max_deposit_period);
 
     row.set("deposit_end_time", &deposit_end_time)
         .set("governance_parameter", &gov_params.block_id_last_updated);
 
     if status == "VotingPeriod" {
-        let voting_end_time = add_nanoseconds_to_timestamp(submit_time, &gov_params.voting_period);
+        // Default to standard voting period if proposal type is not expedited
+        let voting_end_time = determine_voting_end_time(gov_params, submit_time, proposal_type);
+
         row.set("voting_start_time", submit_time)
             .set("voting_end_time", &voting_end_time);
     }
@@ -267,15 +258,4 @@ pub fn decode_text_proposal(content: &Any) -> (String, String) {
     TextProposal::decode(content.value.as_slice())
         .map(|decoded| (decoded.title, decoded.description))
         .unwrap_or_default()
-}
-
-fn proposal_type_to_string(proposal_type: i32) -> String {
-    match proposal_type {
-        0 | 1 => "Standard",
-        2 => "MultipleChoice",
-        3 => "Optimistic",
-        4 => "Expedited",
-        _ => "Unknown",
-    }
-    .to_string()
 }

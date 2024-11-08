@@ -1,5 +1,7 @@
+use cosmos_proposals::pb::cosmos::authz::v1beta1::MsgExec;
+use cosmos_proposals::pb::cosmos::gov::v1::MsgSubmitProposal as MsgSubmitProposalV1;
 use prost::Message;
-use serde_json::json;
+use prost_types::Any;
 use substreams::errors::Error;
 use substreams_cosmos::{pb::TxResults, Block};
 
@@ -8,13 +10,16 @@ use cosmos_proposals::pb::cosmos::params::v1beta1::ParameterChangeProposal;
 use cosmos_proposals::pb::cosmos::tx::v1beta1::Tx;
 use cosmos_proposals::utils::{extract_proposal_id_from_tx, get_attribute_value};
 
-use cosmos_proposals_protobuf::pb::cosmos::proposals::v1::{Events, GovParamsChanges, GovParamsOptional};
+use cosmos_proposals_protobuf::pb::cosmos::proposals::v1::{
+    Events, GovParamsChanges, GovParamsOptional, NewProposalWithType,
+};
 
 #[substreams::handlers::map]
 pub fn map_events(block: Block) -> Result<Events, Error> {
     let mut events = Events {
         gov_params_changes: extract_param_change_proposals(&block),
         passed_proposal_ids: extract_passed_proposal_ids(&block),
+        new_proposals_with_types: extract_new_proposals_with_types(&block),
     };
 
     // Allows for gov_params to push the genesis parameters
@@ -26,7 +31,7 @@ pub fn map_events(block: Block) -> Result<Events, Error> {
 }
 
 fn extract_passed_proposal_ids(block: &Block) -> Vec<String> {
-    let mut proposals_passed = Vec::new();
+    let mut proposals_passed: Vec<String> = Vec::new();
 
     let proposal_updates = block.events.iter().filter(|event| event.r#type == "active_proposal");
 
@@ -90,9 +95,69 @@ fn extract_parameter_change_proposal(tx_result: &TxResults, tx_bytes: &[u8]) -> 
             }
         }
     }
-
     None
 }
+
+fn extract_new_proposals_with_types(block: &Block) -> Vec<NewProposalWithType> {
+    let mut new_proposal_types: Vec<NewProposalWithType> = Vec::new();
+
+    for (i, tx_result) in block.tx_results.iter().enumerate() {
+        let tx = match decode_transaction(&block.txs[i]) {
+            Some(tx) => tx,
+            None => continue,
+        };
+
+        let body = tx.body.expect("Tx body is required");
+        for message in body.messages.iter() {
+            if let Some(proposal_type) = get_proposal_type(message, tx_result) {
+                new_proposal_types.push(proposal_type);
+            }
+        }
+    }
+    new_proposal_types
+}
+
+fn decode_transaction(tx_bytes: &[u8]) -> Option<Tx> {
+    <Tx as prost::Message>::decode(tx_bytes).ok()
+}
+
+fn get_proposal_type(message: &Any, tx_result: &TxResults) -> Option<NewProposalWithType> {
+    let proposal_id = extract_proposal_id_from_tx(tx_result).unwrap_or_default();
+
+    match message.type_url.as_str() {
+        "/cosmos.gov.v1beta1.MsgSubmitProposal" => Some(NewProposalWithType {
+            proposal_id,
+            proposal_type: "Standard".to_string(),
+        }),
+        "/cosmos.gov.v1.MsgSubmitProposal" => {
+            let msg = MsgSubmitProposalV1::decode(message.value.as_slice()).expect("Invalid proposal message");
+            Some(NewProposalWithType {
+                proposal_id,
+                proposal_type: determine_proposal_type(&msg),
+            })
+        }
+        "/cosmos.authz.v1beta1.MsgExec" => {
+            if let Ok(msg_exec) = MsgExec::decode(message.value.as_slice()) {
+                for msg in msg_exec.msgs {
+                    if let Ok(msg) = MsgSubmitProposalV1::decode(msg.value.as_slice()) {
+                        return Some(NewProposalWithType {
+                            proposal_id,
+                            proposal_type: determine_proposal_type(&msg),
+                        });
+                    } else if let Ok(_) = MsgSubmitProposalV1Beta1::decode(msg.value.as_slice()) {
+                        return Some(NewProposalWithType {
+                            proposal_id,
+                            proposal_type: "Standard".to_string(),
+                        });
+                    }
+                }
+            }
+            None
+        }
+        _ => None,
+    }
+}
+
 fn process_proposal_changes(proposal: &ParameterChangeProposal, proposal_id: String) -> Option<GovParamsChanges> {
     let gov_changes = proposal
         .changes
@@ -131,4 +196,28 @@ fn process_proposal_changes(proposal: &ParameterChangeProposal, proposal_id: Str
     }
 
     Some(param_changes)
+}
+
+fn determine_proposal_type(msg: &MsgSubmitProposalV1) -> String {
+    match msg.proposal_type.unwrap_or(-1) {
+        -1 => {
+            if msg.expedited.unwrap_or(false) {
+                "Expedited".to_string()
+            } else {
+                "Standard".to_string()
+            }
+        }
+        proposal_type => proposal_type_to_string(proposal_type),
+    }
+}
+
+fn proposal_type_to_string(proposal_type: i32) -> String {
+    match proposal_type {
+        0 | 1 => "Standard",
+        2 => "MultipleChoice",
+        3 => "Optimistic",
+        4 => "Expedited",
+        _ => "Unknown",
+    }
+    .to_string()
 }

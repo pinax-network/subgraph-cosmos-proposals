@@ -1,5 +1,6 @@
 use cosmos_proposals_protobuf::pb::cosmos::proposals::v1::Events;
 use cosmos_proposals_protobuf::pb::cosmos::proposals::v1::GovParamsOptional;
+use cosmos_proposals_protobuf::pb::cosmos::proposals::v1::NewProposalWithType;
 use substreams::pb::substreams::Clock;
 use substreams::store::StoreGet;
 use substreams::store::StoreGetString;
@@ -29,17 +30,23 @@ pub fn gov_params(
             set_new_gov_params(&gov_params, &gov_param_proposal_str);
         }
     }
+
+    // Set proposal types for new proposal
+    // e.g Standard, MultipleChoice, Optimistic, Expedited
+    for new_proposal in events.new_proposals_with_types {
+        set_proposal_type(&gov_params, &new_proposal);
+    }
 }
 
 fn set_new_gov_params(gov_params: &StoreSetString, gov_param_proposal_str: &String) {
-    // Cosmos SDK uses "veto" instead of "veto_threshold" in the JSON
-    // Injective also uses "veto" instead of "veto_threshold", though in genesis file it's "veto_threshold"
+    // There are some discrepancies in the parameter names between chains
+    // Cosmos & Injective use "veto_threshold" in their genesis files, but then use "veto" in documentation
     // Osmosis uses "min_expedited_deposit" instead of "expedited_min_deposit"
     // https://docs.injective.network/developers/modules/core/gov#parameters
     // https://docs.osmosis.zone/osmosis-core/modules/gov
     let formatted_str = gov_param_proposal_str
-        .replace("veto", "veto_threshold")
-        .replace("min_expedited_deposit", "expedited_min_deposit");
+        .replace("\"veto\"", "\"veto_threshold\"")
+        .replace("\"min_expedited_deposit\"", "\"expedited_min_deposit\"");
 
     let parsed: GovParamsOptional = serde_json::from_str(&formatted_str).expect("Failed to parse gov params");
 
@@ -85,4 +92,12 @@ fn set_new_gov_params(gov_params: &StoreSetString, gov_param_proposal_str: &Stri
             gov_params.set(0, "veto_threshold", &veto_threshold);
         }
     }
+}
+
+fn set_proposal_type(gov_params: &StoreSetString, new_proposal: &NewProposalWithType) {
+    gov_params.set(
+        0,
+        format!("proposal_id_type:{}", new_proposal.proposal_id),
+        &new_proposal.proposal_type,
+    );
 }
