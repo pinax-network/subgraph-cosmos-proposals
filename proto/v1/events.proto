@@ -23,17 +23,23 @@ message GovParamsOptional {
   optional DepositParamsOptional deposit_params = 3;
 }
 
-message VotingParamsOptional { optional string voting_period = 1; }
+message VotingParamsOptional { 
+  optional string voting_period = 1; 
+  optional string expedited_voting_period = 2;
+}
 
 message TallyParamsOptional {
   optional string quorum = 1;
-  optional string threshold = 2;
-  optional string veto_threshold = 3;
+  optional string expedited_quorum = 2;
+  optional string threshold = 3;
+  optional string expedited_threshold = 4;
+  optional string veto_threshold = 5;
 }
 
 message DepositParamsOptional {
   repeated Deposit min_deposit = 1;
-  optional string max_deposit_period = 2;
+  repeated Deposit expedited_min_deposit = 2;
+  optional string max_deposit_period = 3;
 }
 
 message Deposit {

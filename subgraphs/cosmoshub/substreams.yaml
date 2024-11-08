@@ -1,6 +1,6 @@
 specVersion: v0.1.0
 package:
-  name: injective_proposals
+  name: cosmoshub_proposals
   version: v0.1.0
   url: https://github.com/pinax-network/subgraph-cosmos-proposals
 
@@ -12,21 +12,22 @@ binaries:
     type: wasm/rust-v1
     file: ../../target/wasm32-unknown-unknown/release/cosmos_proposals.wasm
 
-network: injective
+network: cosmoshub
+# network name to confirm
 
 params:
   cosmos_proposals:cosmos_governance_parameters:gov_params: '{
     "deposit_params": {
-    "min_deposit": [{ "denom": "inj", "amount": "500000000000000000000"}],
+    "min_deposit": [{"denom": "uatom", "amount": "512000000"}],
     "expedited_min_deposit": [{"denom":"uatom","amount":"50000000"}],
-    "max_deposit_period": "172800000000000"
+    "max_deposit_period": "1209600000000000"
     },
     "voting_params": {
-    "voting_period": "172800000000000",
-    "expedited_voting_period": "86400000000000",
+    "voting_period": "1209600000000000",
+    "expedited_voting_period": "86400000000000"
     },
     "tally_params": {
-    "quorum": "0.334000000000000000",
+    "quorum": "0.400000000000000000",
     "expedited_quorum": "0.5",
     "threshold": "0.500000000000000000",
     "expedited_threshold": "0.667000000000000000",

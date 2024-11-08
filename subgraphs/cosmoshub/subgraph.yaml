@@ -9,6 +9,7 @@ dataSources:
   - kind: substreams
     name: cosmoshub_proposals
     network: cosmoshub
+    # network name to confirm
     source:
       startBlock: 0
       package:
