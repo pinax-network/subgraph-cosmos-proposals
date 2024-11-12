@@ -6,10 +6,7 @@ use substreams_entity_change::tables::Tables;
 
 use crate::pb::cosmos::base::v1beta1::Coin;
 use crate::utils::{determine_voting_end_time, get_proposal_type, GovernanceParamsStore};
-use crate::{
-    pb::cosmos::gov::v1beta1::MsgDeposit,
-    utils::{add_nanoseconds_to_timestamp, extract_proposal_status},
-};
+use crate::{pb::cosmos::gov::v1beta1::MsgDeposit, utils::extract_proposal_status};
 
 pub fn create_deposit_msg(
     tables: &mut Tables,
