@@ -13,7 +13,7 @@ dataSources:
       startBlock: 0
       package:
         moduleName: cosmos_proposals:graph_out
-        file: ./osmosis-proposals-v0.1.0.spkg
+        file: ./osmosis-proposals-v0.2.0.spkg
 
     mapping:
       kind: substreams/graph-entities

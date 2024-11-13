@@ -1,0 +1,31 @@
+specVersion: v0.1.0
+package:
+  name: theta_proposals
+  version: v0.2.0
+  url: https://github.com/pinax-network/subgraph-cosmos-proposals
+
+imports:
+  cosmos_proposals: ../../cosmos-proposals/cosmos-proposals-v0.2.0.spkg
+
+binaries:
+  default:
+    type: wasm/rust-v1
+    file: ../../target/wasm32-unknown-unknown/release/cosmos_proposals.wasm
+
+network: theta
+
+params:
+  # https://github.com/cosmos/testnets/blob/master/release/genesis.json.gz
+  cosmos_proposals:cosmos_governance_parameters:gov_params: '{
+    "deposit_params": {
+      "min_deposit": [{"amount": "1","denom": "uatom"}],
+      "max_deposit_period": "1209600000000"
+    },
+      "voting_params": {
+      "voting_period": "60000000"
+    },
+    "tally_params": {
+      "quorum": "0.000000000000000001",
+      "threshold": "0.000000000000000001",
+      "veto_threshold": "0.334000000000000000"
+    }}'

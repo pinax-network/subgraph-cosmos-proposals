@@ -21,4 +21,4 @@ publish:
 
 .PHONY: gui
 gui:
-	substreams gui substreams.yaml -e mainnet.injective.streamingfast.io:443 graph_out -s 39438554
+	substreams gui substreams.yaml -e mainnet.injective.streamingfast.io:443 cosmos_proposals:graph_out -s 39438554 --network injective
