@@ -25,6 +25,7 @@ fn create_deposit_params(tables: &mut Tables, block_number: &str, gov_params: &G
         tables
             .create_row("DepositParam", &gov_params.block_id_last_updated)
             .set("min_deposit", &gov_params.min_deposit)
+            .set("expedited_min_deposit", &gov_params.expedited_min_deposit)
             .set_bigint("max_deposit_period", &gov_params.max_deposit_period),
         &block_number,
         &gov_params.block_id_last_updated,
@@ -35,7 +36,8 @@ fn create_voting_params(tables: &mut Tables, block_number: &str, gov_params: &Go
     add_governance_parameter_derive_from(
         tables
             .create_row("VotingParam", &gov_params.block_id_last_updated)
-            .set_bigint("voting_period", &gov_params.voting_period),
+            .set_bigint("voting_period", &gov_params.voting_period)
+            .set_bigint("expedited_voting_period", &gov_params.expedited_voting_period),
         &block_number,
         &gov_params.block_id_last_updated,
     );
@@ -46,7 +48,9 @@ fn create_tally_params(tables: &mut Tables, block_number: &str, gov_params: &Gov
         tables
             .create_row("TallyParam", &gov_params.block_id_last_updated)
             .set_bigdecimal("quorum", &gov_params.quorum)
+            .set_bigdecimal("expedited_quorum", &gov_params.expedited_quorum)
             .set_bigdecimal("threshold", &gov_params.threshold)
+            .set_bigdecimal("expedited_threshold", &gov_params.expedited_threshold)
             .set_bigdecimal("veto_threshold", &gov_params.veto_threshold),
         &block_number,
         &gov_params.block_id_last_updated,
