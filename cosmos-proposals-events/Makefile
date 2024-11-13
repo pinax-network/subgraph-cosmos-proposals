@@ -16,8 +16,8 @@ build:
 
 .PHONY: gui
 gui:
-	substreams gui . -e mainnet.injective.streamingfast.io:443 map_events -s 8982722 -t 9157418
+	substreams gui . -e mainnet.injective.streamingfast.io:443 map_events -s 8982722 -t 9157418 --network injective
 
 .PHONY: cache
 cache:
-	substreams gui . -e mainnet.injective.streamingfast.io:443 map_events -s 82182057 -t 0 --production-mode
+	substreams gui . -e mainnet.injective.streamingfast.io:443 map_events -s 82182057 -t 0 --production-mode --network injective
