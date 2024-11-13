@@ -8,29 +8,6 @@ package:
 imports:
   block_index: ../cosmos-block-index/cosmos-block-index-v0.1.0.spkg
 
-protobuf:
-  files:
-    - v1/events.proto
-  importPaths:
-    - ../proto
-  excludePaths:
-    - sf/substreams/rpc
-    - sf/substrea
-    - sf/substreams/sink
-    - sf/substreams/index
-    - sf/substreams/index/v1
-    - sf/substreams
-    - sf/cosmos/type/v2
-    - injective
-    - sf
-    - ibc
-    - google.api
-    - gogoproto
-    - cosmwasm
-    - cosmos
-    - cosmos_proto
-    - google
-
 binaries:
   default:
     type: wasm/rust-v1
@@ -43,7 +20,3 @@ modules:
       - map: block_index:map_blocks
     output:
       type: proto:cosmos.proposals.v1.Events
-# params:
-#   # Block Filter only Governance proposals events
-#   # improves Substreams syncing performance when using `--production-mode`
-#   block_index:map_blocks: "message:cosmos.gov.v1beta1 || message:cosmos.gov.v1 || type:active_proposal || type:signal_proposal || type:inactive_proposal || type:submit_proposal || block.number:1"
