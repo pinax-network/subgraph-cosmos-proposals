@@ -83,7 +83,10 @@ pub fn determine_voting_end_time(
     proposal_type: &str,
 ) -> Timestamp {
     let voting_period = if proposal_type == "Expedited" {
-        &gov_params.expedited_voting_period
+        &gov_params
+            .expedited_voting_period
+            .as_ref()
+            .expect("missing expedited_voting_period")
     } else {
         &gov_params.voting_period
     };
@@ -107,25 +110,17 @@ pub fn extract_gov_params(gov_params: StoreGetString) -> GovernanceParamsStore {
     let min_deposit_arr = build_min_deposit_array(&min_deposit);
     let expedited_min_deposit = gov_params
         .get_at(0, "expedited_min_deposit")
-        .expect("missing expedited_min_deposit");
-    let expedited_min_deposit_arr = build_min_deposit_array(&expedited_min_deposit);
+        .map(|deposit| build_min_deposit_array(&deposit));
 
     let max_deposit_period = gov_params
         .get_at(0, "max_deposit_period")
         .expect("missing max_deposit_period");
     let voting_period = gov_params.get_at(0, "voting_period").expect("missing voting_period");
-    let expedited_voting_period = gov_params
-        .get_at(0, "expedited_voting_period")
-        .expect("missing expedited_voting_period");
+    let expedited_voting_period = gov_params.get_at(0, "expedited_voting_period");
     let quorum = gov_params.get_at(0, "quorum").expect("missing quorum");
-
-    // Osmosis doesn't have "expedited_quorum", so we set it to empty string
-    let expedited_quorum = gov_params.get_at(0, "expedited_quorum").unwrap_or("".to_string());
-
+    let expedited_quorum = gov_params.get_at(0, "expedited_quorum");
     let threshold = gov_params.get_at(0, "threshold").expect("missing threshold");
-    let expedited_threshold = gov_params
-        .get_at(0, "expedited_threshold")
-        .expect("missing expedited_threshold");
+    let expedited_threshold = gov_params.get_at(0, "expedited_threshold");
     let veto_threshold = gov_params.get_at(0, "veto_threshold").expect("missing veto_threshold");
     let block_id_last_updated = gov_params
         .get_at(0, "block_id_last_updated")
@@ -134,7 +129,7 @@ pub fn extract_gov_params(gov_params: StoreGetString) -> GovernanceParamsStore {
     GovernanceParamsStore {
         block_id_last_updated,
         min_deposit: min_deposit_arr,
-        expedited_min_deposit: expedited_min_deposit_arr,
+        expedited_min_deposit,
         max_deposit_period,
         voting_period,
         expedited_voting_period,
@@ -171,14 +166,14 @@ fn build_min_deposit_array(min_deposit: &str) -> Vec<String> {
 pub struct GovernanceParamsStore {
     pub block_id_last_updated: String,
     pub min_deposit: Vec<String>,
-    pub expedited_min_deposit: Vec<String>,
+    pub expedited_min_deposit: Option<Vec<String>>,
     pub max_deposit_period: String,
     pub voting_period: String,
-    pub expedited_voting_period: String,
+    pub expedited_voting_period: Option<String>,
     pub quorum: String,
-    pub expedited_quorum: String,
+    pub expedited_quorum: Option<String>,
     pub threshold: String,
-    pub expedited_threshold: String,
+    pub expedited_threshold: Option<String>,
     pub veto_threshold: String,
     // StoreGetString is used to get proposal types (e.g Standard, MultipleChoice, Optimistic, Expedited)
     // Example : store.get_string(0, "proposal_id_type:234")

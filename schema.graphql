@@ -131,7 +131,7 @@ type DepositParam @entity {
 
   # deposit parameters
   min_deposit: [String!]! # 512000000 uatom
-  expedited_min_deposit: [String!]!
+  expedited_min_deposit: [String!]
   max_deposit_period: BigInt!
 
   # deriveFrom
@@ -144,7 +144,7 @@ type VotingParam @entity {
 
   # voting parameters
   voting_period: BigInt!
-  expedited_voting_period: BigInt!
+  expedited_voting_period: BigInt
   # deriveFrom
   block: Block!
   governance_parameter: GovernanceParameter!
@@ -155,9 +155,9 @@ type TallyParam @entity {
 
   # tally parameters
   quorum: BigDecimal!
-  expedited_quorum: BigDecimal!
+  expedited_quorum: BigDecimal
   threshold: BigDecimal!
-  expedited_threshold: BigDecimal!
+  expedited_threshold: BigDecimal
   veto_threshold: BigDecimal!
 
   # deriveFrom
