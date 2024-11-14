@@ -1,7 +1,7 @@
 specVersion: v0.1.0
 package:
   name: injective_proposals
-  version: v0.2.0
+  version: v0.2.1
   url: https://github.com/pinax-network/subgraph-cosmos-proposals
   image: logo.jpg
 

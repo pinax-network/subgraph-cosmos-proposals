@@ -13,7 +13,7 @@ dataSources:
       startBlock: 0
       package:
         moduleName: cosmos_proposals:graph_out
-        file: ./injective-proposals-v0.2.0.spkg
+        file: ./injective-proposals-v0.2.1.spkg
 
     mapping:
       kind: substreams/graph-entities
