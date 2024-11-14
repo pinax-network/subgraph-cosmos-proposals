@@ -10,7 +10,7 @@ imports:
 binaries:
   default:
     type: wasm/rust-v1
-    file: ../../target/wasm32-unknown-unknown/release/cosmos_proposals.wasm
+    file: ../../target/wasm32-unknown-unknown/release/cosmos_proposals_sinks.wasm
 
 network: osmosis
 

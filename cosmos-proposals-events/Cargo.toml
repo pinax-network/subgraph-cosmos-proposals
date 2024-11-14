@@ -2,12 +2,13 @@
 name = "cosmos-proposals-events"
 edition = { workspace = true }
 version = { workspace = true }
+publish = false
 
 [lib]
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-cosmos-proposals = { path = "../cosmos-proposals" }
+cosmos-proposals-sinks = { path = "../cosmos-proposals-sinks" }
 cosmos-proposals-protobuf = { path = "../cosmos-proposals-protobuf" }
 substreams = { workspace = true }
 substreams-cosmos = { workspace = true }

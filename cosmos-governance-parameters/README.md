@@ -1,5 +1,13 @@
 ## Cosmos: `Governance Parameters`
 
+> Tracks governance proposals on Cosmos based networks.
+
+## Data Includes
+
+- `GovernanceParameter` stores
+  - Active Governance Parameters
+  - Pending Governance Parameters
+
 ## Graph
 
 ```mermaid

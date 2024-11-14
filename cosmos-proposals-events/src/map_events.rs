@@ -1,14 +1,14 @@
-use cosmos_proposals::pb::cosmos::authz::v1beta1::MsgExec;
-use cosmos_proposals::pb::cosmos::gov::v1::MsgSubmitProposal as MsgSubmitProposalV1;
+use cosmos_proposals_sinks::pb::cosmos::authz::v1beta1::MsgExec;
+use cosmos_proposals_sinks::pb::cosmos::gov::v1::MsgSubmitProposal as MsgSubmitProposalV1;
 use prost::Message;
 use prost_types::Any;
 use substreams::errors::Error;
 use substreams_cosmos::{pb::TxResults, Block};
 
-use cosmos_proposals::pb::cosmos::gov::v1beta1::MsgSubmitProposal as MsgSubmitProposalV1Beta1;
-use cosmos_proposals::pb::cosmos::params::v1beta1::ParameterChangeProposal;
-use cosmos_proposals::pb::cosmos::tx::v1beta1::Tx;
-use cosmos_proposals::utils::{extract_proposal_id_from_tx, get_attribute_value};
+use cosmos_proposals_sinks::pb::cosmos::gov::v1beta1::MsgSubmitProposal as MsgSubmitProposalV1Beta1;
+use cosmos_proposals_sinks::pb::cosmos::params::v1beta1::ParameterChangeProposal;
+use cosmos_proposals_sinks::pb::cosmos::tx::v1beta1::Tx;
+use cosmos_proposals_sinks::utils::{extract_proposal_id_from_tx, get_attribute_value};
 
 use cosmos_proposals_protobuf::pb::cosmos::proposals::v1::{
     Events, GovParamsChanges, GovParamsOptional, NewProposalWithType,

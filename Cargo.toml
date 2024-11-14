@@ -3,7 +3,7 @@ members = [
     "cosmos-block-index",
     "cosmos-proposals-events",
     "cosmos-governance-parameters",
-    "cosmos-proposals",
+    "cosmos-proposals-sinks",
     "cosmos-proposals-protobuf",
 ]
 resolver = "2"

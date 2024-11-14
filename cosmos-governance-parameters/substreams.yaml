@@ -4,6 +4,7 @@ package:
   name: cosmos_governance_parameters
   version: v0.2.0
   url: https://github.com/pinax-network/subgraph-cosmos-proposals
+  image: logo.jpg
 
 imports:
   events: ../cosmos-proposals-events/cosmos-proposals-events-v0.2.0.spkg

@@ -1,5 +1,15 @@
 ## Cosmos Proposals: `Events`
 
+> Tracks governance proposals on Cosmos based networks.
+
+## Data Includes
+
+- `GovernanceParameter`
+  - Governance Params Changes
+- `Proposals`
+  - Passed Proposal IDs
+  - New Proposals with types
+
 ## Graph
 
 ```mermaid
@@ -21,7 +31,7 @@ Initial block: 0
 Kind: map
 Input: map: block_index:map_blocks
 Output Type: proto:cosmos.proposals.v1.Events
-Hash: 6ab77ae51a9336f4ea6e1cae224d26429ffa2707
+Hash: 376ed13bfeff44669d625914162a50f7435310d2
 
 Name: block_index:index_blocks
 Initial block: 0
@@ -29,7 +39,7 @@ Kind: index
 Input: source: sf.cosmos.type.v2.Block
 Input: source: sf.substreams.v1.Clock
 Output Type: proto:sf.substreams.index.v1.Keys
-Hash: e3e7b11d789f5b03b2633e9cf3ad77bfa4648cb7
+Hash: a5db3ccc9005164c6805e17ee612a40d17d3dbf9
 
 Name: block_index:map_blocks
 Initial block: 0
@@ -38,5 +48,5 @@ Input: params: message:cosmos.gov.v1beta1 || message:cosmos.gov.v1 || type:activ
 Input: source: sf.cosmos.type.v2.Block
 Block Filter: (using *block_index:index_blocks*): `&{}`
 Output Type: proto:sf.cosmos.type.v2.Block
-Hash: 13d5c9b3335ba1018b02c7b8c93f1edb9e1fd85d
+Hash: cd0139e1363e6b96b692c5731c93e52fcbae43be
 ```

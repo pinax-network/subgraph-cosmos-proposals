@@ -21,7 +21,7 @@ fn add_governance_parameter_derive_from(row: &mut Row, block_id: &str, id: &str)
 }
 
 fn create_deposit_params(tables: &mut Tables, block_number: &str, gov_params: &GovernanceParamsStore) {
-    let mut row = tables
+    let row = tables
         .create_row("DepositParam", &gov_params.block_id_last_updated)
         .set("min_deposit", &gov_params.min_deposit)
         .set_bigint("max_deposit_period", &gov_params.max_deposit_period);

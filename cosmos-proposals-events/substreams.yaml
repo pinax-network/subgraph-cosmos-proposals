@@ -4,9 +4,16 @@ package:
   name: cosmos_proposals_events
   version: v0.2.0
   url: https://github.com/pinax-network/subgraph-cosmos-proposals
+  image: logo.jpg
 
 imports:
-  block_index: ../cosmos-block-index/cosmos-block-index-v0.1.0.spkg
+  block_index: ../cosmos-block-index/cosmos-block-index-v0.2.0.spkg
+
+protobuf:
+  files:
+    - v1/events.proto
+  importPaths:
+    - ../proto
 
 binaries:
   default:

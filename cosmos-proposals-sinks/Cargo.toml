@@ -1,7 +1,8 @@
 [package]
-name = "cosmos-proposals"
+name = "cosmos-proposals-sinks"
 edition = { workspace = true }
 version = { workspace = true }
+publish = false
 
 [lib]
 crate-type = ["cdylib", "rlib"]

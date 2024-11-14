@@ -31,7 +31,7 @@ Kind: index
 Input: source: sf.cosmos.type.v2.Block
 Input: source: sf.substreams.v1.Clock
 Output Type: proto:sf.substreams.index.v1.Keys
-Hash: 9705c43fdf1cd5e5abfdc596d7cef70cb8cad9a9
+Hash: a5db3ccc9005164c6805e17ee612a40d17d3dbf9
 
 Name: map_blocks
 Initial block: 0
@@ -40,5 +40,5 @@ Input: params: message:cosmos.gov.v1beta1 || message:cosmos.gov.v1 || type:activ
 Input: source: sf.cosmos.type.v2.Block
 Block Filter: (using *index_blocks*): `&{<nil>}`
 Output Type: proto:sf.cosmos.type.v2.Block
-Hash: 3f23efeff3966c936714ae556408cf310fbf11c1
+Hash: cd0139e1363e6b96b692c5731c93e52fcbae43be
 ```
