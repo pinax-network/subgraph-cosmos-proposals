@@ -15,4 +15,4 @@ cache:
 
 .PHONY: gui
 gui:
-	substreams gui . -e mainnet.injective.streamingfast.io:443 map_blocks -s 82182057
+	substreams gui . -e mainnet.injective.streamingfast.io:443 map_blocks -s 82182057 --network injective

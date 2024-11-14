@@ -19,6 +19,7 @@ localdata
 !cosmos-block-index/*.spkg
 !cosmos-proposals-events/*.spkg
 !cosmos-governance-parameters/*.spkg
+!cosmos-proposals-sinks/*.spkg
 
 ### VisualStudioCode template
 .vscode/*

@@ -14,7 +14,7 @@ dataSources:
       startBlock: 0
       package:
         moduleName: cosmos_proposals:graph_out
-        file: ../../cosmos-proposals/cosmos-proposals-v0.2.0.spkg
+        file: ../../cosmos-proposals-sinks/cosmos-proposals-sinks-v0.2.0.spkg
 
     mapping:
       kind: substreams/graph-entities

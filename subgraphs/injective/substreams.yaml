@@ -6,7 +6,7 @@ package:
   image: logo.jpg
 
 imports:
-  cosmos_proposals: ../../cosmos-proposals/cosmos-proposals-v0.2.0.spkg
+  cosmos_proposals: ../../cosmos-proposals-sinks/cosmos-proposals-sinks-v0.2.0.spkg
 
 binaries:
   default:

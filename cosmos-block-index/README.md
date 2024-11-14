@@ -1,4 +1,4 @@
-## Cosmos Block Index
+## Cosmos: `Block Index`
 
 ### Available query fields
 
