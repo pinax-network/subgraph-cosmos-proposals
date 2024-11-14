@@ -2,7 +2,7 @@
 specVersion: v0.1.0
 package:
   name: cosmos_proposals_events
-  version: v0.2.0
+  version: v0.2.1
   url: https://github.com/pinax-network/subgraph-cosmos-proposals
   image: logo.jpg
 
