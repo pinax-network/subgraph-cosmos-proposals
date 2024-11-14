@@ -18,6 +18,9 @@ pub fn gov_params(
     gov_params: StoreSetString,
 ) {
     if clock.number == 1 {
+        if genesis_params.is_empty() {
+            return;
+        }
         set_new_gov_params(&gov_params, &genesis_params);
         gov_params.set(0, "block_id_last_updated", &clock.id);
     }
