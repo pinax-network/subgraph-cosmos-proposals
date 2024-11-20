@@ -1,4 +1,4 @@
-# Subgraph Limitations
+# Subgraph Limitations: Governance Parameters
 
 ## Overview
 This document outlines the capabilities and limitations of tracking governance parameters within the Cosmos-based blockchain Governance Proposals subgraph. Understanding these limitations is crucial for developers integrating this subgraph into their applications.
@@ -43,11 +43,16 @@ The following json string is passed in the [substreams.yaml file for the Injecti
 }
 ```
 
-### Parameter Update Mechanisms
+Note that **expedited** parameters were not included in the chain's original genesis file but were introduced later to support the handling of expedited proposals. These parameters were retroactively added to the "genesis" JSON string to ensure compatibility. 
 
-The subgraph handles chain parameter updates through two distinct mechanisms:
+It is important to note that the `uatom` denomination is used for the `expedited_min_deposit`. This denomination is specific to Cosmos Hub and not native to Injective. This suggests that Injective reused Cosmos Hub's expedited parameters during implementation. For more details, refer to [Injective's documentation](https://docs.injective.network/developers/modules/core/gov#parameters).
 
-1. **Parameter Change Proposals**
+### Chain Parameter Updates: Capabilities and Limitations
+
+Chain parameters can be modified through two different mechanisms on-chain, but the subgraph only tracks one of these:
+
+1. ✅ **Parameter Change Proposals** (Tracked)
+
    - Automatically tracked by the subgraph
    - Creates new `GovernanceParameter` entities upon successful proposals
    - Maintains accurate linkage between current parameters and active proposals
@@ -59,10 +64,11 @@ The subgraph handles chain parameter updates through two distinct mechanisms:
      - Deposit and voting periods
      - Time-based constraints (deposit_end_time, voting_end_time)
 
-2. **Software Upgrade Proposals**
+2. ❌ **Software Upgrade Proposals** (Not Tracked)
    - Can modify chain parameters as part of the upgrade
-   - **Not tracked** by the current subgraph implementation
-   - Example: [Injective's Proposal #314](https://www.mintscan.io/injective/proposals/314) changed the `min_deposit` from 500 INJ to 100 INJ
+   - The subgraph cannot detect or track these changes
+   - Creates potential discrepancies between subgraph and on-chain states
+   - Example: [Injective's Proposal #314](https://www.mintscan.io/injective/proposals/314) changed the `min_deposit` from 500 INJ to 100 INJ, but this change was not reflected in the subgraph
 
 ## Important Considerations
 
@@ -82,3 +88,11 @@ Given these limitations, developers should:
 - Exercise caution when relying on the subgraph's parameter values for critical operations
 - Implement additional validation for sensitive operations
 - Consider cross-referencing parameters with direct chain queries when absolute accuracy is required
+
+## Future Improvements
+We are actively working on enhancing the subgraph's parameter tracking capabilities. Future updates may include:
+- Support for detecting parameter changes through software upgrades
+- Improved parameter validation mechanisms
+- Additional cross-referencing capabilities with on-chain data
+
+For the most up-to-date implementation details, please refer to the [subgraph configuration in the repository](https://github.com/pinax-network/subgraph-cosmos-proposals/blob/main/subgraphs/injective/substreams.yaml).
