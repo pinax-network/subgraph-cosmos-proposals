@@ -1,4 +1,4 @@
-# Subgraph Limitations: Governance Parameters
+# Subgraph Limitations
 
 ## Overview
 This document outlines the capabilities and limitations of tracking governance parameters within the Cosmos-based blockchain Governance Proposals subgraph. Understanding these limitations is crucial for developers integrating this subgraph into their applications.
